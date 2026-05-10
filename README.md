@@ -13,9 +13,10 @@ Official marketing website for the Bitfinex Lending Robot — an automated crypt
 │   ├── Dashboard.jsx
 │   └── Icons.jsx
 ├── backend/           # Backend services (in progress)
-└── reference/         # Design references and assets
+└── docs/              # Design references and project documents
     ├── images/        # Reference screenshots & UI mockups
-    └── prompts/       # Design prompt documents
+    ├── prompts/       # Project handover documents (gitignored)
+    └── frontend-video/ # Animation reference videos (gitignored)
 ```
 
 ## Tech Stack
