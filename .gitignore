@@ -1,0 +1,37 @@
+# Claude Code settings (local only)
+.claude/
+
+# Node dependencies & build outputs
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Large binary reference files (videos & frames)
+reference/frontend-video/
+
+# Stripe research dump (scraped content + large assets)
+_stripe_research/
+
+# Business documents (not source code)
+**/*.docx
+**/*.pptx
+**/*.xlsx
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
