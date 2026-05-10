@@ -1,0 +1,48 @@
+---
+import { loginUrl, subscribeUrl } from '../lib/cta';
+
+const navItems = [
+  { label: '產品', href: '#product' },
+  { label: '原理', href: '#why' },
+  { label: '安全', href: '#security' },
+  { label: '定價', href: '#pricing' },
+  { label: '教學', href: '/guides' },
+];
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-bg/80 backdrop-blur-md border-b border-line-soft">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12 h-[68px] flex items-center">
+    <a href="/" class="flex items-center gap-2.5 font-display font-bold text-lg text-ink tracking-tight">
+      <span class="w-8 h-8 rounded-md bg-gradient-to-br from-brand to-coral"></span>
+      LendAuto
+    </a>
+
+    <div class="hidden md:flex items-center gap-7 ml-12">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class="text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="ml-auto flex items-center gap-3">
+      <a
+        href={loginUrl('nav')}
+        class="text-sm font-medium text-ink-soft hover:text-ink transition-colors"
+      >
+        登入
+      </a>
+      <a
+        href={subscribeUrl({ source: 'nav' })}
+        class="inline-flex items-center px-4 py-2 rounded-md bg-ink text-white text-sm font-medium hover:bg-ink-soft transition-colors"
+      >
+        立即開始 →
+      </a>
+    </div>
+  </div>
+</nav>

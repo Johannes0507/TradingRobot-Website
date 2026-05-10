@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  author: { '@type': 'Organization', name: post.data.author },
+  datePublished: post.data.pubDate.toISOString(),
+  ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+};
+---
+
+<Layout title={`${post.data.title} — LendAuto Blog`} description={post.data.description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  </Fragment>
+
+  <Nav />
+  <main class="pt-32 pb-24">
+    <article class="max-w-3xl mx-auto px-6 lg:px-12">
+      <header class="mb-12">
+        <a
+          href="/blog"
+          class="inline-flex items-center text-sm text-mute hover:text-ink mb-6 transition-colors"
+        >
+          ← 回到部落格
+        </a>
+        <time
+          datetime={post.data.pubDate.toISOString()}
+          class="text-xs font-mono text-mute"
+        >
+          {
+            post.data.pubDate.toLocaleDateString('zh-TW', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          }
+        </time>
+        <h1 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.15] tracking-tight mt-2 mb-4">
+          {post.data.title}
+        </h1>
+        <p class="text-lg text-ink-soft leading-relaxed">{post.data.description}</p>
+      </header>
+
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style is:global>
+  .prose {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--color-ink-soft);
+  }
+  .prose h2 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+  }
+  .prose h3 {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose p {
+    margin-bottom: 1.25rem;
+  }
+  .prose a {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .prose a:hover {
+    text-decoration-thickness: 2px;
+  }
+  .prose ul,
+  .prose ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .prose li {
+    margin-bottom: 0.5rem;
+  }
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-line-soft);
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-sm);
+  }
+  .prose pre {
+    background: var(--color-ink);
+    color: white;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .prose pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  .prose blockquote {
+    border-left: 3px solid var(--color-brand);
+    padding-left: 1.25rem;
+    margin: 1.5rem 0;
+    color: var(--color-ink);
+    font-style: italic;
+  }
+</style>

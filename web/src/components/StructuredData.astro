@@ -1,0 +1,115 @@
+---
+/**
+ * Site-wide structured data — Organization + WebSite + Service.
+ * Drop into Layout for the homepage / inject elsewhere via <slot name="head"/>.
+ *
+ * GEO 2026 finding: Schema.org JSON-LD is a top-5 predictor of LLM citation.
+ */
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'LendAuto',
+  url: 'https://lendauto.com',
+  logo: 'https://lendauto.com/logo.png',
+  description:
+    'LendAuto 是 Bitfinex 平台的自動化 USD 放貸機器人，幫助加密貨幣持有者透過自動追單與策略網格，每日獲得被動配息收入。',
+  sameAs: [
+    // Add social links here when ready
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer support',
+    email: 'hello@lendauto.com',
+    availableLanguage: ['Chinese', 'English'],
+  },
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'LendAuto',
+  url: 'https://lendauto.com',
+  inLanguage: 'zh-TW',
+};
+
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: '加密貨幣自動放貸服務',
+  provider: { '@type': 'Organization', name: 'LendAuto' },
+  description:
+    '自動化的 Bitfinex USD/USDT 放貸機器人。24 小時追蹤市場利率，自動掛單、自動配息。非託管式架構，使用者資金始終在自己的 Bitfinex 帳號。',
+  areaServed: { '@type': 'Country', name: 'Taiwan' },
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Starter',
+      price: '0',
+      priceCurrency: 'TWD',
+      description: '免費方案，資金上限 $5,000，2 個策略',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '899',
+      priceCurrency: 'TWD',
+      description: '月訂閱，資金上限 $100,000，10 個策略，Spike Catching',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Elite',
+      price: '2999',
+      priceCurrency: 'TWD',
+      description: '月訂閱，資金上限 $1,000,000，50 個策略，專屬伺服器',
+    },
+  ],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'LendAuto 會碰到我的資金嗎？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '不會。LendAuto 是非託管式（Non-custodial）架構，你的資金始終在自己的 Bitfinex 帳號內。我們只透過 API Key 幫你掛單，且 API 權限只開「Funding」，不開提款。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '為什麼用 LendAuto 報酬會比手動高？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '三個原因：(1) 24 小時自動追蹤市場利率變動，不錯過機會；(2) 預埋高利率訂單，市場波動時自動成交；(3) 毫秒級執行速度，搶在其他人前面。手動掛單通常年化 8%，LendAuto 用戶平均 15-20%。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '訂閱費怎麼付款？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '台幣付款，支援信用卡、Line Pay、超商代碼。不需要先換成 USDT 或處理鏈上轉帳，跟訂 Netflix 一樣簡單。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'API Key 安全嗎？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '我們用 AES-256-GCM 加密儲存，連工程師都看不到明文。加上 API 權限限制（只開 Funding）與非託管架構，三層防護確保資金安全。',
+      },
+    },
+  ],
+};
+
+const schemas = [orgSchema, websiteSchema, serviceSchema, faqSchema];
+---
+
+{
+  schemas.map((schema) => (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  ))
+}

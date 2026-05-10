@@ -1,0 +1,64 @@
+---
+const steps = [
+  {
+    n: 1,
+    title: '連接 Bitfinex 帳號',
+    desc: '透過 API Key 綁定，3 分鐘完成。權限只開放貸，不開提款。',
+    tint: 'from-brand to-brand/70',
+  },
+  {
+    n: 2,
+    title: '選擇放貸策略',
+    desc: '新手模板一鍵套用；進階者可自訂階梯層數與利率區間。',
+    tint: 'from-coral to-coral/70',
+  },
+  {
+    n: 3,
+    title: '機器人自動執行',
+    desc: '關掉電腦也能賺。利率變動時自動追單，市場波動時自動捕捉。',
+    tint: 'from-amber to-amber/70',
+  },
+];
+---
+
+<section id="product" class="py-[140px] relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="max-w-2xl mb-16">
+      <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        三步驟開始
+      </div>
+      <h2 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5">
+        設定簡單到<br />不像在操作自動化系統
+      </h2>
+      <p class="text-lg text-ink-soft">
+        我們把設定流程拆成三步，每步不超過 2 分鐘。不需要讀任何部落客教學文。
+      </p>
+    </div>
+
+    <div class="relative grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Connecting line -->
+      <div
+        class="hidden md:block absolute top-9 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-brand via-coral to-amber opacity-60 z-0"
+      >
+      </div>
+
+      {
+        steps.map((s) => (
+          <div class="relative z-10">
+            <div class="relative w-[72px] h-[72px] rounded-xl bg-bg border border-line-soft shadow-lg flex items-center justify-center mb-5">
+              <span class={`absolute inset-1 rounded-lg bg-gradient-to-br ${s.tint} opacity-10`} />
+              <span class="font-mono font-bold text-2xl text-ink relative">0{s.n}</span>
+              <div class={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-gradient-to-br ${s.tint} flex items-center justify-center text-white text-xs font-mono font-bold`}>
+                {s.n}
+              </div>
+            </div>
+            <h3 class="text-xl font-display font-bold text-ink mb-2.5 tracking-tight">
+              {s.title}
+            </h3>
+            <p class="text-[15px] text-ink-soft leading-relaxed">{s.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

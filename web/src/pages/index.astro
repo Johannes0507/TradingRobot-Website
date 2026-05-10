@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Steps from '../components/Steps.astro';
+import WhyHigher from '../components/WhyHigher.astro';
+import Security from '../components/Security.astro';
+import Pricing from '../components/Pricing.astro';
+import CtaFooter from '../components/CtaFooter.astro';
+import StructuredData from '../components/StructuredData.astro';
+---
+
+<Layout title="LendAuto — 你的加密貨幣，也可以像存股一樣每天配息">
+  <StructuredData slot="head" />
+  <Nav />
+  <main>
+    <Hero />
+    <Steps />
+    <WhyHigher />
+    <Security />
+    <Pricing />
+    <CtaFooter />
+  </main>
+</Layout>

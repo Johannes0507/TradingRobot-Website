@@ -1,0 +1,87 @@
+---
+import FluidRibbon from './islands/FluidRibbon.tsx';
+import { subscribeUrl } from '../lib/cta';
+---
+
+<section class="relative pt-[140px] pb-[100px] overflow-hidden">
+  <!-- Fluid Ribbon — nebula-swirl WebGL silk, right 45% of viewport -->
+  <div class="absolute top-0 right-0 w-[45%] h-full overflow-hidden pointer-events-none z-0">
+    <FluidRibbon client:only="react" />
+  </div>
+
+  <!-- Grid lines overlay (radial mask for vignette) -->
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="
+      background-image: linear-gradient(rgb(15 23 42 / 0.04) 1px, transparent 1px),
+                        linear-gradient(90deg, rgb(15 23 42 / 0.04) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+    "
+  >
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="max-w-2xl">
+      <!-- Announcement pill -->
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-line bg-bg/80 backdrop-blur-sm text-sm text-ink-soft mb-8"
+      >
+        <span class="w-2 h-2 rounded-full bg-success"></span>
+        <span class="font-mono">Bitfinex 官方授權合作</span>
+      </div>
+
+      <!-- Headline -->
+      <h1
+        class="text-5xl lg:text-7xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-6"
+      >
+        你的加密貨幣，<br />
+        也可以像
+        <span
+          class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent"
+          >存股一樣</span
+        >每天配息
+      </h1>
+
+      <!-- Subhead -->
+      <p class="text-lg lg:text-xl text-ink-soft leading-relaxed mb-10 max-w-xl">
+        LendAuto 是 Bitfinex 平台的自動放貸機器人 ——
+        24 小時為你尋找最佳利率，每天結算配息直接入帳。
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex flex-wrap gap-3">
+        <a
+          href={subscribeUrl({ source: 'hero' })}
+          class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-ink text-white font-medium hover:bg-ink-soft transition-colors"
+        >
+          立即開始 →
+        </a>
+        <a
+          href="/guides/bitfinex-api-setup"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-md border border-line bg-bg text-ink font-medium hover:bg-bg-soft transition-colors"
+        >
+          查看設定教學
+        </a>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="mt-16 grid grid-cols-3 gap-6 max-w-lg">
+        <div>
+          <div class="text-3xl font-display font-bold text-ink">2-5%</div>
+          <div class="text-sm text-mute mt-1">年化報酬率</div>
+        </div>
+        <div>
+          <div class="text-3xl font-display font-bold text-ink">24/7</div>
+          <div class="text-sm text-mute mt-1">不間斷監控</div>
+        </div>
+        <div>
+          <div class="text-3xl font-display font-bold text-ink">0</div>
+          <div class="text-sm text-mute mt-1">需要看盤的時間</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

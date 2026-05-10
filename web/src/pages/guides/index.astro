@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+
+const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999)
+);
+
+const difficultyLabel: Record<string, string> = {
+  beginner: '入門',
+  intermediate: '進階',
+  advanced: '高級',
+};
+const difficultyColor: Record<string, string> = {
+  beginner: 'bg-success/10 text-success',
+  intermediate: 'bg-amber/10 text-amber',
+  advanced: 'bg-coral/10 text-coral',
+};
+---
+
+<Layout
+  title="教學文章 — LendAuto"
+  description="LendAuto 完整教學：Bitfinex API Key 設定、放貸策略選擇、安全建議。一步步帶你開始自動化放貸。"
+>
+  <Nav />
+  <main class="pt-32 pb-24">
+    <div class="max-w-5xl mx-auto px-6 lg:px-12">
+      <header class="mb-16 max-w-2xl">
+        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-3">
+          Guides
+        </div>
+        <h1 class="text-5xl font-display font-bold text-ink tracking-tight mb-4">教學文章</h1>
+        <p class="text-lg text-ink-soft">
+          從零開始：API Key 設定、策略選擇、最佳實踐。每篇都附完整截圖。
+        </p>
+      </header>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          guides.map((g) => (
+            <a
+              href={`/guides/${g.id}`}
+              class="group block p-6 rounded-2xl border border-line-soft bg-bg hover:bg-bg-soft hover:-translate-y-0.5 transition-all"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <span
+                  class={`px-2 py-0.5 rounded-md text-xs font-semibold ${difficultyColor[g.data.difficulty]}`}
+                >
+                  {difficultyLabel[g.data.difficulty]}
+                </span>
+                {g.data.readTime && (
+                  <span class="text-xs text-mute font-mono">
+                    {g.data.readTime} 分鐘
+                  </span>
+                )}
+              </div>
+              <h2 class="text-xl font-display font-bold text-ink mb-2 tracking-tight group-hover:text-brand transition-colors">
+                {g.data.title}
+              </h2>
+              <p class="text-[15px] text-ink-soft leading-relaxed">{g.data.description}</p>
+            </a>
+          ))
+        }
+        {
+          guides.length === 0 && (
+            <div class="col-span-2 text-mute text-center py-16">
+              教學文章準備中。
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </main>
+</Layout>

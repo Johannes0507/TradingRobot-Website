@@ -1,0 +1,60 @@
+/**
+ * LendAuto Design Tokens
+ * ----------------------
+ * Single source of truth for color / typography / radius across:
+ *   - lendauto.com (this marketing site)
+ *   - app.lendauto.com (Bitfinex-lending-robot-v2 product app)
+ *
+ * Tailwind v4 reads these via the @theme directive.
+ * To share with v2: copy this file or symlink it.
+ */
+
+@theme {
+  /* ============================================
+     COLORS — Text / Surface / Brand
+     ============================================ */
+
+  /* Text tones (warm navy family — trustworthy) */
+  --color-ink: #1a1f36;
+  --color-ink-soft: #344056;
+  --color-mute: #6b7280;
+  --color-mute-soft: #9ca3af;
+
+  /* Surfaces */
+  --color-bg: #ffffff;
+  --color-bg-soft: #fafafa;
+
+  /* Borders / dividers */
+  --color-line: rgb(26 31 54 / 0.08);
+  --color-line-soft: rgb(26 31 54 / 0.04);
+
+  /* Brand accents — left→right cool→warm gradient identity */
+  --color-brand: #635bff;        /* primary purple — premium trust */
+  --color-coral: #fb7185;        /* warm coral — friendly */
+  --color-amber: #f59e0b;        /* warm amber — reliable */
+  --color-teal: #14b8a6;         /* teal — growth / money */
+
+  /* Semantic */
+  --color-success: #10b981;
+  --color-warn: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+
+  --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --font-display: 'Inter', 'Noto Sans TC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* ============================================
+     RADIUS
+     ============================================ */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+}

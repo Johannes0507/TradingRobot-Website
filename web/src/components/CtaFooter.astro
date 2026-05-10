@@ -1,0 +1,121 @@
+---
+import { subscribeUrl } from '../lib/cta';
+
+const footerLinks = [
+  {
+    heading: '產品',
+    links: [
+      { label: '功能介紹', href: '#product' },
+      { label: '安全機制', href: '#security' },
+      { label: '定價', href: '#pricing' },
+      { label: 'Roadmap', href: '/roadmap' },
+    ],
+  },
+  {
+    heading: '資源',
+    links: [
+      { label: '教學文章', href: '/guides' },
+      { label: '部落格', href: '/blog' },
+      { label: 'API 文件', href: '/docs' },
+      { label: '常見問題', href: '/faq' },
+    ],
+  },
+  {
+    heading: '公司',
+    links: [
+      { label: '關於我們', href: '/about' },
+      { label: '聯絡我們', href: 'mailto:hello@lendauto.com' },
+      { label: '服務條款', href: '/terms' },
+      { label: '隱私政策', href: '/privacy' },
+    ],
+  },
+];
+---
+
+<section class="pt-[100px] pb-[120px] relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div
+      class="relative px-14 py-[72px] rounded-[32px] bg-gradient-to-br from-ink via-ink-soft to-brand/80 text-white text-center overflow-hidden"
+    >
+      <!-- Glow orbs -->
+      <div
+        class="absolute -top-1/3 left-[20%] w-[600px] h-[600px] rounded-full pointer-events-none"
+        style="background: radial-gradient(circle, rgb(139 92 246 / 0.5), transparent 65%); filter: blur(60px);"
+      >
+      </div>
+      <div
+        class="absolute -bottom-2/5 right-[10%] w-[500px] h-[500px] rounded-full pointer-events-none"
+        style="background: radial-gradient(circle, rgb(236 72 153 / 0.4), transparent 65%); filter: blur(60px);"
+      >
+      </div>
+
+      <div class="relative">
+        <h2 class="text-4xl lg:text-5xl font-display font-bold leading-[1.1] tracking-tight mb-5">
+          準備好讓你的 USD<br />開始工作了嗎？
+        </h2>
+        <p class="text-lg opacity-75 max-w-xl mx-auto mb-9">
+          現在加入，享 <strong class="text-white">首月免費</strong>。
+          設定不到 5 分鐘，今晚就開始配息。
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={subscribeUrl({ source: 'cta-footer' })}
+            class="inline-flex items-center px-7 py-3.5 rounded-pill bg-white text-ink font-semibold hover:bg-bg-soft transition-colors"
+          >
+            立即開始 →
+          </a>
+          <a
+            href="/guides/bitfinex-api-setup"
+            class="inline-flex items-center px-7 py-3.5 rounded-pill border border-white/20 text-white font-semibold hover:bg-white/10 transition-colors"
+          >
+            先看設定教學
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-line-soft py-16">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="flex items-center gap-2.5 font-display font-bold text-lg text-ink mb-4">
+          <span class="w-8 h-8 rounded-md bg-gradient-to-br from-brand to-coral"></span>
+          LendAuto
+        </a>
+        <p class="text-sm text-mute leading-relaxed">
+          Bitfinex 自動放貸機器人。<br />讓你的加密貨幣每天配息。
+        </p>
+      </div>
+      {
+        footerLinks.map((col) => (
+          <div>
+            <h4 class="text-sm font-semibold text-ink mb-4">{col.heading}</h4>
+            <ul class="space-y-2.5">
+              {col.links.map((l) => (
+                <li>
+                  <a
+                    href={l.href}
+                    class="text-sm text-mute hover:text-ink transition-colors"
+                  >
+                    {l.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="pt-8 border-t border-line-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs text-mute"
+    >
+      <div>© 2026 LendAuto. All rights reserved.</div>
+      <div class="font-mono">
+        投資有風險。本服務不保證收益，過往績效不代表未來表現。
+      </div>
+    </div>
+  </div>
+</footer>

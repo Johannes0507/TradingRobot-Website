@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Layout
+  title="部落格 — LendAuto"
+  description="LendAuto 部落格：自動放貸策略、Bitfinex 平台分析、加密貨幣被動收入心得。"
+>
+  <Nav />
+  <main class="pt-32 pb-24">
+    <div class="max-w-4xl mx-auto px-6 lg:px-12">
+      <header class="mb-16">
+        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-3">
+          Blog
+        </div>
+        <h1 class="text-5xl font-display font-bold text-ink tracking-tight mb-4">部落格</h1>
+        <p class="text-lg text-ink-soft">
+          策略思考、市場觀察、產品開發紀錄。
+        </p>
+      </header>
+
+      <ul class="space-y-8">
+        {
+          posts.map((post) => (
+            <li class="border-b border-line-soft pb-8 last:border-0">
+              <a href={`/blog/${post.id}`} class="group block">
+                <time
+                  datetime={post.data.pubDate.toISOString()}
+                  class="text-xs font-mono text-mute"
+                >
+                  {post.data.pubDate.toLocaleDateString('zh-TW', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+                <h2 class="text-2xl font-display font-bold text-ink mt-2 mb-3 tracking-tight group-hover:text-brand transition-colors">
+                  {post.data.title}
+                </h2>
+                <p class="text-ink-soft leading-relaxed">{post.data.description}</p>
+              </a>
+            </li>
+          ))
+        }
+        {
+          posts.length === 0 && (
+            <li class="text-mute text-center py-16">尚無文章。</li>
+          )
+        }
+      </ul>
+    </div>
+  </main>
+</Layout>

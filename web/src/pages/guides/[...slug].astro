@@ -1,0 +1,85 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+
+export async function getStaticPaths() {
+  const guides = await getCollection('guides', ({ data }) => !data.draft);
+  return guides.map((g) => ({ params: { slug: g.id }, props: { guide: g } }));
+}
+
+const { guide } = Astro.props;
+const { Content, headings } = await render(guide);
+
+const howToSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: guide.data.title,
+  description: guide.data.description,
+  step: headings
+    .filter((h) => h.depth === 2)
+    .map((h, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: h.text,
+      url: `${Astro.site}guides/${guide.id}#${h.slug}`,
+    })),
+};
+---
+
+<Layout title={`${guide.data.title} — LendAuto 教學`} description={guide.data.description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+  </Fragment>
+
+  <Nav />
+  <main class="pt-32 pb-24">
+    <div class="max-w-6xl mx-auto px-6 lg:px-12 grid lg:grid-cols-[1fr_240px] gap-12">
+      <article>
+        <header class="mb-10">
+          <a
+            href="/guides"
+            class="inline-flex items-center text-sm text-mute hover:text-ink mb-6 transition-colors"
+          >
+            ← 回到教學列表
+          </a>
+          <h1 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.15] tracking-tight mb-4">
+            {guide.data.title}
+          </h1>
+          <p class="text-lg text-ink-soft leading-relaxed">{guide.data.description}</p>
+        </header>
+
+        <div class="prose">
+          <Content />
+        </div>
+      </article>
+
+      <!-- Sticky TOC -->
+      {
+        headings.length > 0 && (
+          <aside class="hidden lg:block">
+            <div class="sticky top-32">
+              <div class="text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-3">
+                目錄
+              </div>
+              <ul class="space-y-2 text-sm">
+                {headings
+                  .filter((h) => h.depth <= 3)
+                  .map((h) => (
+                    <li class={h.depth === 3 ? 'pl-4' : ''}>
+                      <a
+                        href={`#${h.slug}`}
+                        class="text-ink-soft hover:text-brand transition-colors"
+                      >
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          </aside>
+        )
+      }
+    </div>
+  </main>
+</Layout>

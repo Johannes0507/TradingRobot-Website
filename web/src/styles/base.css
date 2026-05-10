@@ -1,0 +1,33 @@
+/**
+ * Base styles — applied site-wide.
+ * Token references resolve via tokens.css @theme block.
+ */
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.55;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Default focus ring — accessible + brand-tinted */
+:where(:focus-visible) {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Selection */
+::selection {
+  background: color-mix(in srgb, var(--color-brand) 25%, transparent);
+  color: var(--color-ink);
+}

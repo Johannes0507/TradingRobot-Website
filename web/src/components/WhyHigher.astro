@@ -1,0 +1,92 @@
+---
+const features = [
+  {
+    title: '智能追蹤市場利率',
+    desc: '自動跟隨 Bitfinex Flash Return Rate 浮動，利率變高時立刻調整，不錯過任何成交機會。',
+    tech: 'FRR Delta Var · FRR Delta Fix',
+    tint: 'brand',
+  },
+  {
+    title: '預埋高利率，爆發時自動捕捉',
+    desc: '市場劇烈波動、資金短缺時，預設的高利率訂單會自動成交，賺到一般人搶不到的暴利。',
+    tech: 'Spike Catching · 階梯式網格',
+    tint: 'coral',
+  },
+  {
+    title: '毫秒級執行，搶在別人前面',
+    desc: 'Go 語言寫的交易引擎，24 小時不停偵測、不停調倉。你在睡覺時它也在工作。',
+    tech: 'Go 1.26 · WebSocket 即時連線',
+    tint: 'teal',
+  },
+];
+
+const tintMap: Record<string, { bg: string; text: string; gradient: string }> = {
+  brand: { bg: 'bg-brand/10', text: 'text-brand', gradient: 'from-brand to-brand/70' },
+  coral: { bg: 'bg-coral/10', text: 'text-coral', gradient: 'from-coral to-coral/70' },
+  teal: { bg: 'bg-teal/10', text: 'text-teal', gradient: 'from-teal to-teal/70' },
+};
+---
+
+<section id="why" class="py-[140px] bg-bg-soft relative overflow-hidden">
+  <!-- Subtle radial mesh -->
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] pointer-events-none"
+    style="background: radial-gradient(ellipse, rgb(99 91 255 / 0.08) 0%, transparent 70%);"
+  >
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="text-center max-w-2xl mx-auto mb-20">
+      <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        為什麼報酬更高
+      </div>
+      <h2 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5">
+        手動掛單賺 <span class="line-through text-mute-soft">8%</span>，<br />
+        交給機器人 <span class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent">賺 15-20%</span>
+      </h2>
+      <p class="text-lg text-ink-soft">
+        三個技術核心，把手動放貸做不到的事做到極致。
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {
+        features.map((f) => {
+          const tint = tintMap[f.tint];
+          return (
+            <div class="relative p-8 rounded-xl bg-bg border border-line-soft overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
+              <div
+                class="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none opacity-50 group-hover:opacity-80 transition-opacity"
+                style={`background: radial-gradient(circle, ${f.tint === 'brand' ? '#635bff' : f.tint === 'coral' ? '#fb7185' : '#14b8a6'}20 0%, transparent 70%);`}
+              />
+              <div
+                class={`relative w-13 h-13 w-[52px] h-[52px] rounded-xl bg-gradient-to-br ${tint.gradient} flex items-center justify-center text-white mb-5 shadow-lg`}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 3v18h18" />
+                  <path d="m7 14 4-4 4 4 5-5" />
+                </svg>
+              </div>
+              <h3 class="relative text-xl font-display font-bold text-ink mb-2.5 tracking-tight">
+                {f.title}
+              </h3>
+              <p class="relative text-[15px] text-ink-soft leading-relaxed mb-4">{f.desc}</p>
+              <div class={`relative inline-block px-2.5 py-1.5 rounded-md font-mono text-[11px] font-semibold ${tint.bg} ${tint.text}`}>
+                {f.tech}
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

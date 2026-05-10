@@ -1,0 +1,47 @@
+# LendAuto — robots.txt
+# AI Search / GEO friendly — explicitly allow major LLM crawlers.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# AI Search crawlers — explicitly opt in (2026)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+# Sitemaps
+Sitemap: https://lendauto.com/sitemap-index.xml

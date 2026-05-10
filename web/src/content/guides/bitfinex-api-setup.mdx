@@ -1,0 +1,166 @@
+---
+title: 'Bitfinex API Key 設定教學：5 分鐘完成、安全無風險'
+description: '一步步教你在 Bitfinex 建立 API Key 並帶回 LendAuto。包含權限設定、IP 白名單、安全提醒與常見錯誤排解。'
+pubDate: 2026-05-10
+updatedDate: 2026-05-10
+difficulty: 'beginner'
+readTime: 5
+order: 1
+topic: 'setup'
+---
+
+import { Callout } from '../../components/mdx/Callout.tsx';
+import { CopyButton } from '../../components/islands/CopyButton.tsx';
+
+> **TL;DR**：登入 Bitfinex → API → Create New Key → **只勾 Funding 相關權限** → 複製 Key 與 Secret → 貼回 LendAuto。全程 5 分鐘。
+
+<Callout type="warn" client:visible>
+最重要的一件事：**絕對不要勾「Withdraw」相關權限**。LendAuto 不需要也不應該有提款權限。
+這層保護來自 Bitfinex 本身的權限控制 —— 即使我們系統被駭，駭客也無法透過你的 API Key 提款。
+</Callout>
+
+## 開始前的檢查清單
+
+確認以下三件事，才能順利完成設定：
+
+1. **你已有 Bitfinex 帳戶且通過 KYC**：未通過 KYC 的帳戶無法建立 API Key
+2. **帳戶已有 USD 或 USDT 餘額**：建議至少 $100 起步試水溫
+3. **設定環境是私人裝置**：不要在公用電腦完成 API Key 流程
+
+## Step 1：進入 API Key 管理頁
+
+登入 Bitfinex 後，點擊右上角頭像 → 選單最下方的 **「API」**。
+
+你也可以直接前往：[https://setting.bitfinex.com/api](https://setting.bitfinex.com/api)
+
+> 截圖待補（API 頁面入口）
+
+## Step 2：建立新 Key
+
+點擊頁面右上角的 **「+ Create New Key」** 按鈕，會跳出權限設定面板。
+
+## Step 3：設定權限（最關鍵的一步）
+
+你會看到一張很長的權限清單，分成 **Account / Orders / Margin Trading / Derivatives / Funding / Wallets / Withdraw** 等區塊。
+
+**只勾選以下權限：**
+
+```
+[Funding]
+  ✅ Get funding statuses and info
+  ✅ Offer, cancel and close funding
+  ✅ Edit funding book settings
+```
+
+**所有其他權限保持不勾選**，特別是：
+
+```
+[Wallets]
+  ❌ Get wallet balances and addresses
+  ❌ Withdraw from wallet
+  ❌ Transfer between wallets
+
+[Account History]
+  ❌ Get historical balances entries and trade information
+```
+
+<Callout type="danger" client:visible>
+如果你看到 **「Withdraw」** 任何選項是勾選狀態，**立刻取消勾選**。
+LendAuto 不需要這些權限就能完整運作。任何要求 Withdraw 權限的「自動放貸服務」都應該避開。
+</Callout>
+
+### 為什麼只開放 Funding 就夠了？
+
+LendAuto 做的事只有三件：
+
+1. **讀取目前的 funding 訂單狀態**（Get funding statuses）
+2. **掛新單、改單、取消單**（Offer, cancel and close funding）
+3. **調整 funding 設定**（Edit funding book settings）
+
+完全不需要碰你的錢包、不需要轉帳、不需要查歷史。把權限縮到最小就是最強的安全防線。
+
+## Step 4：IP 白名單（強烈建議）
+
+權限清單下方會看到 **「Restrict access to a list of IPs」** 區塊。
+
+**建議啟用，並加入 LendAuto 的伺服器 IP：**
+
+<CopyButton client:visible text="52.198.42.7,13.231.156.108" label="複製 LendAuto 伺服器 IP" />
+
+> 上方 IP 為示意，正式部署後會公布實際 IP 名單於本頁。
+
+啟用 IP 白名單後，即使你的 API Key 外洩，也只有來自 LendAuto 伺服器的請求能用 —— 駭客從自己電腦試也是 401 拒絕。
+
+## Step 5：複製 Key 與 Secret
+
+權限設定完成後點 **「Generate API Key」**。Bitfinex 會跳出兩串字串：
+
+- **API Key**：可重複看到
+- **API Secret**：**只會顯示這一次**，務必當下複製
+
+<Callout type="warn" client:visible>
+**Secret 只會出現一次**。如果關掉視窗才發現沒複製，只能砍掉 Key 重新建一個。
+建議先複製到密碼管理器（1Password、Bitwarden）暫存，設定完 LendAuto 後再從密碼管理器刪除。
+</Callout>
+
+## Step 6：帶回 LendAuto
+
+回到 LendAuto 應用程式：
+
+1. 登入 [app.lendauto.com](https://app.lendauto.com)
+2. 進入 **設定 → Bitfinex 連結**
+3. 貼上 **API Key** 與 **API Secret**
+4. 按 **「驗證連結」**
+
+系統會立刻發一個讀取請求測試連線，成功後就完成了 —— 機器人在下一個整點開始接管。
+
+## 安全提醒
+
+### ✅ 應該做的
+
+- 用密碼管理器保存 API Key（不要存在 Notes、Email、Slack）
+- 開啟 IP 白名單
+- 每 6 個月輪替一次 API Key（在 Bitfinex 砍舊的、建新的、貼回 LendAuto）
+- 定期檢查 Bitfinex 上的 API 請求記錄（Settings → API → 點 Key 看 audit log）
+
+### ❌ 絕對不要做的
+
+- 在 Bitfinex 開「Withdraw」權限（**這個錯誤無法挽救**）
+- 把 API Secret 截圖上傳雲端
+- 跟客服或任何「LendAuto 工程師」分享 Secret —— 我們不會、也不需要問你的 Secret
+
+## 常見問題
+
+### Q1：我設定錯權限了，可以改嗎？
+
+不行。Bitfinex 的 API Key 權限**建立後無法修改**。你只能砍掉重建。
+
+砍掉的步驟：API 頁面找到該 Key → Delete → 重新走 Step 2-6。
+
+### Q2：API Key 多久會過期？
+
+Bitfinex 的 API Key **不會自動過期**，但建議每 6 個月主動輪替一次。
+
+### Q3：我可以用同一個 Key 接到別的服務嗎？
+
+**強烈建議不要**。每個服務應該有獨立的 Key，這樣某個服務出事時，砍掉那個 Key 不會影響其他服務。
+
+LendAuto 用的 Key 應該只給 LendAuto 用。
+
+### Q4：驗證失敗怎麼辦？
+
+最常見三個原因：
+
+1. **權限不足**：回 Bitfinex 確認 Funding 三個權限都有勾
+2. **IP 白名單擋到**：暫時關閉白名單測試，能通就加上正確 IP
+3. **Secret 複製錯**：開頭結尾不要有空白字元，整串完整貼上
+
+如果三個都檢查過還是失敗，[寄信給我們](mailto:hello@lendauto.com)，附上 Key 的前 4 碼（不要附 Secret）我們會幫你確認。
+
+---
+
+設定完成後，可以接著看：
+
+- [LendAuto 策略選擇指南](/guides) — 新手該選哪個策略範本？（撰寫中）
+- [自動複利怎麼開？](/guides) — Pro 方案專屬功能（撰寫中）
+- [回到首頁](/) — 看完整產品介紹

@@ -1,0 +1,141 @@
+---
+import { subscribeUrl } from '../lib/cta';
+
+const plans = [
+  {
+    name: 'Starter',
+    price: 'Free',
+    sub: '永久免費',
+    cap: '$5,000',
+    strategies: '2 個',
+    features: ['基本分析', '手動啟動', '單一策略範本', 'Email 支援'],
+    cta: '免費開始',
+    href: subscribeUrl({ source: 'pricing-starter', plan: 'starter' }),
+    highlight: false,
+  },
+  {
+    name: 'Pro',
+    price: 'NT$899',
+    sub: '/ 月',
+    cap: '$100,000',
+    strategies: '10 個',
+    features: ['進階分析', '自動複利', '所有策略範本', 'Spike Catching', '優先支援'],
+    cta: '訂閱 Pro',
+    href: subscribeUrl({ source: 'pricing-pro', plan: 'pro' }),
+    highlight: true,
+  },
+  {
+    name: 'Elite',
+    price: 'NT$2,999',
+    sub: '/ 月',
+    cap: '$1,000,000',
+    strategies: '50 個',
+    features: ['專屬伺服器', '子帳號 API', '自訂策略引擎', '一對一顧問', '24/7 電話支援'],
+    cta: '聯絡我們',
+    href: 'mailto:hello@lendauto.com',
+    highlight: false,
+  },
+];
+---
+
+<section id="pricing" class="py-[140px] bg-bg-soft relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        簡單透明定價
+      </div>
+      <h2 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5">
+        月訂閱，<span class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent">台幣付款</span>
+      </h2>
+      <p class="text-lg text-ink-soft">
+        不用先換成 USDT、不用懂鏈上轉帳。信用卡或超商代碼，跟訂 Netflix 一樣簡單。
+      </p>
+    </div>
+
+    <div
+      class="inline-flex items-center gap-2 px-3.5 py-1.5 mx-auto mb-10 bg-success/8 border border-success/20 rounded-pill text-xs font-semibold text-success"
+      style="display: flex; width: fit-content;"
+    >
+      <span>🇹🇼</span>支援信用卡 · Line Pay · 超商代碼
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+      {
+        plans.map((p) => (
+          <div
+            class={`relative p-8 rounded-2xl border transition-all ${
+              p.highlight
+                ? 'bg-gradient-to-b from-ink to-ink-soft text-white border-brand/30 shadow-2xl scale-[1.02]'
+                : 'bg-bg text-ink border-line-soft'
+            }`}
+          >
+            {p.highlight && (
+              <>
+                <div
+                  class="absolute inset-0 rounded-2xl pointer-events-none"
+                  style="background: radial-gradient(ellipse at top right, rgb(139 92 246 / 0.25), transparent 60%);"
+                />
+                <div class="absolute -top-3 right-6 px-3 py-1 bg-gradient-to-r from-brand to-coral text-white text-[11px] font-bold rounded-pill tracking-wider">
+                  最多人選
+                </div>
+              </>
+            )}
+            <div class="relative">
+              <div class="text-sm font-semibold opacity-70 mb-2">{p.name}</div>
+              <div class="flex items-baseline gap-1.5 mb-1">
+                <span class="font-mono text-4xl font-bold tracking-tight">{p.price}</span>
+                <span class="text-sm opacity-70">{p.sub}</span>
+              </div>
+              <div
+                class={`h-px my-6 ${p.highlight ? 'bg-white/10' : 'bg-line'}`}
+              />
+              <div class="flex justify-between mb-2 text-[13px]">
+                <span class="opacity-70">資金上限</span>
+                <span class="font-mono font-semibold">{p.cap}</span>
+              </div>
+              <div class="flex justify-between mb-6 text-[13px]">
+                <span class="opacity-70">策略數</span>
+                <span class="font-mono font-semibold">{p.strategies}</span>
+              </div>
+              <ul class="mb-7 space-y-1.5">
+                {p.features.map((f) => (
+                  <li class="flex items-center gap-2.5 text-sm py-1">
+                    <span
+                      class={`w-4.5 h-4.5 w-[18px] h-[18px] rounded-full flex items-center justify-center flex-shrink-0 ${
+                        p.highlight ? 'bg-brand/30 text-brand' : 'bg-brand/12 text-brand'
+                      }`}
+                    >
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={p.href}
+                class={`w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-md font-medium transition-colors ${
+                  p.highlight
+                    ? 'bg-bg text-ink hover:bg-bg-soft'
+                    : 'bg-ink text-white hover:bg-ink-soft'
+                }`}
+              >
+                {p.cta} →
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
