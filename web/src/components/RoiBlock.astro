@@ -5,7 +5,7 @@ import {
   monthlyNet,
   breakevenCapital,
 } from '../lib/mock-data';
-// import RoiCalculator from './islands/RoiCalculator.tsx';  // TODO: re-enable after Task 7
+import RoiCalculator from './islands/RoiCalculator.tsx';
 
 const { apr, proPriceUsd, proPriceTwd, scenarios } = ROI_PARAMS;
 const aprPct = (apr * 100).toFixed(2);
@@ -91,7 +91,7 @@ const fmtCapital = (n: number) => `$${n.toLocaleString('en-US')}`;
       </div>
     </div>
 
-    <!-- <RoiCalculator client:idle /> TODO: re-enable after Task 7 -->
+    <RoiCalculator client:idle />
 
     <p class="text-xs text-mute font-mono mt-6 leading-relaxed">
       上述為過去 30 日市場均值試算，不代表未來表現。訂閱費 NT${proPriceTwd} ≈ USD ${proPriceUsd}（以 1 USD = {ROI_PARAMS.twdPerUsd} TWD 估）。不含 Bitfinex 平台費。
