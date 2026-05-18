@@ -24,7 +24,7 @@ export const GET: APIRoute = async ({ site }) => {
 
 > 自動化的 Bitfinex USD/USDT 放貸機器人。透過 API Key 連動，24 小時為使用者尋找最佳利率，每天結算配息直接入帳。非託管式架構，使用者資金始終在自己的 Bitfinex 帳號內。
 
-LendAuto 是面向加密貨幣持有者的被動收入工具。核心價值：把手動掛單能賺到的 8% 年化報酬，透過自動追單、Spike Catching、預埋階梯網格策略，提升至 15-20%。
+LendAuto 是 Bitfinex margin funding 的自動報價工具。核心機制：Flash Return Rate 追蹤、Spike Catching、階梯式網格報價。目標是把手動掛單做不到的事（24 小時不間斷監控、毫秒級調整、多檔利率同時部署）自動化。報酬視市場利率波動而定。
 
 ## 產品資訊
 
