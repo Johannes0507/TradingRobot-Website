@@ -1,0 +1,100 @@
+---
+import {
+  ROI_PARAMS,
+  monthlyGross,
+  monthlyNet,
+  breakevenCapital,
+} from '../lib/mock-data';
+// import RoiCalculator from './islands/RoiCalculator.tsx';  // TODO: re-enable after Task 7
+
+const { apr, proPriceUsd, proPriceTwd, scenarios } = ROI_PARAMS;
+const aprPct = (apr * 100).toFixed(2);
+
+const cards = scenarios.map((capital) => {
+  const gross = monthlyGross(capital, apr);
+  const net = monthlyNet(capital, apr, proPriceUsd);
+  return {
+    capital,
+    gross,
+    net,
+    netPositive: net >= 0,
+  };
+});
+
+const breakeven = breakevenCapital(apr, proPriceUsd);
+
+const fmtUsd = (n: number) => {
+  const rounded = Math.round(n);
+  const sign = rounded < 0 ? '−' : '';
+  return `${sign}$${Math.abs(rounded).toLocaleString('en-US')}`;
+};
+const fmtCapital = (n: number) => `$${n.toLocaleString('en-US')}`;
+---
+
+<section id="roi" class="py-[140px] relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="max-w-2xl mb-12">
+      <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        ROI
+      </div>
+      <h2
+        class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5"
+      >
+        訂閱划得來嗎？
+      </h2>
+      <p class="text-lg text-ink-soft">
+        用過去 30 日 Bitfinex fUSD 平均利率 <span class="font-mono font-semibold text-ink">{aprPct}%</span> 算給你看。
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+      {
+        cards.map((c) => (
+          <div class="p-7 rounded-2xl bg-bg border border-line-soft">
+            <div class="text-xs font-mono text-mute uppercase tracking-wider mb-3">
+              資金 {fmtCapital(c.capital)}
+            </div>
+            <div class="space-y-2 mb-4">
+              <div class="flex justify-between text-sm">
+                <span class="text-mute">月毛配息</span>
+                <span class="font-mono text-ink">{fmtUsd(c.gross)}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-mute">Pro 訂閱</span>
+                <span class="font-mono text-ink">−${ROI_PARAMS.proPriceUsd}</span>
+              </div>
+            </div>
+            <div class="border-t border-line-soft pt-4">
+              <div class="flex justify-between items-baseline">
+                <span class="text-sm text-mute">月淨</span>
+                <span class={`font-mono text-2xl font-bold tracking-tight ${c.netPositive ? 'text-success' : 'text-danger'}`}>
+                  {fmtUsd(c.net)}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="p-7 rounded-2xl bg-bg-soft border border-line-soft mb-6">
+      <div class="text-xs font-mono text-mute uppercase tracking-wider mb-2">
+        盈虧平衡點
+      </div>
+      <div class="flex flex-wrap items-baseline gap-3">
+        <span class="text-3xl lg:text-4xl font-mono font-bold text-ink tracking-tight">
+          ≈ {fmtCapital(Math.round(breakeven))}
+        </span>
+        <span class="text-sm text-mute">
+          資金達此金額時，Pro 訂閱費剛好被月配息覆蓋（以上述 30 日均利率計算）。
+        </span>
+      </div>
+    </div>
+
+    <!-- <RoiCalculator client:idle /> TODO: re-enable after Task 7 -->
+
+    <p class="text-xs text-mute font-mono mt-6 leading-relaxed">
+      上述為過去 30 日市場均值試算，不代表未來表現。訂閱費 NT${proPriceTwd} ≈ USD ${proPriceUsd}（以 1 USD = {ROI_PARAMS.twdPerUsd} TWD 估）。不含 Bitfinex 平台費。
+    </p>
+  </div>
+</section>
