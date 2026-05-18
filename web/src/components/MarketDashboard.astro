@@ -30,6 +30,13 @@ const cards = [
 ];
 
 const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
+
+// Sparkline date span: 30 days ending on META.asOf (chronological, not low/high).
+const asOfDate = new Date(META.asOf);
+const spanEnd = asOfDate.toISOString().slice(0, 10);
+const spanStartDate = new Date(asOfDate);
+spanStartDate.setUTCDate(spanStartDate.getUTCDate() - 29);
+const spanStart = spanStartDate.toISOString().slice(0, 10);
 ---
 
 <section id="market" class="py-[140px] bg-bg-soft relative">
@@ -68,7 +75,7 @@ const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
           fUSD · 30 日利率走勢
         </div>
         <div class="text-xs font-mono text-mute">
-          {fmtDate(MARKET_DATA.fusd30dLowDate)} — {fmtDate(MARKET_DATA.fusd30dHighDate)}
+          {spanStart} — {spanEnd}
         </div>
       </div>
       <Sparkline
