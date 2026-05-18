@@ -1,8 +1,8 @@
 # LendAuto Website
 
-Marketing website for **LendAuto** — an automated Bitfinex USD lending robot. SEO-first, AI Search friendly, built for performance.
+Marketing website for **LendAuto** — automated Bitfinex margin funding quoting tool. SEO-first, AI Search friendly, built for performance.
 
-> **Live:** _coming soon (deploys to Cloudflare Pages, see [`web/DEPLOY.md`](./web/DEPLOY.md))_
+> **Status:** Pre-launch. GCP deployment (Firebase Hosting + Cloud Run Functions + Cloud Scheduler) deferred — current focus is frontend.
 
 ## Stack
 
@@ -17,13 +17,15 @@ Marketing website for **LendAuto** — an automated Bitfinex USD lending robot. 
 ├── web/                 # ★ Astro 6 production site
 │   ├── src/
 │   │   ├── pages/        # Routes (index, /blog, /guides, llms.txt, rss.xml)
-│   │   ├── components/   # .astro components + /islands (React)
+│   │   ├── components/   # .astro section components
+│   │   │   ├── islands/   #   React 19 islands (FluidRibbon, forms, RoiCalculator)
+│   │   │   └── mdx/       #   MDX-only components (Step, Mockup, Callout, mockups/)
 │   │   ├── content/      # MDX guides + blog posts
 │   │   ├── layouts/      # Base Layout (meta, OG, Schema.org)
-│   │   ├── lib/          # CTA helpers, utilities
+│   │   ├── lib/          # CTA helpers + mock-data.ts (GCP swap point)
 │   │   └── styles/       # tokens.css (shareable) + base.css
-│   ├── public/           # robots.txt, favicons, static assets
-│   └── DEPLOY.md         # Cloudflare Pages deployment guide
+│   ├── public/           # robots.txt, favicons, screenshots/, static assets
+│   └── DEPLOY.md         # (legacy Cloudflare guide; will be rewritten for GCP)
 │
 ├── _legacy/             # Original CDN-React prototype (reference)
 │   ├── LendAuto.html     # Full standalone HTML prototype
@@ -44,6 +46,9 @@ Marketing website for **LendAuto** — an automated Bitfinex USD lending robot. 
 - **Subscription flow**: marketing site never owns auth/payment. CTAs jump to `app.lendauto.com` (the v2 product app). See `src/lib/cta.ts`.
 - **AI Search friendly**: pure SSG output means GPTBot / ClaudeBot / PerplexityBot get full HTML — they don't run JS, so SPAs are invisible to them. Astro is purpose-built for this.
 - **Design tokens** (`web/src/styles/tokens.css`) are deliberately a single CSS file — copy/symlink into v2 to keep the two products visually consistent.
+- **Mock-data swap point** (`web/src/lib/mock-data.ts`): every market/KPI/ROI number on the homepage flows through this single module. The GCP phase later replaces it with a build-time generator producing the same export shape; components don't change. See `docs/specs/2026-05-18-frontend-design-exploration.md` §6.1.
+- **Image-led guides**: `/guides/*` use custom SVG mockups of the relevant Bitfinex / LendAuto screens (not real screenshots — legal safety + maintainability). Built with `Step` + `Mockup` MDX components and per-screen mockup files under `components/mdx/mockups/`.
+- **Visual reference**: stripe.com is the canonical visual target. Anti-patterns documented in `docs/specs/2026-05-18-frontend-design-exploration.md` §3.
 
 ## Development
 
@@ -62,4 +67,6 @@ npm run preview      # serve the production build locally
 
 ## Deployment
 
-See [`web/DEPLOY.md`](./web/DEPLOY.md) for Cloudflare Pages setup.
+GCP integration (Firebase Hosting + Cloud Run Functions + Cloud Scheduler) is planned but not yet wired. The site builds to static HTML via `npm run build`. See `docs/specs/2026-05-18-frontend-design-exploration.md` §7 for the deferred GCP scope.
+
+The legacy `web/DEPLOY.md` documents Cloudflare Pages — kept for reference, will be rewritten for GCP when that phase starts.
