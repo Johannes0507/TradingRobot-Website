@@ -2,19 +2,19 @@
 const features = [
   {
     title: '智能追蹤市場利率',
-    desc: '自動跟隨 Bitfinex Flash Return Rate 浮動，利率變高時立刻調整，不錯過任何成交機會。',
+    desc: '自動跟隨 Bitfinex Flash Return Rate 浮動，市場利率變動時即時更新報價。',
     tech: 'FRR Delta Var · FRR Delta Fix',
     tint: 'brand',
   },
   {
-    title: '預埋高利率，爆發時自動捕捉',
-    desc: '市場劇烈波動、資金短缺時，預設的高利率訂單會自動成交，賺到一般人搶不到的暴利。',
+    title: '預埋高利率訂單，市場波動時自動成交',
+    desc: '階梯式部署多檔高利率訂單。當市場資金短缺、利率瞬時抬升時，預埋單會被自動成交。',
     tech: 'Spike Catching · 階梯式網格',
     tint: 'coral',
   },
   {
-    title: '毫秒級執行，搶在別人前面',
-    desc: 'Go 語言寫的交易引擎，24 小時不停偵測、不停調倉。你在睡覺時它也在工作。',
+    title: '毫秒級執行',
+    desc: 'Go 語言寫的引擎，24 小時不停偵測、不停調倉。',
     tech: 'Go 1.26 · WebSocket 即時連線',
     tint: 'teal',
   },
@@ -41,11 +41,13 @@ const tintMap: Record<string, { bg: string; text: string; gradient: string }> = 
         為什麼報酬更高
       </div>
       <h2 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5">
-        手動掛單賺 <span class="line-through text-mute-soft">8%</span>，<br />
-        交給機器人 <span class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent">賺 15-20%</span>
+        手動掛 1-2 次，<br />
+        bot 每
+        <span class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent">30 秒</span>
+        重新評估
       </h2>
       <p class="text-lg text-ink-soft">
-        三個技術核心，把手動放貸做不到的事做到極致。
+        三個技術差異，把手動放貸的盲點補起來。
       </p>
     </div>
 
