@@ -1,0 +1,85 @@
+---
+import { MARKET_DATA, META } from '../lib/mock-data';
+import Sparkline from './Sparkline.astro';
+
+const fmtPct = (n: number) => `${n.toFixed(2)}%`;
+const fmtDelta = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}`;
+const fmtDate = (iso: string) => iso.slice(0, 10);
+
+const cards = [
+  {
+    label: 'fUSD · 30 日平均',
+    value: fmtPct(MARKET_DATA.fusd30dAvgApr),
+    sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fusdVsPrevDelta)}`,
+  },
+  {
+    label: 'fUST · 30 日平均',
+    value: fmtPct(MARKET_DATA.fust30dAvgApr),
+    sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fustVsPrevDelta)}`,
+  },
+  {
+    label: 'fUSD · 30 日高點',
+    value: fmtPct(MARKET_DATA.fusd30dHighApr),
+    sub: `↗ ${fmtDate(MARKET_DATA.fusd30dHighDate)} · spike event`,
+  },
+  {
+    label: 'fUSD · 30 日低點',
+    value: fmtPct(MARKET_DATA.fusd30dLowApr),
+    sub: `↘ ${fmtDate(MARKET_DATA.fusd30dLowDate)} · low-vol day`,
+  },
+];
+
+const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
+---
+
+<section id="market" class="py-[140px] bg-bg-soft relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="max-w-2xl mb-12">
+      <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        Market Data
+      </div>
+      <h2
+        class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5"
+      >
+        Bitfinex Funding Market
+      </h2>
+      <p class="text-lg text-ink-soft">
+        過去 30 日公開市場數據，來自 Bitfinex Public API。LendAuto 自動報價就跑在這個市場上。
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      {
+        cards.map((c) => (
+          <div class="p-6 rounded-2xl bg-bg border border-line-soft">
+            <div class="text-xs font-mono text-mute uppercase tracking-wider mb-3">{c.label}</div>
+            <div class="text-3xl lg:text-4xl font-mono font-bold text-ink mb-2 tracking-tight">
+              {c.value}
+            </div>
+            <div class="text-xs text-mute font-mono">{c.sub}</div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="p-6 rounded-2xl bg-bg border border-line-soft">
+      <div class="flex items-baseline justify-between mb-4">
+        <div class="text-xs font-mono text-mute uppercase tracking-wider">
+          fUSD · 30 日利率走勢
+        </div>
+        <div class="text-xs font-mono text-mute">
+          {fmtDate(MARKET_DATA.fusd30dLowDate)} — {fmtDate(MARKET_DATA.fusd30dHighDate)}
+        </div>
+      </div>
+      <Sparkline
+        data={MARKET_DATA.fusd30dDaily}
+        height={140}
+        ariaLabel="Bitfinex fUSD 過去 30 日每日平均年化利率"
+      />
+    </div>
+
+    <p class="text-xs text-mute font-mono mt-6">
+      資料來源：Bitfinex Public API（截至 {asOfLocal}）。本區塊全部數據與 LendAuto 自身績效無關。
+    </p>
+  </div>
+</section>
