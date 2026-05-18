@@ -12,64 +12,135 @@ const difficultyLabel: Record<string, string> = {
   intermediate: '進階',
   advanced: '高級',
 };
-const difficultyColor: Record<string, string> = {
-  beginner: 'bg-success/10 text-success',
-  intermediate: 'bg-amber/10 text-amber',
-  advanced: 'bg-coral/10 text-coral',
+const difficultyDot: Record<string, string> = {
+  beginner: 'bg-success',
+  intermediate: 'bg-amber',
+  advanced: 'bg-coral',
 };
+
+const [first, ...rest] = guides;
 ---
 
 <Layout
   title="教學文章 — LendAuto"
-  description="LendAuto 完整教學：Bitfinex API Key 設定、放貸策略選擇、安全建議。一步步帶你開始自動化放貸。"
+  description="LendAuto 完整教學：Bitfinex API Key 設定、放貸策略選擇、安全建議。圖片導向，每一步都看得到。"
 >
   <Nav />
-  <main class="pt-32 pb-24">
-    <div class="max-w-5xl mx-auto px-6 lg:px-12">
+  <main class="pt-32 pb-24 relative overflow-hidden">
+    <!-- Subtle radial mesh -->
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] pointer-events-none opacity-60"
+      style="background: radial-gradient(ellipse, rgb(99 91 255 / 0.10) 0%, transparent 70%);"
+    >
+    </div>
+
+    <div class="relative max-w-5xl mx-auto px-6 lg:px-12">
       <header class="mb-16 max-w-2xl">
-        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-3">
+        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
           Guides
         </div>
-        <h1 class="text-5xl font-display font-bold text-ink tracking-tight mb-4">教學文章</h1>
-        <p class="text-lg text-ink-soft">
-          從零開始：API Key 設定、策略選擇、最佳實踐。每篇都附完整截圖。
+        <h1
+          class="text-5xl lg:text-6xl font-display font-bold text-ink tracking-tight leading-[1.05] mb-5"
+        >
+          教學文章
+        </h1>
+        <p class="text-lg lg:text-xl text-ink-soft leading-relaxed">
+          從零開始：API Key 設定、策略選擇、安全建議。每一步都附畫面，不用猜。
         </p>
       </header>
 
-      <div class="grid gap-4 md:grid-cols-2">
-        {
-          guides.map((g) => (
-            <a
-              href={`/guides/${g.id}`}
-              class="group block p-6 rounded-2xl border border-line-soft bg-bg hover:bg-bg-soft hover:-translate-y-0.5 transition-all"
-            >
-              <div class="flex items-center gap-2 mb-3">
-                <span
-                  class={`px-2 py-0.5 rounded-md text-xs font-semibold ${difficultyColor[g.data.difficulty]}`}
-                >
-                  {difficultyLabel[g.data.difficulty]}
+      {/* Featured card — first / order-1 guide gets larger treatment */}
+      {
+        first && (
+          <a
+            href={`/guides/${first.id}`}
+            class="group block mb-6 p-8 lg:p-10 rounded-2xl border border-line-soft bg-bg-soft hover:bg-bg hover:-translate-y-0.5 transition-all relative overflow-hidden"
+          >
+            <div
+              class="absolute -top-20 -right-16 w-72 h-72 rounded-full pointer-events-none opacity-60 group-hover:opacity-80 transition-opacity"
+              style="background: radial-gradient(circle, rgb(99 91 255 / 0.18) 0%, transparent 70%);"
+            />
+            <div class="relative">
+              <div class="flex flex-wrap items-center gap-3 mb-4">
+                <span class="text-xs font-mono font-semibold text-brand uppercase tracking-wider">
+                  Featured · Start here
                 </span>
-                {g.data.readTime && (
-                  <span class="text-xs text-mute font-mono">
-                    {g.data.readTime} 分鐘
-                  </span>
+                <span class="text-xs text-mute">·</span>
+                <span class="flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
+                  <span class={`w-1.5 h-1.5 rounded-full ${difficultyDot[first.data.difficulty]}`} />
+                  {difficultyLabel[first.data.difficulty]}
+                </span>
+                {first.data.readTime && (
+                  <>
+                    <span class="text-xs text-mute">·</span>
+                    <span class="text-xs font-mono text-mute">{first.data.readTime} 分鐘</span>
+                  </>
                 )}
               </div>
-              <h2 class="text-xl font-display font-bold text-ink mb-2 tracking-tight group-hover:text-brand transition-colors">
-                {g.data.title}
+              <h2 class="text-3xl lg:text-4xl font-display font-bold text-ink mb-3 tracking-tight leading-tight group-hover:text-brand transition-colors">
+                {first.data.title}
               </h2>
-              <p class="text-[15px] text-ink-soft leading-relaxed">{g.data.description}</p>
-            </a>
-          ))
-        }
-        {
-          guides.length === 0 && (
-            <div class="col-span-2 text-mute text-center py-16">
-              教學文章準備中。
+              <p class="text-base lg:text-lg text-ink-soft leading-relaxed max-w-2xl">
+                {first.data.description}
+              </p>
+              <div class="mt-6 inline-flex items-center gap-1 text-sm font-medium text-ink group-hover:text-brand transition-colors">
+                開始教學
+                <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
             </div>
-          )
-        }
-      </div>
+          </a>
+        )
+      }
+
+      {/* Other guides — compact grid */}
+      {
+        rest.length > 0 && (
+          <div class="grid gap-4 md:grid-cols-2">
+            {rest.map((g) => (
+              <a
+                href={`/guides/${g.id}`}
+                class="group block p-6 rounded-2xl border border-line-soft bg-bg hover:bg-bg-soft hover:-translate-y-0.5 transition-all"
+              >
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
+                    <span class={`w-1.5 h-1.5 rounded-full ${difficultyDot[g.data.difficulty]}`} />
+                    {difficultyLabel[g.data.difficulty]}
+                  </span>
+                  {g.data.readTime && (
+                    <span class="text-xs text-mute font-mono">
+                      · {g.data.readTime} 分鐘
+                    </span>
+                  )}
+                </div>
+                <h2 class="text-xl font-display font-bold text-ink mb-2 tracking-tight group-hover:text-brand transition-colors">
+                  {g.data.title}
+                </h2>
+                <p class="text-[15px] text-ink-soft leading-relaxed">{g.data.description}</p>
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      {
+        guides.length === 0 && (
+          <div class="text-mute text-center py-16 font-mono text-sm">教學文章準備中。</div>
+        )
+      }
+
+      {/* "Coming soon" tease */}
+      {
+        guides.length < 4 && (
+          <div class="mt-16 p-6 rounded-2xl border border-dashed border-line bg-bg-soft text-center">
+            <div class="text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-2">
+              撰寫中
+            </div>
+            <p class="text-sm text-ink-soft">
+              策略選擇指南、自動複利設定、Spike Catching 進階配置 — 陸續推出。
+            </p>
+          </div>
+        )
+      }
     </div>
   </main>
 </Layout>

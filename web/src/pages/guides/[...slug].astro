@@ -11,19 +11,29 @@ export async function getStaticPaths() {
 const { guide } = Astro.props;
 const { Content, headings } = await render(guide);
 
+const difficultyLabel: Record<string, string> = {
+  beginner: '入門',
+  intermediate: '進階',
+  advanced: '高級',
+};
+
+// Step headings are <Step n="..." title="..."> — these don't appear in
+// astro:content headings (which only captures `#` markdown). For the
+// step list we extract `## ` headings inside MDX (any block after step
+// cards, e.g. 安全提醒 / 常見問題).
+const sectionHeadings = headings.filter((h) => h.depth === 2);
+
 const howToSchema = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
   name: guide.data.title,
   description: guide.data.description,
-  step: headings
-    .filter((h) => h.depth === 2)
-    .map((h, i) => ({
-      '@type': 'HowToStep',
-      position: i + 1,
-      name: h.text,
-      url: `${Astro.site}guides/${guide.id}#${h.slug}`,
-    })),
+  step: sectionHeadings.map((h, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: h.text,
+    url: `${Astro.site}guides/${guide.id}#${h.slug}`,
+  })),
 };
 ---
 
@@ -33,48 +43,69 @@ const howToSchema = {
   </Fragment>
 
   <Nav />
-  <main class="pt-32 pb-24">
-    <div class="max-w-6xl mx-auto px-6 lg:px-12 grid lg:grid-cols-[1fr_240px] gap-12">
-      <article>
-        <header class="mb-10">
-          <a
-            href="/guides"
-            class="inline-flex items-center text-sm text-mute hover:text-ink mb-6 transition-colors"
-          >
-            ← 回到教學列表
-          </a>
-          <h1 class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.15] tracking-tight mb-4">
-            {guide.data.title}
-          </h1>
-          <p class="text-lg text-ink-soft leading-relaxed">{guide.data.description}</p>
-        </header>
 
-        <div class="prose">
-          <Content />
-        </div>
+  <main class="pt-32 pb-24">
+    <!-- Hero header -->
+    <header class="max-w-5xl mx-auto px-6 lg:px-12 mb-16">
+      <a
+        href="/guides"
+        class="inline-flex items-center text-sm text-mute hover:text-ink mb-6 transition-colors"
+      >
+        ← 回到教學列表
+      </a>
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="text-xs font-mono font-semibold text-brand uppercase tracking-wider">
+          Guide
+        </span>
+        {
+          guide.data.difficulty && (
+            <span class="px-2 py-0.5 rounded-md text-xs font-semibold bg-success/10 text-success">
+              {difficultyLabel[guide.data.difficulty]}
+            </span>
+          )
+        }
+        {
+          guide.data.readTime && (
+            <span class="text-xs font-mono text-mute">
+              · {guide.data.readTime} 分鐘
+            </span>
+          )
+        }
+      </div>
+      <h1
+        class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-4 max-w-3xl"
+      >
+        {guide.data.title}
+      </h1>
+      <p class="text-lg lg:text-xl text-ink-soft leading-relaxed max-w-2xl">
+        {guide.data.description}
+      </p>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-6 lg:px-12 grid lg:grid-cols-[1fr_220px] gap-10 lg:gap-16">
+      <article class="guide-prose min-w-0">
+        <Content />
       </article>
 
       <!-- Sticky TOC -->
       {
-        headings.length > 0 && (
+        sectionHeadings.length > 0 && (
           <aside class="hidden lg:block">
             <div class="sticky top-32">
               <div class="text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-3">
                 目錄
               </div>
-              <ul class="space-y-2 text-sm">
-                {headings
-                  .filter((h) => h.depth <= 3)
-                  .map((h) => (
-                    <li class={h.depth === 3 ? 'pl-4' : ''}>
-                      <a
-                        href={`#${h.slug}`}
-                        class="text-ink-soft hover:text-brand transition-colors"
-                      >
-                        {h.text}
-                      </a>
-                    </li>
-                  ))}
+              <ul class="space-y-2 text-sm border-l border-line-soft pl-4">
+                {sectionHeadings.map((h) => (
+                  <li>
+                    <a
+                      href={`#${h.slug}`}
+                      class="text-ink-soft hover:text-brand transition-colors"
+                    >
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </aside>
@@ -83,3 +114,129 @@ const howToSchema = {
     </div>
   </main>
 </Layout>
+
+<style is:global>
+  /* Scoped to .guide-prose article so it doesn't pollute the home page. */
+  .guide-prose {
+    color: var(--color-ink-soft);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .guide-prose > * + * {
+    margin-top: 1.2em;
+  }
+
+  .guide-prose > blockquote {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border-left: 3px solid var(--color-brand);
+    background: color-mix(in srgb, var(--color-brand) 5%, transparent);
+    border-radius: 0.5rem;
+    color: var(--color-ink);
+  }
+
+  .guide-prose > blockquote p {
+    margin: 0;
+  }
+
+  .guide-prose h2 {
+    margin: 3rem 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    scroll-margin-top: 8rem;
+  }
+
+  .guide-prose h3 {
+    margin: 2rem 0 0.75rem;
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    scroll-margin-top: 8rem;
+  }
+
+  .guide-prose p {
+    color: var(--color-ink-soft);
+  }
+
+  .guide-prose p strong {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  .guide-prose a {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color 150ms ease;
+  }
+
+  .guide-prose a:hover {
+    color: color-mix(in srgb, var(--color-brand) 75%, black);
+  }
+
+  .guide-prose ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    list-style: disc;
+  }
+
+  .guide-prose ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    list-style: decimal;
+  }
+
+  .guide-prose li {
+    margin: 0.4em 0;
+  }
+
+  .guide-prose li::marker {
+    color: var(--color-mute);
+  }
+
+  .guide-prose code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    color: var(--color-ink);
+  }
+
+  .guide-prose pre {
+    margin: 1.25rem 0;
+    padding: 1rem 1.25rem;
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-line-soft);
+    border-radius: 0.625rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+  }
+
+  .guide-prose pre code {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .guide-prose hr {
+    margin: 3rem 0;
+    border: 0;
+    border-top: 1px solid var(--color-line-soft);
+  }
+
+  .guide-prose em {
+    font-style: italic;
+    color: var(--color-mute);
+    font-size: 0.95em;
+  }
+</style>
