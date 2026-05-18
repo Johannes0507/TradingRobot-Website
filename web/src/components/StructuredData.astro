@@ -13,7 +13,7 @@ const orgSchema = {
   url: 'https://lendauto.com',
   logo: 'https://lendauto.com/logo.png',
   description:
-    'LendAuto 是 Bitfinex 平台的自動化 USD 放貸機器人，幫助加密貨幣持有者透過自動追單與策略網格，每日獲得被動配息收入。',
+    'LendAuto 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。',
   sameAs: [
     // Add social links here when ready
   ],
@@ -39,7 +39,7 @@ const serviceSchema = {
   serviceType: '加密貨幣自動放貸服務',
   provider: { '@type': 'Organization', name: 'LendAuto' },
   description:
-    '自動化的 Bitfinex USD/USDT 放貸機器人。24 小時追蹤市場利率，自動掛單、自動配息。非託管式架構，使用者資金始終在自己的 Bitfinex 帳號。',
+    'Bitfinex fUSD / fUST funding market 的自動報價代理工具。30 秒級重新評估市場利率、階梯式報價部署。Non-custodial — 使用者保有 Bitfinex 帳號 custody。',
   areaServed: { '@type': 'Country', name: 'Taiwan' },
   offers: [
     {
@@ -83,7 +83,7 @@ const faqSchema = {
       name: '為什麼用 LendAuto 報酬會比手動高？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '三個原因：(1) 24 小時自動追蹤市場利率變動，不錯過機會；(2) 預埋高利率訂單，市場波動時自動成交；(3) 毫秒級執行速度，搶在其他人前面。手動掛單通常年化 8%，LendAuto 用戶平均 15-20%。',
+        text: '三個機制差異：(1) bot 24 小時自動跟隨 Flash Return Rate 變動，手動掛單通常每天只動 1-2 次；(2) 階梯式預埋多檔高利率訂單，在市場波動時自動成交；(3) 毫秒級執行。報酬高低取決於市場利率波動，bot 主要改善的是「不錯過機會」，而非保證任何特定報酬。',
       },
     },
     {
@@ -99,7 +99,7 @@ const faqSchema = {
       name: 'API Key 安全嗎？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '我們用 AES-256-GCM 加密儲存，連工程師都看不到明文。加上 API 權限限制（只開 Funding）與非託管架構，三層防護確保資金安全。',
+        text: 'API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，LendAuto 不開錢包、不持有資產。',
       },
     },
   ],
