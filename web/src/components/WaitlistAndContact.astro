@@ -1,0 +1,38 @@
+---
+import WaitlistForm from './islands/WaitlistForm.tsx';
+import ContactForm from './islands/ContactForm.tsx';
+---
+
+<section id="connect" class="py-[100px] bg-bg-soft relative">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <!-- Waitlist -->
+      <div class="p-8 rounded-2xl bg-bg border border-line-soft">
+        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-3">
+          候補名單
+        </div>
+        <h3 class="text-2xl font-display font-bold text-ink mb-3 tracking-tight">
+          還沒準備好開始？
+        </h3>
+        <p class="text-sm text-ink-soft leading-relaxed mb-6">
+          留 Email，我們會在有重大更新或推出年費方案時通知你。不發行銷信。
+        </p>
+        <WaitlistForm client:idle />
+      </div>
+
+      <!-- Contact -->
+      <div class="p-8 rounded-2xl bg-bg border border-line-soft">
+        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-3">
+          聯絡
+        </div>
+        <h3 class="text-2xl font-display font-bold text-ink mb-3 tracking-tight">
+          有問題想先問？
+        </h3>
+        <p class="text-sm text-ink-soft leading-relaxed mb-6">
+          直接寫信給我們，工作時段 24 小時內回覆。
+        </p>
+        <ContactForm client:idle />
+      </div>
+    </div>
+  </div>
+</section>
