@@ -1,0 +1,74 @@
+---
+/**
+ * BitfinexIpWhitelist.astro — mockup of the IP whitelist section.
+ *
+ * Shows the "Restrict access to a list of IPs" toggle ON + a sample
+ * IP entered. Annotation explains what this protects against.
+ */
+---
+
+<svg
+  viewBox="0 0 1200 400"
+  class="block w-full h-auto"
+  role="img"
+  aria-label="Bitfinex IP 白名單區域示意。開啟限制存取後，只有指定 IP 才能用此 Key。"
+>
+  <!-- Background -->
+  <rect x="0" y="0" width="1200" height="400" fill="#0d1018" />
+
+  <!-- Card -->
+  <g transform="translate(120, 40)">
+    <rect x="0" y="0" width="960" height="320" rx="14" fill="#161a26" stroke="#ffffff" stroke-opacity="0.08" />
+
+    <!-- Section title -->
+    <text x="32" y="44" font-family="Inter, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Access Restrictions</text>
+    <text x="32" y="64" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.55">Limit which IP addresses can use this API Key.</text>
+
+    <!-- Toggle row -->
+    <g transform="translate(32, 92)">
+      <!-- Toggle ON -->
+      <rect x="0" y="0" width="40" height="22" rx="11" fill="#9be37e" />
+      <circle cx="29" cy="11" r="9" fill="#ffffff" />
+
+      <text x="52" y="16" font-family="Inter, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Restrict access to a list of IPs</text>
+    </g>
+
+    <!-- IP input area -->
+    <g transform="translate(32, 138)">
+      <text font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff" opacity="0.6" letter-spacing="0.5">ALLOWED IP ADDRESSES</text>
+      <rect x="0" y="14" width="896" height="44" rx="8" fill="#0d1018" stroke="#ffffff" stroke-opacity="0.1" />
+
+      <!-- IP chips -->
+      <g transform="translate(12, 24)" font-family="JetBrains Mono, monospace" font-size="12">
+        <rect x="0" y="0" width="138" height="24" rx="4" fill="#1f2738" />
+        <text x="10" y="16" fill="#ffffff">52.198.42.7</text>
+        <text x="125" y="16" fill="#ffffff" opacity="0.5">×</text>
+
+        <rect x="150" y="0" width="148" height="24" rx="4" fill="#1f2738" />
+        <text x="160" y="16" fill="#ffffff">13.231.156.108</text>
+        <text x="287" y="16" fill="#ffffff" opacity="0.5">×</text>
+
+        <text x="318" y="16" fill="#ffffff" opacity="0.35">Add another IP…</text>
+      </g>
+    </g>
+
+    <!-- Info row -->
+    <g transform="translate(32, 220)">
+      <rect x="0" y="0" width="896" height="64" rx="8" fill="#635bff" fill-opacity="0.08" stroke="#635bff" stroke-opacity="0.2" />
+      <text x="20" y="28" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#635bff">即使 Key 外洩也擋得住</text>
+      <text x="20" y="48" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.7">非白名單 IP 的請求一律回 401，駭客拿到 Key 也用不了。</text>
+    </g>
+  </g>
+
+  <!-- Annotation -->
+  <g>
+    <circle cx="84" cy="116" r="18" fill="#fb7185" />
+    <text x="84" y="122" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">4</text>
+
+    <g transform="translate(16, 146)">
+      <rect x="0" y="0" width="124" height="44" rx="8" fill="#ffffff" />
+      <text x="62" y="20" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fb7185">開啟限制</text>
+      <text x="62" y="35" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">貼上 LendAuto IP</text>
+    </g>
+  </g>
+</svg>

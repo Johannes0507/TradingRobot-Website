@@ -1,0 +1,76 @@
+---
+/**
+ * BitfinexKeyReveal.astro — mockup of the modal shown after API Key is generated.
+ *
+ * Critical UI: yellow warning bar "Secret will only be shown once" + Key + Secret
+ * fields with Copy buttons. The "copy NOW or regret" moment.
+ */
+---
+
+<svg
+  viewBox="0 0 1200 480"
+  class="block w-full h-auto"
+  role="img"
+  aria-label="API Key 與 Secret 產生後的畫面示意。Secret 只會出現這一次，務必當下複製。"
+>
+  <!-- Dim BG -->
+  <rect x="0" y="0" width="1200" height="480" fill="#0d1018" opacity="0.7" />
+
+  <!-- Modal -->
+  <g transform="translate(180, 40)">
+    <rect x="0" y="0" width="840" height="400" rx="16" fill="#161a26" stroke="#ffffff" stroke-opacity="0.08" />
+
+    <!-- Header -->
+    <text x="40" y="46" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#10b981">✓ API Key Created</text>
+    <text x="40" y="68" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.55">Label: LendAuto · Scope: funding_only</text>
+
+    <!-- Warning bar -->
+    <g transform="translate(40, 92)">
+      <rect x="0" y="0" width="760" height="56" rx="10" fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="1.5" />
+      <text x="20" y="22" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#f59e0b">⚠ Secret 只顯示這一次</text>
+      <text x="20" y="42" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.75">關閉這個視窗後就再也看不到 Secret。先複製，再關。</text>
+    </g>
+
+    <!-- API Key field -->
+    <g transform="translate(40, 172)">
+      <text font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff" opacity="0.6" letter-spacing="0.5">API KEY</text>
+      <rect x="0" y="14" width="640" height="44" rx="8" fill="#0d1018" stroke="#ffffff" stroke-opacity="0.08" />
+      <text x="16" y="42" font-family="JetBrains Mono, monospace" font-size="13" fill="#ffffff">abc1234…XyZ789</text>
+      <rect x="660" y="14" width="100" height="44" rx="8" fill="#1f2738" />
+      <text x="710" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Copy</text>
+    </g>
+
+    <!-- API Secret field -->
+    <g transform="translate(40, 248)">
+      <text font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f59e0b" letter-spacing="0.5">API SECRET （ONLY SHOWN ONCE）</text>
+      <rect x="0" y="14" width="640" height="44" rx="8" fill="#0d1018" stroke="#f59e0b" stroke-opacity="0.45" stroke-width="1.5" />
+      <text x="16" y="42" font-family="JetBrains Mono, monospace" font-size="13" fill="#ffffff">s3cr3t…DELTA42</text>
+
+      <!-- Copy button (highlighted) -->
+      <rect x="660" y="14" width="100" height="44" rx="8" fill="#9be37e" />
+      <text x="710" y="42" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#0a0e1a">Copy</text>
+    </g>
+
+    <!-- Close hint -->
+    <text x="40" y="360" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.55">複製完兩串字串後，再點 Done 關閉視窗。</text>
+
+    <g transform="translate(700, 340)">
+      <rect x="0" y="0" width="100" height="36" rx="6" fill="#1f2738" />
+      <text x="50" y="23" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Done</text>
+    </g>
+  </g>
+
+  <!-- Annotation: Copy SECRET first -->
+  <g>
+    <circle cx="990" cy="284" r="18" fill="#fb7185" />
+    <text x="990" y="290" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">5</text>
+
+    <g transform="translate(1010, 250)">
+      <path d="M 0 14 l -16 8 l 16 8 z" fill="#ffffff" transform="translate(0, 20)" />
+      <rect x="0" y="0" width="170" height="68" rx="8" fill="#ffffff" />
+      <text x="85" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fb7185">先按綠色 Copy</text>
+      <text x="85" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">貼到密碼管理器</text>
+      <text x="85" y="56" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">關掉就找不回來了</text>
+    </g>
+  </g>
+</svg>

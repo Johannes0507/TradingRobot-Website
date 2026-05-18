@@ -1,0 +1,40 @@
+---
+/**
+ * Step.astro — visual step card for image-led guides.
+ *
+ * Usage in MDX:
+ *   <Step n="1" title="進入 API 設定" desc="點擊右上角頭像 → API">
+ *     <BitfinexNav />
+ *   </Step>
+ *
+ * Renders a numbered card with a slot for a UI mockup or screenshot.
+ */
+
+export interface Props {
+  n: string | number;
+  title: string;
+  desc?: string;
+}
+
+const { n, title, desc } = Astro.props;
+---
+
+<section class="not-prose mb-12 group" data-step={n}>
+  <div class="flex items-baseline gap-4 mb-5">
+    <span
+      class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-ink to-ink-soft text-white font-mono font-bold text-xl shadow-md"
+    >
+      {String(n).padStart(2, '0')}
+    </span>
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl lg:text-3xl font-display font-bold text-ink tracking-tight leading-tight">
+        {title}
+      </h2>
+      {desc && <p class="text-base text-ink-soft mt-1">{desc}</p>}
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-line-soft bg-bg-soft p-4 lg:p-6 overflow-hidden">
+    <slot />
+  </div>
+</section>

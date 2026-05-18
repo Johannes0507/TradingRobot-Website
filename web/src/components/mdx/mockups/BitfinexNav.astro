@@ -1,0 +1,127 @@
+---
+/**
+ * BitfinexNav.astro — mockup of Bitfinex top nav + user dropdown showing API.
+ *
+ * Visual goal: when user sees this and then logs into Bitfinex, the real
+ * UI is immediately recognizable. Not pixel-perfect — recognizable.
+ *
+ * Dark Bitfinex-style UI (#0d1018 / #161a26). Annotations in coral/amber.
+ */
+---
+
+<svg
+  viewBox="0 0 1200 360"
+  class="block w-full h-auto"
+  role="img"
+  aria-label="Bitfinex 頂部導覽列示意，點頭像會展開 Profile / Settings / API / Logout，API 是這次要點的項目"
+>
+  <!-- Top nav bar (dark) -->
+  <rect x="0" y="0" width="1200" height="60" fill="#0a0e1a" />
+
+  <!-- Logo "bitfinex" -->
+  <g transform="translate(40, 20)">
+    <rect x="0" y="0" width="14" height="20" rx="3" fill="#9be37e" />
+    <rect x="18" y="0" width="14" height="20" rx="3" fill="#9be37e" opacity="0.7" />
+    <text x="42" y="16" font-family="Inter, sans-serif" font-size="16" font-weight="700" fill="#ffffff">bitfinex</text>
+  </g>
+
+  <!-- Nav items -->
+  <g font-family="Inter, sans-serif" font-size="13" font-weight="500" fill="#ffffff" opacity="0.85">
+    <text x="190" y="38">Trading</text>
+    <text x="260" y="38">Derivatives</text>
+    <text x="345" y="38">Funding</text>
+    <text x="412" y="38">Earn</text>
+    <text x="465" y="38">Borrow</text>
+    <text x="528" y="38">Convert</text>
+  </g>
+
+  <!-- Right cluster: Deposit/Withdraw, notification, language, user -->
+  <g transform="translate(870, 14)">
+    <!-- Deposit pill -->
+    <rect x="0" y="0" width="76" height="32" rx="6" fill="#1f2738" />
+    <text x="38" y="21" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Deposit</text>
+
+    <!-- Withdraw pill -->
+    <rect x="84" y="0" width="80" height="32" rx="6" fill="#1f2738" />
+    <text x="124" y="21" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#ffffff">Withdraw</text>
+
+    <!-- Bell icon stub -->
+    <circle cx="184" cy="16" r="14" fill="#1f2738" />
+    <path d="M 178 13 q 0 -5 6 -5 q 6 0 6 5 v 4 h 1 v 2 h -14 v -2 h 1 z" fill="#ffffff" opacity="0.7" />
+
+    <!-- User avatar -->
+    <g>
+      <circle cx="220" cy="16" r="14" fill="#635bff" />
+      <text x="220" y="20" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">U</text>
+      <path d="M 238 14 l 4 4 l 4 -4" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    </g>
+  </g>
+
+  <!-- Page content stub (dimmed) -->
+  <g opacity="0.25">
+    <rect x="40" y="90" width="280" height="18" rx="4" fill="#ffffff" />
+    <rect x="40" y="120" width="180" height="12" rx="3" fill="#ffffff" />
+
+    <rect x="40" y="160" width="1120" height="160" rx="10" fill="#1a1f2e" />
+  </g>
+
+  <!-- Dropdown menu (anchored to user avatar at x=1090) -->
+  <g transform="translate(996, 60)">
+    <!-- Drop shadow -->
+    <rect x="0" y="4" width="180" height="244" rx="12" fill="#000000" opacity="0.5" filter="blur(4)" />
+    <!-- Menu surface -->
+    <rect x="0" y="0" width="180" height="244" rx="12" fill="#161a26" stroke="#ffffff" stroke-opacity="0.08" />
+
+    <!-- User header -->
+    <text x="16" y="28" font-family="Inter, sans-serif" font-size="11" fill="#ffffff" opacity="0.5" font-weight="600">SIGNED IN AS</text>
+    <text x="16" y="48" font-family="Inter, sans-serif" font-size="13" fill="#ffffff" font-weight="600">user@example.com</text>
+
+    <!-- Divider -->
+    <line x1="12" y1="64" x2="168" y2="64" stroke="#ffffff" stroke-opacity="0.08" />
+
+    <!-- Menu items -->
+    <g font-family="Inter, sans-serif" font-size="13" fill="#ffffff">
+      <text x="16" y="86">Profile</text>
+      <text x="16" y="116">Security</text>
+      <text x="16" y="146">Wallets</text>
+
+      <!-- Highlighted "API" item -->
+      <rect x="6" y="158" width="168" height="32" rx="6" fill="#fb7185" fill-opacity="0.18" />
+      <text x="16" y="178" font-weight="700">API</text>
+      <text x="156" y="178" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#fb7185" font-weight="700">click</text>
+
+      <text x="16" y="206">Sub-Accounts</text>
+      <text x="16" y="232" opacity="0.6">Logout</text>
+    </g>
+  </g>
+
+  <!-- Annotation: arrow + label pointing at "API" menu item -->
+  <g>
+    <!-- Numbered callout circle -->
+    <circle cx="970" cy="238" r="18" fill="#fb7185" />
+    <text x="970" y="244" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">1</text>
+
+    <!-- Curved arrow from callout to API item -->
+    <path
+      d="M 988 238 Q 1010 250 1030 230"
+      stroke="#fb7185"
+      stroke-width="2.5"
+      fill="none"
+      stroke-linecap="round"
+      marker-end="url(#arrow-coral)"
+    />
+
+    <!-- Label -->
+    <g transform="translate(810, 218)">
+      <rect x="0" y="0" width="156" height="40" rx="8" fill="#ffffff" />
+      <text x="78" y="17" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fb7185">點這裡</text>
+      <text x="78" y="32" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#1a1f36">展開頭像選單 → API</text>
+    </g>
+  </g>
+
+  <defs>
+    <marker id="arrow-coral" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fb7185" />
+    </marker>
+  </defs>
+</svg>

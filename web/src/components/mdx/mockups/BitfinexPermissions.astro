@@ -1,0 +1,120 @@
+---
+/**
+ * BitfinexPermissions.astro — mockup of Bitfinex API permissions panel.
+ *
+ * Critical visual: Funding section with 3 checkboxes ticked (green),
+ * Withdraw section explicitly UN-ticked with red "do not check" overlay.
+ * This is the most important screen of the whole guide.
+ */
+---
+
+<svg
+  viewBox="0 0 1200 720"
+  class="block w-full h-auto"
+  role="img"
+  aria-label="Bitfinex API 權限設定面板示意。只勾選 Funding 三個權限，所有 Withdraw 與 Wallets 權限都不要勾。"
+>
+  <!-- Dim background -->
+  <rect x="0" y="0" width="1200" height="720" fill="#0d1018" opacity="0.7" />
+
+  <!-- Modal/panel surface -->
+  <g transform="translate(160, 40)">
+    <rect x="0" y="0" width="880" height="640" rx="16" fill="#161a26" stroke="#ffffff" stroke-opacity="0.08" />
+
+    <!-- Header -->
+    <text x="40" y="44" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#ffffff">Create New API Key</text>
+    <text x="40" y="68" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.55">Select the permissions this key should have. Cannot be changed after creation.</text>
+
+    <!-- Label input -->
+    <g transform="translate(40, 92)">
+      <text font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff" opacity="0.65" letter-spacing="0.5">LABEL</text>
+      <rect x="0" y="10" width="800" height="36" rx="6" fill="#0d1018" stroke="#ffffff" stroke-opacity="0.08" />
+      <text x="14" y="33" font-family="JetBrains Mono, monospace" font-size="12" fill="#ffffff">LendAuto</text>
+    </g>
+
+    <!-- Permission sections -->
+    <g transform="translate(40, 168)" font-family="Inter, sans-serif" font-size="13">
+      <!-- Account section (collapsed, all unchecked) -->
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="800" height="40" rx="6" fill="#0d1018" />
+        <text x="20" y="25" fill="#ffffff" font-weight="700">Account</text>
+        <text x="780" y="25" text-anchor="end" fill="#ffffff" opacity="0.4" font-size="11">0 of 4 selected</text>
+      </g>
+
+      <!-- Orders section (collapsed) -->
+      <g transform="translate(0, 50)">
+        <rect x="0" y="0" width="800" height="40" rx="6" fill="#0d1018" />
+        <text x="20" y="25" fill="#ffffff" font-weight="700">Orders</text>
+        <text x="780" y="25" text-anchor="end" fill="#ffffff" opacity="0.4" font-size="11">0 of 6 selected</text>
+      </g>
+
+      <!-- Funding section (EXPANDED, 3 checked) -->
+      <g transform="translate(0, 100)">
+        <rect x="0" y="0" width="800" height="172" rx="6" fill="#0d1018" stroke="#10b981" stroke-width="1.5" />
+        <text x="20" y="25" fill="#ffffff" font-weight="700">Funding</text>
+        <text x="780" y="25" text-anchor="end" fill="#10b981" font-size="11" font-weight="700">3 of 3 selected ✓</text>
+
+        <!-- 3 checkbox items, all checked -->
+        <g transform="translate(20, 50)" font-size="12">
+          <rect x="0" y="0" width="16" height="16" rx="3" fill="#10b981" />
+          <path d="M 4 8 l 4 4 l 8 -8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" />
+          <text x="28" y="13" fill="#ffffff">Get funding statuses and information</text>
+
+          <rect x="0" y="32" width="16" height="16" rx="3" fill="#10b981" />
+          <path d="M 4 40 l 4 4 l 8 -8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" />
+          <text x="28" y="45" fill="#ffffff">Offer, cancel and close funding</text>
+
+          <rect x="0" y="64" width="16" height="16" rx="3" fill="#10b981" />
+          <path d="M 4 72 l 4 4 l 8 -8" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" />
+          <text x="28" y="77" fill="#ffffff">Edit funding book settings</text>
+
+          <text x="0" y="112" fill="#10b981" opacity="0.7" font-size="11" font-family="JetBrains Mono, monospace">scope: funding_only</text>
+        </g>
+      </g>
+
+      <!-- Wallets section (collapsed, all unchecked — but highlighted as forbidden) -->
+      <g transform="translate(0, 282)">
+        <rect x="0" y="0" width="800" height="40" rx="6" fill="#0d1018" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5 4" />
+        <text x="20" y="25" fill="#ffffff" font-weight="700">Wallets</text>
+        <text x="780" y="25" text-anchor="end" fill="#ef4444" font-size="11" font-weight="700">0 of 3 — keep unchecked ✕</text>
+      </g>
+
+      <!-- Withdraw section (collapsed, EXPLICITLY UN-CHECKED with red warning) -->
+      <g transform="translate(0, 332)">
+        <rect x="0" y="0" width="800" height="40" rx="6" fill="#0d1018" stroke="#ef4444" stroke-width="2" />
+        <text x="20" y="25" fill="#ef4444" font-weight="700">Withdraw</text>
+        <text x="780" y="25" text-anchor="end" fill="#ef4444" font-size="11" font-weight="700">0 of 2 — DO NOT CHECK</text>
+      </g>
+    </g>
+
+    <!-- Footer / submit -->
+    <g transform="translate(40, 580)">
+      <rect x="612" y="0" width="188" height="40" rx="6" fill="#9be37e" />
+      <text x="706" y="26" text-anchor="middle" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#0a0e1a">Generate API Key</text>
+    </g>
+  </g>
+
+  <!-- Annotation 1: Green tick / Funding correct -->
+  <g>
+    <circle cx="120" cy="320" r="18" fill="#10b981" />
+    <text x="120" y="326" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">✓</text>
+    <g transform="translate(20, 350)">
+      <rect x="0" y="0" width="120" height="56" rx="8" fill="#ffffff" />
+      <text x="60" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#10b981">勾這三個</text>
+      <text x="60" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">只開放</text>
+      <text x="60" y="52" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">Funding scope</text>
+    </g>
+  </g>
+
+  <!-- Annotation 2: Red X / Withdraw forbidden -->
+  <g>
+    <circle cx="1080" cy="540" r="18" fill="#ef4444" />
+    <text x="1080" y="546" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">✕</text>
+    <g transform="translate(1040, 570)">
+      <rect x="0" y="0" width="140" height="68" rx="8" fill="#ffffff" />
+      <text x="70" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ef4444">絕對不要勾</text>
+      <text x="70" y="40" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">Withdraw / Wallets</text>
+      <text x="70" y="56" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#1a1f36">建立後無法修改</text>
+    </g>
+  </g>
+</svg>

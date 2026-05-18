@@ -1,0 +1,50 @@
+---
+/**
+ * Mockup.astro — wrapper for SVG UI mockups used inside Step cards.
+ *
+ * Provides a consistent dark "browser-chrome" frame so all mockups look
+ * cohesive. Caption text appears below the artwork.
+ *
+ * Usage:
+ *   <Mockup caption="Bitfinex 頂部導覽列 — 點頭像展開選單">
+ *     <BitfinexNav />
+ *   </Mockup>
+ */
+
+export interface Props {
+  caption?: string;
+  chrome?: boolean; // show browser chrome bar
+  url?: string; // fake address bar text
+}
+
+const { caption, chrome = true, url = 'bitfinex.com' } = Astro.props;
+---
+
+<figure class="rounded-xl overflow-hidden border border-ink/10 shadow-lg bg-[#0d1018]">
+  {
+    chrome && (
+      <div class="flex items-center gap-2 px-4 py-2.5 bg-[#161a26] border-b border-white/5">
+        <div class="flex gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+          <span class="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+          <span class="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+        </div>
+        <div class="flex-1 ml-3 px-3 py-1 rounded bg-[#0d1018] text-[11px] font-mono text-white/40 truncate">
+          {url}
+        </div>
+      </div>
+    )
+  }
+
+  <div class="relative">
+    <slot />
+  </div>
+
+  {
+    caption && (
+      <figcaption class="px-4 py-3 bg-[#0d1018] text-[12px] font-mono text-white/55 border-t border-white/5">
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>
