@@ -30,9 +30,6 @@ function toY(v: number): number {
 }
 
 const points = data.map((v, i) => `${i * stepX},${toY(v)}`);
-const polyline = points.join(' ');
-
-// Build SVG path with smooth(ish) join — straight segments are fine for sparklines.
 const path = points.reduce((acc, p, i) => acc + (i === 0 ? `M ${p}` : ` L ${p}`), '');
 
 const highIdx = data.indexOf(max);
