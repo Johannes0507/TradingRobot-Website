@@ -1,6 +1,9 @@
 ---
 import FluidRibbon from './islands/FluidRibbon.tsx';
 import { subscribeUrl } from '../lib/cta';
+import { HERO_KPIS } from '../lib/mock-data';
+
+const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 ---
 
 <section class="relative pt-[140px] pb-[100px] overflow-hidden">
@@ -25,30 +28,29 @@ import { subscribeUrl } from '../lib/cta';
   <!-- Content -->
   <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
     <div class="max-w-2xl">
-      <!-- Announcement pill -->
+      <!-- Announcement pill — descriptive, not affiliation claim -->
       <div
         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-line bg-bg/80 backdrop-blur-sm text-sm text-ink-soft mb-8"
       >
         <span class="w-2 h-2 rounded-full bg-success"></span>
-        <span class="font-mono">Bitfinex 官方授權合作</span>
+        <span class="font-mono">fUSD / fUST 自動報價</span>
       </div>
 
       <!-- Headline -->
       <h1
         class="text-5xl lg:text-7xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-6"
       >
-        你的加密貨幣，<br />
-        也可以像
+        把 Bitfinex funding 報價，<br />
+        交給機器人
         <span
           class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent"
-          >存股一樣</span
-        >每天配息
+          >24×60×60 秒</span
+        >盯
       </h1>
 
       <!-- Subhead -->
       <p class="text-lg lg:text-xl text-ink-soft leading-relaxed mb-10 max-w-xl">
-        LendAuto 是 Bitfinex 平台的自動放貸機器人 ——
-        24 小時為你尋找最佳利率，每天結算配息直接入帳。
+        fUSD 與 fUST 雙幣對的 funding 自動化工具，根據資金量分層報價，每日結算入帳。
       </p>
 
       <!-- CTAs -->
@@ -57,29 +59,38 @@ import { subscribeUrl } from '../lib/cta';
           href={subscribeUrl({ source: 'hero' })}
           class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-ink text-white font-medium hover:bg-ink-soft transition-colors"
         >
-          立即開始 →
+          開始使用 →
         </a>
         <a
           href="/guides/bitfinex-api-setup"
           class="inline-flex items-center justify-center px-6 py-3 rounded-md border border-line bg-bg text-ink font-medium hover:bg-bg-soft transition-colors"
         >
-          查看設定教學
+          先看設定教學
         </a>
       </div>
 
       <!-- KPI strip -->
       <div class="mt-16 grid grid-cols-3 gap-6 max-w-lg">
         <div>
-          <div class="text-3xl font-display font-bold text-ink">2-5%</div>
-          <div class="text-sm text-mute mt-1">年化報酬率</div>
+          <div class="text-3xl font-display font-bold text-ink font-mono">{fmtPct(HERO_KPIS.fusd30dAvgApr)}</div>
+          <div class="text-sm text-mute mt-1">
+            過去 30 日<br />
+            fUSD 平均利率
+          </div>
         </div>
         <div>
-          <div class="text-3xl font-display font-bold text-ink">24/7</div>
-          <div class="text-sm text-mute mt-1">不間斷監控</div>
+          <div class="text-3xl font-display font-bold text-ink font-mono">24/7</div>
+          <div class="text-sm text-mute mt-1">
+            自動<br />
+            報價監控
+          </div>
         </div>
         <div>
-          <div class="text-3xl font-display font-bold text-ink">0</div>
-          <div class="text-sm text-mute mt-1">需要看盤的時間</div>
+          <div class="text-3xl font-display font-bold text-ink font-mono">{HERO_KPIS.rateRefreshSec}s</div>
+          <div class="text-sm text-mute mt-1">
+            報價<br />
+            重新評估週期
+          </div>
         </div>
       </div>
     </div>
