@@ -8,11 +8,16 @@ body {
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-feature-settings: 'cv11', 'ss01';
+  /* palt: 日中文比例字寬，"立刻變精緻"的單一最強開關 (ICS Media)
+     kern: Latin pair kerning
+     cv11/ss01: Inter stylistic sets (preserved from original) */
+  font-feature-settings: 'palt' 1, 'kern' 1, 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  line-height: 1.55;
+  /* CJK 友善：1.7 給段落呼吸，標題在自身 leading-[1.1] 處 override */
+  line-height: 1.7;
+  letter-spacing: 0.015em;
 }
 
 body {
@@ -30,4 +35,142 @@ body {
 ::selection {
   background: color-mix(in srgb, var(--color-brand) 25%, transparent);
   color: var(--color-ink);
+}
+
+/* ============================================
+   Scroll-driven section reveal (2026)
+   Runs on compositor thread, zero JS, 60fps.
+   Firefox without flag → no animation, content shows immediately (graceful).
+   Respects prefers-reduced-motion.
+   ============================================ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    main > section {
+      animation: section-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+  }
+}
+
+@keyframes section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* ============================================
+   Global interactive feedback — buttons, links, cards
+   Uses motion tokens for consistent "hand feel".
+   ============================================ */
+a,
+button {
+  transition:
+    color var(--dur-micro) var(--ease-standard),
+    background-color var(--dur-micro) var(--ease-standard),
+    border-color var(--dur-micro) var(--ease-standard),
+    transform var(--dur-micro) var(--ease-out-expo),
+    box-shadow var(--dur-micro) var(--ease-out-expo),
+    filter var(--dur-micro) var(--ease-standard);
+}
+
+a:active,
+button:active {
+  transform: scale(0.98);
+}
+
+/* Cards / surfaces with .lift class get a subtle hover lift */
+.lift {
+  transition:
+    transform var(--dur-base) var(--ease-out-expo),
+    box-shadow var(--dur-base) var(--ease-out-expo),
+    border-color var(--dur-base) var(--ease-standard);
+}
+
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -12px rgb(26 31 54 / 0.18);
+}
+
+/* ============================================
+   Typography refinements — Japanese-influenced
+   ============================================ */
+
+/* Numbers: tabular widths + slashed zero — tighter financial readability */
+.font-mono,
+[class*='font-mono'] {
+  font-feature-settings: 'tnum' 1, 'zero' 1, 'kern' 1;
+  letter-spacing: 0;
+}
+
+/* Headings — tighter optical kerning, smaller body line-height */
+h1, h2, h3, h4 {
+  font-feature-settings: 'palt' 1, 'kern' 1, 'ss01';
+  letter-spacing: -0.01em; /* Latin display kerning */
+}
+
+/* Prose-style text links — Japanese "letter-spacing widen" hover
+   instead of color/translate. Scoped to .guide-prose & .prose-link
+   so it doesn't push button text. */
+.guide-prose a,
+.prose-link {
+  transition: letter-spacing var(--dur-base) var(--ease-out-expo),
+              color var(--dur-micro) var(--ease-standard);
+}
+
+.guide-prose a:hover,
+.prose-link:hover {
+  letter-spacing: 0.06em;
+}
+
+/* ============================================
+   Japanese refinement — tate-sen eyebrow
+   1px vertical column before section label,
+   mirrors 縦書罫線 DNA from Japanese corporate sites.
+   Apply via `class="eyebrow"` on the small label div.
+   ============================================ */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0.9em;
+  background: currentColor;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Hero-bottom hairline + 12-col grid hint
+   ============================================ */
+.hero-divider {
+  position: relative;
+  height: 1px;
+  background: var(--color-line);
+}
+
+.hero-divider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(99 91 255 / 0.22) 0 1px,
+      transparent 1px calc(100% / 12)
+    );
+  background-size: calc(100% / 12) 100%;
+  pointer-events: none;
 }

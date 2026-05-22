@@ -21,12 +21,12 @@ const pillars = [
 ];
 ---
 
-<section id="security" class="py-[140px] relative">
+<section id="security" class="py-[56px] lg:py-[96px] relative">
   <div class="max-w-7xl mx-auto px-6 lg:px-12">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-20 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10 lg:gap-14 items-start">
       <!-- Left: sticky headline -->
       <div class="lg:sticky lg:top-32">
-        <div class="text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
+        <div class="eyebrow text-xs font-mono font-semibold text-brand uppercase tracking-wider mb-4">
           架構與安全
         </div>
         <h2
@@ -40,7 +40,7 @@ const pillars = [
       </div>
 
       <!-- Right: diagram + pillars + screenshot -->
-      <div class="flex flex-col gap-10">
+      <div class="flex flex-col gap-7">
         <!-- Architecture diagram -->
         <div class="p-7 rounded-2xl bg-bg-soft border border-line-soft">
           <div class="text-xs font-mono text-mute uppercase tracking-wider mb-5">
@@ -136,7 +136,7 @@ const pillars = [
           <img
             src="/screenshots/demo-performance-placeholder.svg"
             alt="LendAuto demo account 30 日績效截圖（placeholder，待真實資料更新）"
-            class="w-full rounded-xl border border-line-soft"
+            class="w-full max-h-[360px] object-contain rounded-xl border border-line-soft bg-bg"
             loading="lazy"
             decoding="async"
             width="1200"

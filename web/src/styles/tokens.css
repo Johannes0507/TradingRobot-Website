@@ -20,13 +20,21 @@
   --color-mute: #6b7280;
   --color-mute-soft: #9ca3af;
 
-  /* Surfaces */
+  /* Surfaces — keep pure white; Japanese "精緻感" comes from
+     hairlines + grid + restraint, not warm paper tone (warm bg
+     clashes with cool brand purple WebGL ribbon). */
   --color-bg: #ffffff;
   --color-bg-soft: #fafafa;
+  /* Cool-leaning tint for alt sections, aligns with cool brand purple */
+  --color-bg-tint: #f7f9fc;
 
-  /* Borders / dividers */
-  --color-line: rgb(26 31 54 / 0.08);
-  --color-line-soft: rgb(26 31 54 / 0.04);
+  /* Borders / dividers — slate-900 base rgba (Japanese hairline standard)
+     soft: section dividers, card borders
+     base: standard divider
+     strong: hover / emphasized */
+  --color-line-soft: rgb(15 23 42 / 0.04);
+  --color-line: rgb(15 23 42 / 0.08);
+  --color-line-strong: rgb(15 23 42 / 0.14);
 
   /* Brand accents — left→right cool→warm gradient identity */
   --color-brand: #635bff;        /* primary purple — premium trust */
@@ -57,4 +65,21 @@
   --radius-lg: 20px;
   --radius-xl: 28px;
   --radius-pill: 999px;
+
+  /* ============================================
+     MOTION — easing curves + durations
+     2026 reference: Stripe / Linear / Vercel
+     ============================================ */
+
+  /* Expo-out: snappy entrance, soft tail. Default for reveals + state-in */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Smooth-out: gentler version. For layout shifts */
+  --ease-out-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Standard: bidirectional state changes */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Durations — micro for hover/focus, base for state, layout for size shifts */
+  --dur-micro: 180ms;
+  --dur-base: 240ms;
+  --dur-layout: 320ms;
 }

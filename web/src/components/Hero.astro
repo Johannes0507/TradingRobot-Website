@@ -6,7 +6,7 @@ import { HERO_KPIS } from '../lib/mock-data';
 const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 ---
 
-<section class="relative pt-[140px] pb-[100px] overflow-hidden">
+<section class="relative pt-[112px] lg:pt-[140px] pb-[64px] lg:pb-[80px] overflow-hidden">
   <!-- Fluid Ribbon — nebula-swirl WebGL silk, right 45% of viewport -->
   <div class="absolute top-0 right-0 w-[45%] h-full overflow-hidden pointer-events-none z-0">
     <FluidRibbon client:only="react" />
@@ -70,7 +70,7 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
       </div>
 
       <!-- KPI strip -->
-      <div class="mt-16 grid grid-cols-3 gap-6 max-w-lg">
+      <div class="mt-10 lg:mt-12 grid grid-cols-3 gap-6 max-w-lg">
         <div>
           <div class="text-3xl font-display font-bold text-ink font-mono">{fmtPct(HERO_KPIS.fusd30dAvgApr)}</div>
           <div class="text-sm text-mute mt-1">
