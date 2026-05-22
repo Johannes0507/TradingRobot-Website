@@ -51,7 +51,7 @@ void main() {
      Centre moved up-right so silk extends off the canvas to right (silk's
      vivid-purple edge is positioned at canvas top-right corner area).     */
   vec2  c        = uv - vec2(0.75, 0.30);
-  float angle    = -0.42;                                 /* clockwise rotation         */
+  float angle    = -0.28;                                 /* ~16° from vertical — matches Stripe band slope */
   float ca       = cos(angle), sa = sin(angle);
   vec2  silkUV;
   silkUV.x = c.x *  ca + c.y * sa;                       /* across silk                 */
@@ -60,9 +60,9 @@ void main() {
   /* ── Along-silk parameter (–0.5..0.5 across canvas height) ──────────── */
   float yt = silkUV.y + 0.5;                              /* shift to 0..1 range        */
 
-  /* ── Subtle curvature ─────────────────────────────────────────────── */
-  float curvature = (yt - 0.3) * 0.10
-                  + sin(yt * 1.8) * 0.020;
+  /* ── Very subtle curvature — Stripe's bands are mostly straight ─────── */
+  float curvature = sin(yt * 1.4 + t * 0.05) * 0.025
+                  + (vn(vec2(yt * 1.0, t * 0.04)) - 0.5) * 0.020;
 
   /* ── Centreline sway ─────────────────────────────────────────────── */
   float sway = sin(yt * 1.6 + t * 0.10) * 0.025
@@ -89,9 +89,8 @@ void main() {
   vec3 c4 = vec3(0.941, 0.451, 0.549);   /* coral                          */
   vec3 c5 = vec3(0.314, 0.153, 0.969);   /* vivid purple                   */
 
-  /* Stripe palette is orange-dominant: orange covers ~40% of width,
-     other colours are narrower accents.                                   */
-  float w  = 0.022;
+  /* Softer panel transitions for flowing silk feel (was 0.022 → 0.045) */
+  float w  = 0.045;
   vec3  color = c1;
   color = mix(color, c2, smoothstep(0.13 - w, 0.13 + w, colorPos));  /* lavender→amber */
   color = mix(color, c3, smoothstep(0.28 - w, 0.28 + w, colorPos));  /* amber→orange   */
