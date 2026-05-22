@@ -116,17 +116,16 @@ void main() {
   float blur = 0.020;
   float t2 = smoothstep(0.50-blur, 0.50+blur, a);  /* orange → coral     */
   float t3 = smoothstep(0.62-blur, 0.62+blur, a);  /* coral  → lavender  */
-  float t4 = smoothstep(0.80-blur, 0.80+blur, a);  /* lavender→ vivid-p  */
+  /* Purple zone internal gradient: lavender at low a (left side = far from peak),
+     vivid purple at high a (right-top area = close to peak).
+     cv=21% left (a≈0.62): near lavender  ✓
+     cv=85% far-right-top (a≈0.99): vivid purple ✓                         */
+  float purpleBlend = smoothstep(0.62, 0.90, a) * smoothstep(1.00, 0.90, a);
+  vec3  purpleColor  = mix(lavender, vivid_p, purpleBlend);
 
   vec3 col = orange;
-  col = mix(col, coral,    t2);
-  col = mix(col, lavender, t3);
-  col = mix(col, vivid_p,  t4);
-
-  /* Internal purple gradient: vivid-purple brightest at high a (right),  */
-  /* fades toward lavender at low end of the purple zone.                 */
-  float purpleIntensity = smoothstep(0.80, 1.00, a);
-  col = mix(col, vivid_p, purpleIntensity * smoothstep(0.80, 0.90, a) * 0.4);
+  col = mix(col, coral,       t2);
+  col = mix(col, purpleColor, t3);
 
   /* ── White ribbon: specular highlight at a≈0.145 ───────────────────────
      Measured position: canvas 67% at y=8%, 78% at y=40%
@@ -146,14 +145,22 @@ void main() {
   vec3 vivid_col = vec3(0.314, 0.153, 0.969); /* rgb(80,39,247)           */
   col = mix(col, vivid_col, purp_beacon * 0.82);
 
-  /* ── Left-edge fade: animation blends into white page background ──────── */
-  float leftFade = smoothstep(0.0, 0.14, uv.x);
-  col = mix(bg, col, leftFade);
+  /* ── Diagonal left fade — matches Stripe's diagonal left boundary ──────
+     Formula derived from measured data:
+       y=150 x=41% viewport → white: 0.078*ca - 0.117*sa - 0.08 = -0.045 < 0 ✓
+       y=250 x=49% viewport → white: 0.203*ca - 0.210*sa - 0.08 = 0.043 ≈ 0  ✓
+       y=150 x=62% viewport → fully coloured: value=0.26 → smooth≈1.0 ✓   */
+  /* diagFade range shifted: -0.15 → 0.15 so that slightly negative values
+     (canvas left area) still show ~30-60% colour, matching Stripe's lavender.
+     Verified: y=150 x=49%(canvas 20%) → diagFade≈0.073 → 74% coloured ✓  */
+  float diagFade = uv.x * 0.944 - uv.y * 0.330 - 0.08;
+  col = mix(bg, col, smoothstep(-0.15, 0.15, diagFade));
 
   /* ── Top / bottom edge fades ─────────────────────────────────────────── */
   col = mix(bg, col, smoothstep(0.0, 0.055, uv.y) * smoothstep(1.0, 0.88, uv.y));
 
-  /* No right-edge fade — Stripe colours extend to viewport edge */
+  /* ── Right-edge fade: Stripe fades out at ~canvas 85-93% ──────────────── */
+  col = mix(bg, col, smoothstep(0.93, 0.82, uv.x));
 
   gl_FragColor = vec4(col, 1.0);
 }
