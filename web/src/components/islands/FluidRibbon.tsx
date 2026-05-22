@@ -1,26 +1,22 @@
 /**
- * FluidRibbon — Stripe hero animation (pixel-calibrated)
+ * FluidRibbon — Stripe-style diagonally-twisted silk
  *
- * Exhaustive analysis via 30fps frame extraction + per-pixel RGB tracking:
+ * Critical insight from frame analysis: the silk's LENGTH runs diagonally
+ * from upper-left to lower-right of canvas. Its WIDTH (perpendicular)
+ * gives the colour bands from upper-right to lower-left, matching Stripe.
  *
- * Gradient direction: NEGATIVE x, POSITIVE y  →  pos = -x·0.944 + y·0.330
- *   Bands run "\" (upper-left → lower-right), nearly vertical (19° from vert).
- *   LEFT side = high pos = purple/lavender
- *   RIGHT/bottom = low pos = orange
+ * Implementation:
+ *   1. Rotate canvas UV to align silk's length with the rotated y axis
+ *   2. Apply silk twist algorithm in rotated coords (centerline + width)
+ *   3. Sharp panel transitions create distinct silk faces
+ *   4. White folds at panel boundaries (silk crease highlights)
  *
- * Calibration (measured from pixel data):
- *   Orange left boundary at canvas cv=41.6%, hero y=20% moves +0.67%/s rightward
- *   → scrollSpeed = 0.0063 / s  (full cycle ~174 s)
- *   Canvas-left (cv=4%, y=10%) is always purple  → pos ≈ -0.005 → a ≈ 0.69
- *   Canvas-centre (cv=50%, y=40%) is orange at t=0 → pos ≈ -0.340 → a ≈ 0.39
- *   PERIOD = 1.10, phase offset = 0.767
- *
- * Colour palette from direct video pixel sampling:
- *   purple:  rgb(80, 39,247)  vivid indigo-purple
- *   lavender: rgb(190,204,252) pale periwinkle (long-range purple)
- *   orange:  rgb(242,148, 24) rich warm orange
- *   coral:   rgb(240,115,140) warm coral-salmon
- *   magenta: rgb(235, 95,185) vivid hot pink
+ * Geometry:
+ *   silk LENGTH direction in canvas: (0.91, 0.41) — right and down
+ *   silk WIDTH direction in canvas: (-0.41, 0.91) — left and down
+ *   colour bands run perpendicular to width = parallel to length-perp
+ *     = along (-0.41, 0.91) direction in canvas
+ *     = from UPPER-RIGHT to LOWER-LEFT (matches Stripe) ✓
  */
 import { useEffect, useRef } from 'react';
 
@@ -38,131 +34,96 @@ precision highp float;
 varying vec2  v_uv;
 uniform float u_time;
 
-float h2(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float vn(vec2 p) {
-  vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
-  return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x),f.y);
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h2(i), h2(i+vec2(1,0)), f.x),
+             mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y);
 }
 
 void main() {
   vec2  uv = v_uv;
   float t  = u_time;
 
-  /* ── Gradient: bands run "\" (upper-left to lower-right) ───────────────
-     Measured from orange zone tracing:
-       orange cv=58% at hero-y=5% → canvas (0.58, 0.05)
-       orange cv=69% at hero-y=40% → canvas (0.69, 0.40)
-     Line direction: (Δx=0.11, Δy=0.35) → normal: (-0.330, 0.944) → ca=0.944, sa=0.330
-     pos = -ca*x + sa*y  (decreases going right, increases going down)    */
-  float ca = 0.944, sa = 0.330;
+  /* ── Rotate canvas UV to silk's natural frame ─────────────────────────
+     NEGATIVE rotation: silk length runs from upper-right → lower-left.
+     This puts vivid purple at TOP-RIGHT (matching Stripe).                */
+  vec2  c        = uv - vec2(0.62, 0.40);
+  float angle    = -0.42;                                 /* clockwise rotation         */
+  float ca       = cos(angle), sa = sin(angle);
+  vec2  silkUV;
+  silkUV.x = c.x *  ca + c.y * sa;                       /* across silk                 */
+  silkUV.y = -c.x * sa + c.y * ca;                       /* along silk                  */
 
-  /* Organic warp: breaks straight lines → silk-like curvature.
-     Amplitude 0.055 chosen to match the ~4% band position variation
-     observed across hero height in pixel data.                           */
-  /* Warp max ±0.050: enough for organic silk curvature without destroying
-     colour zones at canvas edges (e.g. vivid-purple at top-right).        */
-  float warp = (vn(uv * 1.8 + vec2(t*0.016, t*0.011)) - 0.5) * 0.038
-             + (vn(uv * 4.2 + vec2(t*0.008, t*0.013)) - 0.5) * 0.014;
+  /* ── Along-silk parameter (–0.5..0.5 across canvas height) ──────────── */
+  float yt = silkUV.y + 0.5;                              /* shift to 0..1 range        */
 
-  float pos = -uv.x * ca + uv.y * sa + warp;
+  /* ── Subtle linear curve: bands tilt slightly with y position ─────── */
+  float curvature = (yt - 0.5) * 0.15
+                  + sin(yt * 2.0) * 0.025;
 
-  /* Scroll: a increases → orange retreats rightward (as measured).
-     Speed 0.0063/s  (orange boundary moves +0.0067 canvas/s at y=20%)
-     PERIOD = 1.10   offset = 0.767                                       */
-  float PERIOD = 1.10;
-  float a = fract((pos + t * 0.0063 + 0.767) / PERIOD);
+  /* ── Across-width with gentle centreline sway ──────────────────────── */
+  float sway = sin(yt * 1.6 + t * 0.10) * 0.025
+             + (vn(vec2(yt * 1.2, t * 0.07)) - 0.5) * 0.035;
+  float halfW   = 0.48;                                   /* wider — silk covers more   */
+  float across  = (silkUV.x - sway + curvature) / halfW;
+  float localX  = (across + 1.0) * 0.5;                   /* 0..1 across silk          */
 
-  /* ── Secondary component: vivid-purple beacon at upper-right ───────────
-     Measured: vivid purple (rgb 80,39,247) at canvas x=0.84-0.89, y=0.08
-     This cannot be explained by the main linear gradient alone — it needs
-     a separate radial source that slowly orbits around the upper-right.   */
-  float purp_t = t * 0.22 + 0.0;                   /* ~29s orbit period   */
-  vec2  purp_src = vec2(
-    1.05 + cos(purp_t) * 0.12,
-   -0.18 + sin(purp_t) * 0.14
-  );
-  float purp_dist = length(uv - purp_src);
-  /* Beacon fades from vivid at source (dist=0) to invisible at dist~0.7   */
-  float purp_beacon = smoothstep(0.75, 0.0, purp_dist);
+  /* ── Twist phase ───────────────────────────────────────────────────────
+     Higher frequency → multiple bands visible at once.
+     fbm warp adds subtle organic curvature.                              */
+  float twistNoise = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.60;
+  float twistPhase = yt * 4.20 + twistNoise + t * 0.38;
+  float twist      = sin(twistPhase) * 0.42;
+  float colorPos   = clamp(localX + twist, 0.0, 1.0);
 
-  /* ── Colour zones (a increasing = retreating from orange toward purple) ─
-     Sampled colour positions:
-       cv=4%,  y=10%  → always purple  → pos≈-0.005 → a≈0.692
-       cv=21%, y=35%  → always lavender → pos≈-0.088 → a≈0.617
-       cv=41%, y=20%  → orange left edge → a≈0.40 (boundary)
-       cv=50%, y=40%  → orange core     → a≈0.39
-       cv=58%, y=5%   → orange peak     → a≈0.28
-       cv=75%, y=10%  → transition/magenta → a≈0.15
-     Zones: orange 0.00-0.40, transition 0.40-0.55, purple 0.55-0.85,
-             magenta 0.85-0.97, return-to-orange 0.97-1.00               */
-  vec3 bg       = vec3(1.000, 1.000, 1.000);
-  /* Palette: sampled from actual video pixels                             */
-  vec3 orange   = vec3(0.945, 0.565, 0.082);   /* rgb(241,144, 21) amber */
-  vec3 coral    = vec3(0.941, 0.451, 0.549);   /* rgb(240,115,140)       */
-  vec3 lavender = vec3(0.745, 0.800, 0.988);   /* rgb(190,204,252) pale  */
-  vec3 vivid_p  = vec3(0.314, 0.153, 0.969);   /* rgb( 80, 39,247) vivid */
+  /* ── 5-panel colour gradient with sharp transitions ──────────────────── */
+  vec3 c1 = vec3(0.745, 0.800, 0.988);   /* lavender                       */
+  vec3 c2 = vec3(0.985, 0.700, 0.250);   /* amber                          */
+  vec3 c3 = vec3(0.945, 0.565, 0.082);   /* orange peak                    */
+  vec3 c4 = vec3(0.941, 0.451, 0.549);   /* coral                          */
+  vec3 c5 = vec3(0.314, 0.153, 0.969);   /* vivid purple                   */
 
-  /* CORRECTED zone layout (verified by computing a at measured positions):
-     a = 0.00-0.50: orange  (wide — canvas centre+right are orange)
-     a = 0.50-0.62: coral   (narrow transition)
-     a = 0.62-0.80: lavender (canvas left area, always pale)
-     a = 0.80-1.00: vivid purple (canvas far-right area at top)
+  /* Stripe palette is orange-dominant: orange covers ~40% of width,
+     other colours are narrower accents.                                   */
+  float w  = 0.022;
+  vec3  color = c1;
+  color = mix(color, c2, smoothstep(0.13 - w, 0.13 + w, colorPos));  /* lavender→amber */
+  color = mix(color, c3, smoothstep(0.28 - w, 0.28 + w, colorPos));  /* amber→orange   */
+  color = mix(color, c4, smoothstep(0.68 - w, 0.68 + w, colorPos));  /* orange→coral   */
+  color = mix(color, c5, smoothstep(0.86 - w, 0.86 + w, colorPos));  /* coral→vivid_p  */
 
-     Verification:
-       cv=50%,y=40% (canvas ctr): a=0.388 → orange ✓
-       cv=21%,y=35% (canvas left): a=0.623 → lavender ✓
-       cv=85%,y=8%  (far-right top): a=0.992 → vivid-purple ✓
-       cv=41%,y=20% (orange left edge): a=0.400 → still orange ✓        */
-  float blur = 0.020;
-  float t2 = smoothstep(0.50-blur, 0.50+blur, a);  /* orange → coral     */
-  float t3 = smoothstep(0.62-blur, 0.62+blur, a);  /* coral  → lavender  */
-  /* Purple zone internal gradient: lavender at low a (left side = far from peak),
-     vivid purple at high a (right-top area = close to peak).
-     cv=21% left (a≈0.62): near lavender  ✓
-     cv=85% far-right-top (a≈0.99): vivid purple ✓                         */
-  float purpleBlend = smoothstep(0.62, 0.90, a) * smoothstep(1.00, 0.90, a);
-  vec3  purpleColor  = mix(lavender, vivid_p, purpleBlend);
+  /* ── White folds (very thin silk creases between panels) ────────────── */
+  float fold = 0.0;
+  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.13)));
+  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.28)));
+  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.68)));
+  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.86)));
+  /* Only show within silk body                                            */
+  fold *= 1.0 - smoothstep(0.70, 0.95, abs(across));
+  color = mix(color, vec3(1.0), fold * 0.95);
 
-  vec3 col = orange;
-  col = mix(col, coral,       t2);
-  col = mix(col, purpleColor, t3);
+  /* ── 3D silk shading ───────────────────────────────────────────────── */
+  float silkDepth = 1.0 - abs(across);
+  silkDepth = smoothstep(0.0, 0.65, silkDepth);
+  color *= 0.86 + silkDepth * 0.14;
 
-  /* ── White ribbon: specular highlight at a≈0.145 ───────────────────────
-     Measured position: canvas 67% at y=8%, 78% at y=40%
-     (pos = -0.635 → a = fract(0.145) = 0.145)
-     This is the "silk fold" crease within the orange zone toward the right. */
-  float rib = smoothstep(0.026, 0.000, abs(a - 0.145));
-  rib *= smoothstep(0.0, 0.10, uv.x)
-       * smoothstep(0.0, 0.055, uv.y);
-  col = mix(col, bg, rib * 0.90);
+  /* Brighten where silk faces the viewer (panel centre = brightest)       */
+  float panelCtr = 1.0 - abs(colorPos * 2.0 - 1.0);
+  color *= 0.95 + panelCtr * 0.08;
 
-  /* Second dimmer ribbon at a≈0.50 (orange→coral boundary)               */
-  float rib2 = smoothstep(0.016, 0.000, abs(a - 0.50));
-  rib2 *= smoothstep(0.0, 0.08, uv.x) * smoothstep(0.0, 0.04, uv.y);
-  col = mix(col, bg, rib2 * 0.40);
+  /* ── Silk silhouette ──────────────────────────────────────────────── */
+  float mask = smoothstep(0.85, 0.72, abs(across));
 
-  /* Apply vivid-purple beacon on top of gradient colours                   */
-  vec3 vivid_col = vec3(0.314, 0.153, 0.969); /* rgb(80,39,247)           */
-  col = mix(col, vivid_col, purp_beacon * 0.82);
+  /* ── Top/bottom canvas fades (using canvas uv.y, not silkUV.y) ────── */
+  mask *= smoothstep(0.0, 0.05, uv.y) * smoothstep(1.0, 0.92, uv.y);
 
-  /* ── Diagonal left fade — matches Stripe's diagonal left boundary ──────
-     Formula derived from measured data:
-       y=150 x=41% viewport → white: 0.078*ca - 0.117*sa - 0.08 = -0.045 < 0 ✓
-       y=250 x=49% viewport → white: 0.203*ca - 0.210*sa - 0.08 = 0.043 ≈ 0  ✓
-       y=150 x=62% viewport → fully coloured: value=0.26 → smooth≈1.0 ✓   */
-  /* diagFade range shifted: -0.15 → 0.15 so that slightly negative values
-     (canvas left area) still show ~30-60% colour, matching Stripe's lavender.
-     Verified: y=150 x=49%(canvas 20%) → diagFade≈0.073 → 74% coloured ✓  */
-  float diagFade = uv.x * 0.944 - uv.y * 0.330 - 0.08;
-  col = mix(bg, col, smoothstep(-0.15, 0.15, diagFade));
+  /* ── Composite ──────────────────────────────────────────────────────── */
+  vec3 bg = vec3(1.0);
+  color = mix(bg, color, mask);
 
-  /* ── Top / bottom edge fades ─────────────────────────────────────────── */
-  col = mix(bg, col, smoothstep(0.0, 0.055, uv.y) * smoothstep(1.0, 0.88, uv.y));
-
-  /* ── Right-edge fade: Stripe fades out at ~canvas 85-93% ──────────────── */
-  col = mix(bg, col, smoothstep(0.93, 0.82, uv.x));
-
-  gl_FragColor = vec4(col, 1.0);
+  gl_FragColor = vec4(color, 1.0);
 }
 `;
 
