@@ -59,8 +59,10 @@ void main() {
   /* Organic warp: breaks straight lines → silk-like curvature.
      Amplitude 0.055 chosen to match the ~4% band position variation
      observed across hero height in pixel data.                           */
-  float warp = (vn(uv * 2.1 + vec2(t*0.019, t*0.013)) - 0.5) * 0.055
-             + (vn(uv * 5.3 + vec2(t*0.009, t*0.017)) - 0.5) * 0.020;
+  /* Warp max ±0.050: enough for organic silk curvature without destroying
+     colour zones at canvas edges (e.g. vivid-purple at top-right).        */
+  float warp = (vn(uv * 1.8 + vec2(t*0.016, t*0.011)) - 0.5) * 0.038
+             + (vn(uv * 4.2 + vec2(t*0.008, t*0.013)) - 0.5) * 0.014;
 
   float pos = -uv.x * ca + uv.y * sa + warp;
 
@@ -69,6 +71,19 @@ void main() {
      PERIOD = 1.10   offset = 0.767                                       */
   float PERIOD = 1.10;
   float a = fract((pos + t * 0.0063 + 0.767) / PERIOD);
+
+  /* ── Secondary component: vivid-purple beacon at upper-right ───────────
+     Measured: vivid purple (rgb 80,39,247) at canvas x=0.84-0.89, y=0.08
+     This cannot be explained by the main linear gradient alone — it needs
+     a separate radial source that slowly orbits around the upper-right.   */
+  float purp_t = t * 0.22 + 0.0;                   /* ~29s orbit period   */
+  vec2  purp_src = vec2(
+    1.05 + cos(purp_t) * 0.12,
+   -0.18 + sin(purp_t) * 0.14
+  );
+  float purp_dist = length(uv - purp_src);
+  /* Beacon fades from vivid at source (dist=0) to invisible at dist~0.7   */
+  float purp_beacon = smoothstep(0.75, 0.0, purp_dist);
 
   /* ── Colour zones (a increasing = retreating from orange toward purple) ─
      Sampled colour positions:
@@ -81,50 +96,55 @@ void main() {
      Zones: orange 0.00-0.40, transition 0.40-0.55, purple 0.55-0.85,
              magenta 0.85-0.97, return-to-orange 0.97-1.00               */
   vec3 bg       = vec3(1.000, 1.000, 1.000);
-  /* Vivid purple (measured far-right at top): rgb(80,39,247)             */
-  vec3 orange   = vec3(0.949, 0.580, 0.094);   /* rgb(242,148, 24) peak  */
+  /* Palette: sampled from actual video pixels                             */
+  vec3 orange   = vec3(0.945, 0.565, 0.082);   /* rgb(241,144, 21) amber */
   vec3 coral    = vec3(0.941, 0.451, 0.549);   /* rgb(240,115,140)       */
-  vec3 vivid_p  = vec3(0.314, 0.153, 0.969);   /* rgb( 80, 39,247) vivid */
   vec3 lavender = vec3(0.745, 0.800, 0.988);   /* rgb(190,204,252) pale  */
-  vec3 magenta  = vec3(0.922, 0.373, 0.725);   /* rgb(235, 95,185)       */
+  vec3 vivid_p  = vec3(0.314, 0.153, 0.969);   /* rgb( 80, 39,247) vivid */
 
-  /* Zone layout (a increasing = orange retreats right):
-     return-orange 0.00-0.12 → orange 0.12-0.50 → coral 0.50-0.62
-     → white ribbon at 0.55 → vivid-purple 0.62-0.80 → lavender 0.80-0.92
-     → magenta 0.92-1.00
-     Far right top (a≈0.86 at canvas x=1, y=0.05) → lavender ✓
-     Far left (a≈0.69 at canvas x=0, y=0.5) → lavender/purple ✓          */
-  float blur = 0.018;
-  float t1 = smoothstep(0.12-blur, 0.12+blur, a);  /* return → orange    */
+  /* CORRECTED zone layout (verified by computing a at measured positions):
+     a = 0.00-0.50: orange  (wide — canvas centre+right are orange)
+     a = 0.50-0.62: coral   (narrow transition)
+     a = 0.62-0.80: lavender (canvas left area, always pale)
+     a = 0.80-1.00: vivid purple (canvas far-right area at top)
+
+     Verification:
+       cv=50%,y=40% (canvas ctr): a=0.388 → orange ✓
+       cv=21%,y=35% (canvas left): a=0.623 → lavender ✓
+       cv=85%,y=8%  (far-right top): a=0.992 → vivid-purple ✓
+       cv=41%,y=20% (orange left edge): a=0.400 → still orange ✓        */
+  float blur = 0.020;
   float t2 = smoothstep(0.50-blur, 0.50+blur, a);  /* orange → coral     */
-  float t3 = smoothstep(0.62-blur, 0.62+blur, a);  /* coral  → vivid-p   */
-  float t4 = smoothstep(0.80-blur, 0.80+blur, a);  /* vivid-p → lavender */
-  float t5 = smoothstep(0.92-blur, 0.92+blur, a);  /* lavender → magenta */
+  float t3 = smoothstep(0.62-blur, 0.62+blur, a);  /* coral  → lavender  */
+  float t4 = smoothstep(0.80-blur, 0.80+blur, a);  /* lavender→ vivid-p  */
 
-  vec3 col = orange;  /* start colour (a=0.00 = return-from-orange zone) */
-  col = mix(col, orange,    t1);   /* transition back to orange           */
-  col = mix(col, coral,     t2);
-  col = mix(col, vivid_p,   t3);
-  col = mix(col, lavender,  t4);
-  col = mix(col, magenta,   t5);
+  vec3 col = orange;
+  col = mix(col, coral,    t2);
+  col = mix(col, lavender, t3);
+  col = mix(col, vivid_p,  t4);
 
-  /* Subtle within-band brightness lift (Stripe's silk has 3D depth)      */
-  /* Keep it very gentle to avoid visible banding artefacts.               */
-  float bandCtr = sin(a * 3.14159 * 2.0) * 0.5 + 0.5;
-  col *= 0.97 + bandCtr * 0.06;
+  /* Internal purple gradient: vivid-purple brightest at high a (right),  */
+  /* fades toward lavender at low end of the purple zone.                 */
+  float purpleIntensity = smoothstep(0.80, 1.00, a);
+  col = mix(col, vivid_p, purpleIntensity * smoothstep(0.80, 0.90, a) * 0.4);
 
-  /* ── White ribbon at the orange→coral crease (a≈0.50) ─────────────────
-     The most prominent visual element in Stripe's animation.              */
-  float rib = smoothstep(0.028, 0.000, abs(a - 0.50));
-  rib *= smoothstep(0.0, 0.12, uv.x)
-       * smoothstep(0.0, 0.055, uv.y)
-       * smoothstep(1.0, 0.90, uv.x);
-  col = mix(col, bg, rib * 0.92);
+  /* ── White ribbon: specular highlight at a≈0.145 ───────────────────────
+     Measured position: canvas 67% at y=8%, 78% at y=40%
+     (pos = -0.635 → a = fract(0.145) = 0.145)
+     This is the "silk fold" crease within the orange zone toward the right. */
+  float rib = smoothstep(0.026, 0.000, abs(a - 0.145));
+  rib *= smoothstep(0.0, 0.10, uv.x)
+       * smoothstep(0.0, 0.055, uv.y);
+  col = mix(col, bg, rib * 0.90);
 
-  /* Second dimmer ribbon at coral→purple (a≈0.62)                        */
-  float rib2 = smoothstep(0.018, 0.000, abs(a - 0.62));
+  /* Second dimmer ribbon at a≈0.50 (orange→coral boundary)               */
+  float rib2 = smoothstep(0.016, 0.000, abs(a - 0.50));
   rib2 *= smoothstep(0.0, 0.08, uv.x) * smoothstep(0.0, 0.04, uv.y);
-  col = mix(col, bg, rib2 * 0.45);
+  col = mix(col, bg, rib2 * 0.40);
+
+  /* Apply vivid-purple beacon on top of gradient colours                   */
+  vec3 vivid_col = vec3(0.314, 0.153, 0.969); /* rgb(80,39,247)           */
+  col = mix(col, vivid_col, purp_beacon * 0.82);
 
   /* ── Left-edge fade: animation blends into white page background ──────── */
   float leftFade = smoothstep(0.0, 0.14, uv.x);
@@ -133,8 +153,7 @@ void main() {
   /* ── Top / bottom edge fades ─────────────────────────────────────────── */
   col = mix(bg, col, smoothstep(0.0, 0.055, uv.y) * smoothstep(1.0, 0.88, uv.y));
 
-  /* ── Right-edge soft fade ─────────────────────────────────────────────── */
-  col = mix(bg, col, smoothstep(1.0, 0.90, uv.x));
+  /* No right-edge fade — Stripe colours extend to viewport edge */
 
   gl_FragColor = vec4(col, 1.0);
 }
