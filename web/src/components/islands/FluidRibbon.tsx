@@ -50,7 +50,8 @@ void main() {
      NEGATIVE rotation: silk length runs from upper-right → lower-left.
      Centre moved up-right so silk extends off the canvas to right (silk's
      vivid-purple edge is positioned at canvas top-right corner area).     */
-  vec2  c        = uv - vec2(0.75, 0.30);
+  /* Centre shifted slightly left so silk extends more into canvas left   */
+  vec2  c        = uv - vec2(0.68, 0.32);
   float angle    = -0.28;                                 /* ~16° from vertical — matches Stripe band slope */
   float ca       = cos(angle), sa = sin(angle);
   vec2  silkUV;
@@ -68,9 +69,8 @@ void main() {
   float sway = sin(yt * 1.6 + t * 0.10) * 0.025
              + (vn(vec2(yt * 1.2, t * 0.07)) - 0.5) * 0.035;
 
-  /* ── Tapering silk width: wide at upper-right (yt≈0.3), narrow at
-     lower-left (yt≈0.8) — matches Stripe's fan-from-corner shape.        */
-  float halfW = mix(0.55, 0.25, smoothstep(0.20, 0.85, yt));
+  /* ── Tapering silk width: wider overall so silk extends further left   */
+  float halfW = mix(0.65, 0.30, smoothstep(0.20, 0.85, yt));
   float across  = (silkUV.x - sway + curvature) / halfW;
   float localX  = (across + 1.0) * 0.5;
 
@@ -103,15 +103,16 @@ void main() {
   color = mix(color, c4, smoothstep(0.68 - w, 0.68 + w, colorPos));  /* orange→coral   */
   color = mix(color, c5, smoothstep(0.86 - w, 0.86 + w, colorPos));  /* coral→vivid_p  */
 
-  /* ── White silk fold creases (Stripe's signature bright lines) ─────── */
-  /* Use exp falloff for sharp narrow bright lines (Gaussian-like)        */
+  /* ── Subtle silk fold creases — thin, slightly bright lines ─────────
+     Stripe's white lines are present but DON'T dominate; they're suggestive
+     of silk creases rather than hard divider lines.                       */
   float fold = 0.0;
-  fold = max(fold, exp(-pow((colorPos - 0.13) / 0.008, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.28) / 0.008, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.68) / 0.008, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.86) / 0.008, 2.0)));
-  fold *= 1.0 - smoothstep(0.70, 0.95, abs(across));
-  color = mix(color, vec3(1.0), fold * 0.95);
+  fold = max(fold, exp(-pow((colorPos - 0.13) / 0.012, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.28) / 0.012, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.68) / 0.012, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.86) / 0.012, 2.0)));
+  fold *= 1.0 - smoothstep(0.65, 0.95, abs(across));
+  color = mix(color, vec3(1.0), fold * 0.55);    /* much softer 0.55 vs 0.95 */
 
   /* ── 3D silk shading ───────────────────────────────────────────────── */
   float silkDepth = 1.0 - abs(across);
@@ -122,8 +123,8 @@ void main() {
   float panelCtr = 1.0 - abs(colorPos * 2.0 - 1.0);
   color *= 0.95 + panelCtr * 0.08;
 
-  /* ── Silk silhouette ──────────────────────────────────────────────── */
-  float mask = smoothstep(0.85, 0.72, abs(across));
+  /* ── Silk silhouette: GENTLE fade for smooth blend to white page bg ─── */
+  float mask = smoothstep(1.05, 0.40, abs(across));
 
   /* ── Top/bottom canvas fades (using canvas uv.y, not silkUV.y) ────── */
   mask *= smoothstep(0.0, 0.05, uv.y) * smoothstep(1.0, 0.92, uv.y);
