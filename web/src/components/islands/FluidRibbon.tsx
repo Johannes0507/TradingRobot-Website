@@ -48,8 +48,9 @@ void main() {
 
   /* ── Rotate canvas UV to silk's natural frame ─────────────────────────
      NEGATIVE rotation: silk length runs from upper-right → lower-left.
-     This puts vivid purple at TOP-RIGHT (matching Stripe).                */
-  vec2  c        = uv - vec2(0.62, 0.40);
+     Centre moved up-right so silk extends off the canvas to right (silk's
+     vivid-purple edge is positioned at canvas top-right corner area).     */
+  vec2  c        = uv - vec2(0.75, 0.30);
   float angle    = -0.42;                                 /* clockwise rotation         */
   float ca       = cos(angle), sa = sin(angle);
   vec2  silkUV;
@@ -59,16 +60,19 @@ void main() {
   /* ── Along-silk parameter (–0.5..0.5 across canvas height) ──────────── */
   float yt = silkUV.y + 0.5;                              /* shift to 0..1 range        */
 
-  /* ── Subtle linear curve: bands tilt slightly with y position ─────── */
-  float curvature = (yt - 0.5) * 0.15
-                  + sin(yt * 2.0) * 0.025;
+  /* ── Subtle curvature ─────────────────────────────────────────────── */
+  float curvature = (yt - 0.3) * 0.10
+                  + sin(yt * 1.8) * 0.020;
 
-  /* ── Across-width with gentle centreline sway ──────────────────────── */
+  /* ── Centreline sway ─────────────────────────────────────────────── */
   float sway = sin(yt * 1.6 + t * 0.10) * 0.025
              + (vn(vec2(yt * 1.2, t * 0.07)) - 0.5) * 0.035;
-  float halfW   = 0.48;                                   /* wider — silk covers more   */
+
+  /* ── Tapering silk width: wide at upper-right (yt≈0.3), narrow at
+     lower-left (yt≈0.8) — matches Stripe's fan-from-corner shape.        */
+  float halfW = mix(0.55, 0.25, smoothstep(0.20, 0.85, yt));
   float across  = (silkUV.x - sway + curvature) / halfW;
-  float localX  = (across + 1.0) * 0.5;                   /* 0..1 across silk          */
+  float localX  = (across + 1.0) * 0.5;
 
   /* ── Twist phase ───────────────────────────────────────────────────────
      Higher frequency → multiple bands visible at once.
