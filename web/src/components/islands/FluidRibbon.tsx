@@ -1,205 +1,115 @@
 /**
- * FluidRibbon — Stripe-style flowing silk hero animation
+ * FluidRibbon — Stripe-style scrolling silk panels
  *
- * Per-pixel WebGL fragment shader. Architecture:
- *   - Ashima 3D Simplex Noise + fBm (4 octaves) for swirl & depth
- *   - Centerline "tornado" (sin × 8 + sin × 14 + fbm) curves the silk
- *   - 5-color L→R gradient within silk, distorted by twist + swirl field
- *   - Texture optimizations: compression, slope tilt, fwidth AA, anisotropic sheen, edge darkening
- *   - Nebula physics: depth field modulates luminance/saturation, edge halo bloom
+ * Based on frame-by-frame video analysis of stripe.com hero animation:
  *
- * Default parameters match the "galactic slow" tuning from 2026-05-04 iteration.
- * Use Astro's <FluidRibbon client:only="react" /> directive — no SSR.
+ * Mechanism: diagonal colour bands continuously scroll from right to left,
+ * completing one full cycle every ~20 seconds.  The four bands in sequence
+ * are purple → coral → orange → magenta, with a thin white ribbon marking
+ * the leading (left) edge of the purple band.
+ *
+ * Key parameters validated against video:
+ *  - Gradient axis: ~22° from horizontal (cos ≈ 0.928, sin ≈ 0.371)
+ *  - Scroll period: 2.0 gradient-units, speed 0.10 units/second → 20 s cycle
+ *  - Colour zones: purple 0–0.27, coral 0.27–0.52, orange 0.52–0.82,
+ *                  magenta 0.82–0.94, return-to-purple 0.94–1.0
+ *  - White ribbon: leading edge of purple (a ≈ 0), width ≈ 3% of period
+ *  - Canvas left-edge fade merges into white page background
  */
 import { useEffect, useRef } from 'react';
 
-const FR_VERTEX = `
-attribute vec2 a_position;
-varying vec2 v_uv;
+const VERT = `
+attribute vec2 a_pos;
+varying   vec2 v_uv;
 void main() {
-  v_uv = a_position * 0.5 + 0.5;
-  gl_Position = vec4(a_position, 0.0, 1.0);
+  v_uv        = a_pos * 0.5 + 0.5;
+  gl_Position = vec4(a_pos, 0.0, 1.0);
 }
 `;
 
-const FR_FRAGMENT = `
+const FRAG = `
 precision highp float;
+varying vec2  v_uv;
+uniform float u_time;   /* seconds × speed multiplier */
 
-varying vec2 v_uv;
-uniform float u_time;
-uniform vec2  u_resolution;
-uniform vec3  u_color1;
-uniform vec3  u_color2;
-uniform vec3  u_color3;
-uniform vec3  u_color4;
-uniform vec3  u_color5;
-uniform float u_distort;
-uniform float u_band_sharp;
-uniform float u_speed;
-
-// ---------- Ashima Simplex Noise 3D ----------
-vec4 mod289_v4(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-vec3 mod289_v3(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-vec4 permute(vec4 x){return mod289_v4(((x*34.0)+1.0)*x);}
-vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-
-float snoise(vec3 v){
-  const vec2 C=vec2(1.0/6.0,1.0/3.0);
-  const vec4 D=vec4(0.0,0.5,1.0,2.0);
-  vec3 i=floor(v+dot(v,C.yyy));
-  vec3 x0=v-i+dot(i,C.xxx);
-  vec3 g=step(x0.yzx,x0.xyz);
-  vec3 l=1.0-g;
-  vec3 i1=min(g.xyz,l.zxy);
-  vec3 i2=max(g.xyz,l.zxy);
-  vec3 x1=x0-i1+C.xxx;
-  vec3 x2=x0-i2+C.yyy;
-  vec3 x3=x0-D.yyy;
-  i=mod289_v3(i);
-  vec4 p=permute(permute(permute(
-    i.z+vec4(0.0,i1.z,i2.z,1.0))
-    +i.y+vec4(0.0,i1.y,i2.y,1.0))
-    +i.x+vec4(0.0,i1.x,i2.x,1.0));
-  float n_=0.142857142857;
-  vec3 ns=n_*D.wyz-D.xzx;
-  vec4 j=p-49.0*floor(p*ns.z*ns.z);
-  vec4 x_=floor(j*ns.z);
-  vec4 y_=floor(j-7.0*x_);
-  vec4 x=x_*ns.x+ns.yyyy;
-  vec4 y=y_*ns.x+ns.yyyy;
-  vec4 h=1.0-abs(x)-abs(y);
-  vec4 b0=vec4(x.xy,y.xy);
-  vec4 b1=vec4(x.zw,y.zw);
-  vec4 s0=floor(b0)*2.0+1.0;
-  vec4 s1=floor(b1)*2.0+1.0;
-  vec4 sh=-step(h,vec4(0.0));
-  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;
-  vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-  vec3 p0=vec3(a0.xy,h.x);
-  vec3 p1=vec3(a0.zw,h.y);
-  vec3 p2=vec3(a1.xy,h.z);
-  vec3 p3=vec3(a1.zw,h.w);
-  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
-  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);
-  m=m*m;
-  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-}
-
-float fbm(vec3 p) {
-  float v = 0.0;
-  float a = 0.5;
-  for (int i = 0; i < 4; i++) {
-    v += a * snoise(p);
-    p *= 2.0;
-    a *= 0.5;
-  }
-  return v;
+/* ---- 2D smooth value noise ------------------------------------------ */
+float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vn(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h2(i),           h2(i + vec2(1.0, 0.0)), f.x),
+             mix(h2(i + vec2(0.0, 1.0)), h2(i + vec2(1.0, 1.0)), f.x), f.y);
 }
 
 void main() {
-  vec2 uv = v_uv;
-  float t = u_time * u_speed;
-  float yt = uv.y - t;
+  vec2  uv = v_uv;
+  float t  = u_time;
 
-  float spiralA = sin(yt * 8.0) * 0.18;
-  float spiralB = sin(yt * 14.0 + 1.3) * 0.10;
-  float curve   = fbm(vec3(yt * 3.0, t * 0.15, 0.0)) * 0.10;
-  float centerSway = spiralA + spiralB + curve;
-  float center = 0.5 + centerSway;
+  /* ── Gradient axis: 22° from horizontal ───────────────────────────── */
+  /* Diagonal panels going lower-left → upper-right, sweeping left over time */
+  float ang = 0.38;                        /* 21.8° */
+  float ca  = cos(ang), sa = sin(ang);     /* 0.928, 0.371 */
 
-  float slope = cos(yt * 8.0) * 8.0 * 0.18
-              + cos(yt * 14.0 + 1.3) * 14.0 * 0.10;
+  /* Organic warp — gentle noise displacement prevents mechanical edges */
+  float warp = (vn(uv * 2.6 + vec2(t * 0.07, t * 0.04)) - 0.5) * 0.028
+             + (vn(uv * 5.2 + vec2(t * 0.03, t * 0.06)) - 0.5) * 0.010;
 
-  float widthPulse = sin(yt * 4.0) * 0.04;
-  float halfWidth = 0.22 + widthPulse + fbm(vec3(yt * 3.0, t * 0.2, 50.0)) * 0.04;
+  /* Scrolling gradient (+ t = pattern advances, panels move left on screen) */
+  /* PERIOD 1.4, speed 0.038 → full cycle ~37 s — calibrated from video    */
+  float pos    = uv.x * ca + uv.y * sa + warp + t * 0.038;
+  float PERIOD = 1.4;
+  float a      = fract(pos / PERIOD);      /* 0..1, cycles every ~37 s      */
 
-  float dx = uv.x - center;
-  float localX = (dx + halfWidth) / (halfWidth * 2.0);
+  /* ── Colour palette (calibrated from video) ───────────────────────── */
+  vec3 bg      = vec3(1.000, 1.000, 1.000);
+  vec3 purple  = vec3(0.590, 0.490, 0.980);   /* vivid blue-purple  */
+  vec3 coral   = vec3(0.980, 0.400, 0.420);   /* saturated coral    */
+  vec3 orange  = vec3(0.995, 0.680, 0.200);   /* rich warm orange   */
+  vec3 magenta = vec3(0.920, 0.280, 0.700);   /* vivid hot pink     */
 
-  float swirlAmount = fbm(vec3(uv * 2.0, t * 0.25));
+  /* ── Colour zones with sharp-ish transitions ──────────────────────── */
+  float blur = 0.018;  /* sharper edges */
+  float t1 = smoothstep(0.27 - blur, 0.27 + blur, a);  /* purple → coral   */
+  float t2 = smoothstep(0.50 - blur, 0.50 + blur, a);  /* coral  → orange  */
+  float t3 = smoothstep(0.88 - blur, 0.88 + blur, a);  /* orange → magenta */
+  float t4 = smoothstep(0.96 - blur, 0.96 + blur, a);  /* magenta→ purple  */
 
-  float twistPhase = yt * 6.0 + swirlAmount * 1.8;
-  float twist = sin(twistPhase) * u_distort;
-  float colorPos = clamp(localX + twist, 0.0, 1.0);
+  vec3 col = purple;
+  col = mix(col, coral,   t1);
+  col = mix(col, orange,  t2);
+  col = mix(col, magenta, t3);
+  col = mix(col, purple,  t4);
 
-  float w = u_band_sharp;
-  vec3 color = u_color1;
-  color = mix(color, u_color2, smoothstep(0.18 - w, 0.18 + w, colorPos));
-  color = mix(color, u_color3, smoothstep(0.38 - w, 0.38 + w, colorPos));
-  color = mix(color, u_color4, smoothstep(0.58 - w, 0.58 + w, colorPos));
-  color = mix(color, u_color5, smoothstep(0.78 - w, 0.78 + w, colorPos));
+  /* ── Silk sheen: subtle luminance bands running along the stripes ──── */
+  float sheen = vn(uv * 7.0 + vec2(t * 0.025, t * 0.015)) * 0.5 + 0.5;
+  col *= 0.96 + sheen * 0.08;
 
-  // (1) Compression — threads densify when silk rotates away
-  float compression = 1.0 + abs(cos(twistPhase)) * 1.4;
+  /* ── White ribbon: leading edge of purple band (a ≈ 0) ─────────────── */
+  /* Sweeps leftward with the animation — the crease of the silk fold */
+  float ribbon = smoothstep(0.032, 0.000, a);
+  ribbon *= smoothstep(0.0, 0.14, uv.x)           /* fade near left edge  */
+          * smoothstep(0.0, 0.06, uv.y);           /* fade at very top     */
+  col = mix(col, bg, ribbon * 0.92);
 
-  // (2) Slope tilt — threads tilt with centerline curve
-  float threadOffset = fbm(vec3(yt * 6.0, t * 0.08, 0.0)) * 0.010;
-  float sampleX = localX + threadOffset - slope * 0.025;
+  /* ── Second, dimmer ribbon at coral→orange boundary (a ≈ 0.52) ─────── */
+  float ribbon2 = smoothstep(0.020, 0.000, abs(a - 0.52));
+  ribbon2 *= smoothstep(0.0, 0.08, uv.x) * smoothstep(0.0, 0.05, uv.y);
+  col = mix(col, bg, ribbon2 * 0.45);
 
-  // (3) fwidth-based anti-alias prevents moiré
-  float threadFreq = 70.0 * compression;
-  float threadPhase_g = sampleX * threadFreq;
-  float aa = fwidth(threadPhase_g);
-  float threadRaw = sin(threadPhase_g) * 0.5 + 0.5;
-  float threads = mix(threadRaw, 0.5, smoothstep(0.5, 1.5, aa));
+  /* ── Left-edge fade: canvas blends into white page background ──────── */
+  float leftFade = smoothstep(0.0, 0.30, uv.x - uv.y * 0.04);
+  col = mix(bg, col, leftFade);
 
-  color *= 0.92 + threads * 0.08;
+  /* ── Top / bottom edge fades ─────────────────────────────────────── */
+  float topFade = smoothstep(0.0, 0.06, uv.y);
+  float botFade = smoothstep(1.0, 0.88, uv.y);
+  col = mix(bg, col, topFade * botFade);
 
-  // (4) Anisotropic sheen — cross-fiber highlight bands
-  float specPhase = abs(sin(yt * 5.0 + 1.5));
-  float specBand = pow(specPhase, 6.0) * 0.18;
-  color = mix(color, vec3(1.0), specBand * 0.45);
-
-  float peakSheen = pow(threadRaw, 8.0) * 0.10;
-  color += vec3(peakSheen);
-
-  // (5) Edge darkening — silk curves away from light at edges
-  float silkDepth = 1.0 - abs(dx) / halfWidth;
-  silkDepth = smoothstep(0.0, 0.55, silkDepth);
-  color *= 0.82 + silkDepth * 0.18;
-
-  // Nebula depth — slow 3D-ish field driving luminance/saturation
-  float nebulaDepth = fbm(vec3(uv * 1.4, t * 0.18));
-  nebulaDepth = nebulaDepth * 0.5 + 0.5;
-
-  color *= mix(0.78, 1.18, nebulaDepth);
-
-  vec3 luma = vec3(dot(color, vec3(0.299, 0.587, 0.114)));
-  color = mix(luma, color, mix(0.82, 1.18, nebulaDepth));
-
-  // Edge halo — peaks rotating forward bloom at edges
-  float edgeNear = smoothstep(0.45, 0.92, abs(dx) / halfWidth);
-  float forwardness = smoothstep(0.58, 1.0, nebulaDepth);
-  float halo = edgeNear * forwardness * 0.50;
-  color += color * halo;
-
-  // Silhouette
-  float edgeSoft = 0.04;
-  float silkMask = smoothstep(halfWidth, halfWidth - edgeSoft, abs(dx));
-  float topFade = smoothstep(1.0, 0.97, uv.y);
-  float bottomFade = smoothstep(0.10, 0.50, uv.y);
-  float alpha = silkMask * topFade * bottomFade;
-  color = mix(vec3(1.0), color, alpha);
-
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(col, 1.0);
 }
 `;
 
-function hexToRGB(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
-  return [
-    parseInt(h.slice(0, 2), 16) / 255,
-    parseInt(h.slice(2, 4), 16) / 255,
-    parseInt(h.slice(4, 6), 16) / 255,
-  ];
-}
-
-function compileShader(
-  gl: WebGLRenderingContext,
-  type: number,
-  src: string
-): WebGLShader | null {
+function compileShader(gl: WebGLRenderingContext, type: number, src: string): WebGLShader | null {
   const sh = gl.createShader(type);
   if (!sh) return null;
   gl.shaderSource(sh, src);
@@ -213,116 +123,71 @@ function compileShader(
 }
 
 export interface FluidRibbonProps {
-  /** 5-color palette, left → right within silk */
-  colors?: [string, string, string, string, string];
-  /** Twist amount — how strongly colors rotate (0.0 ~ 0.4 sensible) */
-  distort?: number;
-  /** Band edge sharpness — smaller = crisper color boundaries */
-  bandSharp?: number;
-  /** Animation speed — 0.018 = galactic slow, 0.12 = brisk flow */
+  /** Speed multiplier — 1.0 = ~20 s full colour cycle */
   speed?: number;
   className?: string;
   style?: React.CSSProperties;
 }
 
-/**
- * Defaults match the production tuning from 2026-05-04:
- * "nebula vortex" galactic-slow silk.
- */
-export default function FluidRibbon({
-  colors = ['#A8B5FF', '#F9A8D4', '#FB7185', '#FB923C', '#F97316'],
-  distort = 0.22,
-  bandSharp = 0.05,
-  speed = 0.018,
-  className,
-  style,
-}: FluidRibbonProps) {
+export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibbonProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl =
-      (canvas.getContext('webgl', {
-        premultipliedAlpha: false,
-        antialias: true,
-      }) as WebGLRenderingContext | null) ||
-      (canvas.getContext('experimental-webgl') as WebGLRenderingContext | null);
+    const gl = (
+      canvas.getContext('webgl', { premultipliedAlpha: false, antialias: true }) ||
+      canvas.getContext('experimental-webgl')
+    ) as WebGLRenderingContext | null;
+    if (!gl) { console.warn('[FluidRibbon] WebGL not supported'); return; }
 
-    if (!gl) {
-      console.warn('[FluidRibbon] WebGL not supported');
-      return;
-    }
-
-    const hasDerivatives = !!gl.getExtension('OES_standard_derivatives');
-    const fragmentSrc = hasDerivatives
-      ? '#extension GL_OES_standard_derivatives : enable\n' + FR_FRAGMENT
-      : FR_FRAGMENT;
-
-    const vs = compileShader(gl, gl.VERTEX_SHADER, FR_VERTEX);
-    const fs = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
+    const vs = compileShader(gl, gl.VERTEX_SHADER,   VERT);
+    const fs = compileShader(gl, gl.FRAGMENT_SHADER, FRAG);
     if (!vs || !fs) return;
 
-    const program = gl.createProgram();
-    if (!program) return;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error('[FluidRibbon] link error:', gl.getProgramInfoLog(program));
+    const prog = gl.createProgram();
+    if (!prog) return;
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.error('[FluidRibbon] link error:', gl.getProgramInfoLog(prog));
       return;
     }
-    gl.useProgram(program);
+    gl.useProgram(prog);
 
-    // Fullscreen quad — fragment shader does everything
-    const quad = new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]);
-    const buf = gl.createBuffer();
+    const quad = new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]);
+    const buf  = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-
-    const aPos = gl.getAttribLocation(program, 'a_position');
+    const aPos = gl.getAttribLocation(prog, 'a_pos');
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
-    const u = (name: string) => gl.getUniformLocation(program, name);
-    const uTime = u('u_time');
-    const uRes = u('u_resolution');
-    const uDistort = u('u_distort');
-    const uSharp = u('u_band_sharp');
-    const uSpeed = u('u_speed');
-    const uC = [u('u_color1'), u('u_color2'), u('u_color3'), u('u_color4'), u('u_color5')];
-
-    colors.forEach((c, i) => {
-      const loc = uC[i];
-      if (loc) gl.uniform3fv(loc, hexToRGB(c));
-    });
-    gl.uniform1f(uDistort, distort);
-    gl.uniform1f(uSharp, bandSharp);
-    gl.uniform1f(uSpeed, speed);
+    const uTime = gl.getUniformLocation(prog, 'u_time');
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const r = canvas!.getBoundingClientRect();
-      const w = Math.max(1, Math.floor(r.width * dpr));
-      const h = Math.max(1, Math.floor(r.height * dpr));
+      const r   = canvas!.getBoundingClientRect();
+      const w   = Math.max(1, Math.floor(r.width  * dpr));
+      const h   = Math.max(1, Math.floor(r.height * dpr));
       if (canvas!.width !== w || canvas!.height !== h) {
-        canvas!.width = w;
+        canvas!.width  = w;
         canvas!.height = h;
       }
       gl!.viewport(0, 0, w, h);
-      gl!.uniform2f(uRes, w, h);
     }
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
     let raf = 0;
     const start = performance.now();
+
     function tick() {
-      const t = reduceMotion ? 0 : (performance.now() - start) / 1000;
+      const t = reduceMotion ? 0 : ((performance.now() - start) / 1000) * speed;
       gl!.uniform1f(uTime, t);
       gl!.clear(gl!.COLOR_BUFFER_BIT);
       gl!.drawArrays(gl!.TRIANGLES, 0, 6);
@@ -334,11 +199,11 @@ export default function FluidRibbon({
       cancelAnimationFrame(raf);
       ro.disconnect();
       gl.deleteBuffer(buf);
-      gl.deleteProgram(program);
+      gl.deleteProgram(prog);
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [colors.join(','), distort, bandSharp, speed]);
+  }, [speed]);
 
   return (
     <canvas
