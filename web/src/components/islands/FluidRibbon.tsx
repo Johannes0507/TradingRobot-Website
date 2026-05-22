@@ -74,18 +74,14 @@ void main() {
   float across  = (silkUV.x - sway + curvature) / halfW;
   float localX  = (across + 1.0) * 0.5;
 
-  /* ── Twist phase with radial fan component ──────────────────────────
-     The silk appears to fan out from the upper-right corner.
-     Adding a distance-from-corner term to twistPhase makes the bands
-     curve toward this point — like a real silk gathered at one corner.   */
-  vec2  fanCorner   = vec2(0.95, 0.05);
-  float distFromFan = length(uv - fanCorner);
-  float twistNoise  = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.55;
+  /* ── Twist phase: simple, natural silk twist ──────────────────────── */
+  /* Removed fan-from-corner — created concentric rings artefact.
+     Use only along-silk twist + organic fbm warp for natural drape.      */
+  float twistNoise  = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.85;
   float twistPhase  = yt * 3.20                              /* base twist along length    */
-                    + distFromFan * 1.20                     /* fan-out from corner        */
                     + twistNoise
                     + t * 0.32;
-  float twist       = sin(twistPhase) * 0.42;
+  float twist       = sin(twistPhase) * 0.38;
   float colorPos    = clamp(localX + twist, 0.0, 1.0);
 
   /* ── 5-panel colour gradient with sharp transitions ──────────────────── */
@@ -114,14 +110,25 @@ void main() {
   fold *= 1.0 - smoothstep(0.65, 0.95, abs(across));
   color = mix(color, vec3(1.0), fold * 0.55);    /* much softer 0.55 vs 0.95 */
 
-  /* ── 3D silk shading ───────────────────────────────────────────────── */
+  /* ── Internal silk variation: simulates real silk fabric texture ─────
+     Each "fibre" runs along silk length, giving anisotropic sheen.        */
+  float fibre = sin(silkUV.y * 80.0 + twistNoise * 4.0) * 0.5 + 0.5;
+  fibre = pow(fibre, 1.5) * 0.10;
+  color = mix(color, color * 1.12, fibre);
+
+  /* ── 3D silk shading: light from upper-left direction ──────────────── */
   float silkDepth = 1.0 - abs(across);
-  silkDepth = smoothstep(0.0, 0.65, silkDepth);
+  silkDepth = smoothstep(0.0, 0.55, silkDepth);
   color *= 0.86 + silkDepth * 0.14;
 
-  /* Brighten where silk faces the viewer (panel centre = brightest)       */
+  /* ── Cos-based shading: simulates silk's curve catching light ─────── */
+  /* cos(twistPhase) ≈ which face is visible: front (bright) or back (dim) */
+  float facing = cos(twistPhase) * 0.5 + 0.5;
+  color *= 0.92 + facing * 0.16;
+
+  /* ── Panel centre brightening (silk fibre highlight peak per panel) ─── */
   float panelCtr = 1.0 - abs(colorPos * 2.0 - 1.0);
-  color *= 0.95 + panelCtr * 0.08;
+  color *= 0.96 + panelCtr * 0.07;
 
   /* ── Silk silhouette: GENTLE fade for smooth blend to white page bg ─── */
   float mask = smoothstep(1.05, 0.40, abs(across));
