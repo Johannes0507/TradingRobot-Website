@@ -74,13 +74,19 @@ void main() {
   float across  = (silkUV.x - sway + curvature) / halfW;
   float localX  = (across + 1.0) * 0.5;
 
-  /* ── Twist phase ───────────────────────────────────────────────────────
-     Higher frequency → multiple bands visible at once.
-     fbm warp adds subtle organic curvature.                              */
-  float twistNoise = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.60;
-  float twistPhase = yt * 4.20 + twistNoise + t * 0.38;
-  float twist      = sin(twistPhase) * 0.42;
-  float colorPos   = clamp(localX + twist, 0.0, 1.0);
+  /* ── Twist phase with radial fan component ──────────────────────────
+     The silk appears to fan out from the upper-right corner.
+     Adding a distance-from-corner term to twistPhase makes the bands
+     curve toward this point — like a real silk gathered at one corner.   */
+  vec2  fanCorner   = vec2(0.95, 0.05);
+  float distFromFan = length(uv - fanCorner);
+  float twistNoise  = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.55;
+  float twistPhase  = yt * 3.20                              /* base twist along length    */
+                    + distFromFan * 1.20                     /* fan-out from corner        */
+                    + twistNoise
+                    + t * 0.32;
+  float twist       = sin(twistPhase) * 0.42;
+  float colorPos    = clamp(localX + twist, 0.0, 1.0);
 
   /* ── 5-panel colour gradient with sharp transitions ──────────────────── */
   vec3 c1 = vec3(0.745, 0.800, 0.988);   /* lavender                       */
@@ -97,13 +103,13 @@ void main() {
   color = mix(color, c4, smoothstep(0.68 - w, 0.68 + w, colorPos));  /* orange→coral   */
   color = mix(color, c5, smoothstep(0.86 - w, 0.86 + w, colorPos));  /* coral→vivid_p  */
 
-  /* ── White folds (very thin silk creases between panels) ────────────── */
+  /* ── White silk fold creases (Stripe's signature bright lines) ─────── */
+  /* Use exp falloff for sharp narrow bright lines (Gaussian-like)        */
   float fold = 0.0;
-  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.13)));
-  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.28)));
-  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.68)));
-  fold = max(fold, smoothstep(0.010, 0.000, abs(colorPos - 0.86)));
-  /* Only show within silk body                                            */
+  fold = max(fold, exp(-pow((colorPos - 0.13) / 0.008, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.28) / 0.008, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.68) / 0.008, 2.0)));
+  fold = max(fold, exp(-pow((colorPos - 0.86) / 0.008, 2.0)));
   fold *= 1.0 - smoothstep(0.70, 0.95, abs(across));
   color = mix(color, vec3(1.0), fold * 0.95);
 
