@@ -130,13 +130,16 @@ void main() {
   float depth = 1.0 - abs(across);
   col *= 0.92 + smoothstep(0.0, 0.7, depth) * 0.10;
 
-  /* ── Silk silhouette: SOFT elliptical mask + soft edge fade ─────── */
-  /* Edge of silk fades smoothly (no hard cutoff)                       */
+  /* ── Silk silhouette: asymmetric — concentrated upper-right ──────── */
   float edgeMask = smoothstep(1.05, 0.55, abs(across));
-  /* Combine with top/bottom fades                                       */
+
+  /* Extra fade in lower-left where Stripe's silk drapes off (asymmetric) */
+  float diagFade = smoothstep(-0.10, 0.50, uv.x - (1.0 - uv.y) * 0.30);
+
+  /* Top/bottom edge fades                                              */
   float topFade  = smoothstep(0.0, 0.05, uv.y);
   float botFade  = smoothstep(1.0, 0.92, uv.y);
-  float mask     = edgeMask * topFade * botFade;
+  float mask     = edgeMask * topFade * botFade * diagFade;
 
   /* ── Composite with white background ────────────────────────────── */
   vec3 bg = vec3(1.0);
