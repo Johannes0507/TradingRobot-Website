@@ -1,23 +1,15 @@
 /**
- * FluidRibbon — Brand-gradient base with petal-texture overlay
+ * FluidRibbon — Clean brand-gradient washes
  *
- * Multi-layer composition:
- *   1. BASE — designer-grade brand gradient (purple → coral → amber)
- *      Cool tint anchors with page, warm corner toward viewport edge.
- *   2. PETAL OVERLAY — radial petal pattern from upper-right focal point
- *      5 petals radiating, soft translucent edges, like an open bloom.
- *   3. PETAL VEINS — subtle striations within petals (delicate texture)
- *   4. FLOWING MOTION — slow rotation + organic warp for life
+ * Pure smooth multi-stop gradient aligned to design tokens.
+ * No discrete shapes, no petal overlays, no specular crests.
+ * Just colour fields flowing organically.
  *
- * Visual reference: blooming flower seen from above, captured in our
- * exact brand palette. The petals are SOFT and TRANSLUCENT, not opaque
- * shapes — they enhance the gradient, not overwrite it.
- *
- * Brand colors (from design tokens):
- *   --color-bg-tint  #f7f9fc  (page anchor)
- *   --color-brand    #635bff  (primary purple, dominant)
- *   --color-coral    #fb7185  (warm transition)
- *   --color-amber    #f59e0b  (warm accent)
+ * Brand colours (tokens.css):
+ *   --color-bg-tint  #f7f9fc
+ *   --color-brand    #635bff
+ *   --color-coral    #fb7185
+ *   --color-amber    #f59e0b
  */
 import { useEffect, useRef } from 'react';
 
@@ -34,8 +26,6 @@ const FRAG = `
 precision highp float;
 varying vec2  v_uv;
 uniform float u_time;
-
-const float PI = 3.14159265359;
 
 float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float vn(vec2 p) {
@@ -58,14 +48,11 @@ void main() {
   vec2  uv = v_uv;
   float t  = u_time;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 1 — BASE DIAGONAL GRADIENT (brand palette)
-     Same direction as the headline gradient for visual coherence.
-     ───────────────────────────────────────────────────────────────────── */
+  /* Diagonal field — same direction as the headline brand gradient */
   float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;
 
-  /* Multi-octave organic warp */
-  float warp_l = fbm(vec2(uv.x * 1.0, uv.y * 1.3 + t * 0.04)) * 0.18;
+  /* Multi-octave organic warp (only on the field, not on top of overlays) */
+  float warp_l = fbm(vec2(uv.x * 1.0, uv.y * 1.3 + t * 0.040)) * 0.18;
   float warp_m = fbm(vec2(uv.x * 2.6, uv.y * 3.0 + t * 0.025)) * 0.07;
   float field  = diag + warp_l + warp_m + sin(t * 0.05) * 0.03;
 
@@ -86,63 +73,7 @@ void main() {
   col = mix(col, c_amber,      smoothstep(0.72, 0.88, field));
   col = mix(col, c_amber_pale, smoothstep(0.88, 1.05, field));
 
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 2 — PETAL RADIAL FIELD
-     Focal point upper-right (off-canvas). 5 petals radiate inward.
-     ───────────────────────────────────────────────────────────────────── */
-  vec2  focal   = vec2(1.05, -0.05);
-  vec2  d       = uv - focal;
-  float r       = length(d);
-  float theta   = atan(d.y, d.x);
-
-  /* Slow rotation + organic angular warp                                  */
-  float wobble  = fbm(vec2(theta * 1.5, r * 1.8 + t * 0.06)) * 0.30;
-  float theta2  = theta + t * 0.04 + wobble;
-
-  /* Petal modulation: n petals around full circle                         */
-  float n_petals = 5.0;
-  float petals   = cos(theta2 * n_petals);
-  petals         = pow(max(petals, 0.0), 1.4);    /* sharpen peaks slightly */
-
-  /* Radial envelope: petals strongest at moderate distance, fade at tip   */
-  float radial = smoothstep(0.1, 0.55, r) * smoothstep(1.30, 0.75, r);
-
-  float petalField = petals * radial;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 3 — APPLY PETAL HIGHLIGHTS
-     Soft translucent overlay — petals lighten and slightly warm the base.
-     Multiply blending preserves the brand gradient underneath.
-     ───────────────────────────────────────────────────────────────────── */
-  /* Inner petal tone: warm cream */
-  vec3 petalInner = vec3(1.000, 0.965, 0.910);
-  col = mix(col, petalInner, petalField * 0.35);
-
-  /* Outer petal tint: slight pink warmth at petal edges                   */
-  float petalEdge = (1.0 - petals) * radial * smoothstep(0.8, 1.2, r);
-  col = mix(col, c_coral * 1.05, petalEdge * 0.10);
-
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 4 — PETAL VEINS
-     Delicate radial striations within petals — like flower veins.
-     ───────────────────────────────────────────────────────────────────── */
-  float veinPhase = theta * n_petals * 3.0 + r * 8.0;
-  float vein      = sin(veinPhase) * 0.5 + 0.5;
-  vein            = pow(vein, 4.0);
-  /* Only show veins within petal areas                                    */
-  vein *= petalField;
-  col *= 1.0 + vein * 0.06;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 5 — SUBTLE ROTATIONAL SHIMMER
-     Adds gentle "breath" — petal field slightly pulsates over time.
-     ───────────────────────────────────────────────────────────────────── */
-  float breath = sin(t * 0.18) * 0.04 + 1.0;
-  col = mix(col, col * breath, petalField * 0.3);
-
-  /* ─────────────────────────────────────────────────────────────────────
-     STEP 6 — CANVAS MASK (soft asymmetric)
-     ───────────────────────────────────────────────────────────────────── */
+  /* Soft asymmetric mask — gathered upper-right, drape to lower-left */
   float leftFade = smoothstep(0.0, 0.32, uv.x);
   float diagFade = smoothstep(-0.05, 0.55, uv.x - (1.0 - uv.y) * 0.28);
   float topFade  = smoothstep(0.0, 0.04, uv.y);
@@ -244,7 +175,7 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
       cancelAnimationFrame(raf);
     }
 
-    /* Pause animation when hero is off-screen (saves CPU/GPU/battery) */
+    /* Pause when off-screen */
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
