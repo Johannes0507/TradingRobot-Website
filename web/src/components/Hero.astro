@@ -15,19 +15,8 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
     <FluidRibbon client:only="react" />
   </div>
 
-  <!-- Grid lines overlay (radial mask for vignette) — desktop only, decorative -->
-  <div
-    aria-hidden="true"
-    class="hidden md:block absolute inset-0 pointer-events-none"
-    style="
-      background-image: linear-gradient(rgb(15 23 42 / 0.04) 1px, transparent 1px),
-                        linear-gradient(90deg, rgb(15 23 42 / 0.04) 1px, transparent 1px);
-      background-size: 72px 72px;
-      mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
-      -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
-    "
-  >
-  </div>
+  <!-- (Grid overlay removed — created floating-rectangle visual artefact
+       when stacked over the animated background) -->
 
   <!-- Content -->
   <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
