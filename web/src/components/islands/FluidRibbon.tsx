@@ -60,13 +60,17 @@ void main() {
   float sway = sin(yt * 1.5 + t * 0.10) * 0.030
              + (fbm(vec2(yt * 1.2, t * 0.07))) * 0.045;
 
-  /* ── Multi-scale noise warp on silk's WIDTH coordinate ─────────────── */
-  float warp_l = fbm(vec2(silkUV.x * 1.0, yt * 1.3 + t * 0.06)) * 0.16;
-  float warp_m = fbm(vec2(silkUV.x * 3.5 + 7.1, yt * 2.5 + t * 0.04)) * 0.05;
+  /* ── Multi-scale noise warp (HUGE large flow for organic band curvature) ──
+     Larger amplitude on the slowest layer creates the wide arching bend.    */
+  float warp_xl = fbm(vec2(silkUV.x * 0.4, yt * 0.6 + t * 0.07)) * 0.32;
+  float warp_l  = fbm(vec2(silkUV.x * 1.1 + 5.0, yt * 1.4 + t * 0.05)) * 0.16;
+  float warp_m  = fbm(vec2(silkUV.x * 3.0 + 7.1, yt * 2.5 + t * 0.04)) * 0.07;
+  float warp_s  = fbm(vec2(silkUV.x * 9.0 + 13.7, yt * 8.0 + t * 0.02)) * 0.020;
+  float totalWarp = warp_xl + warp_l + warp_m + warp_s;
 
   /* ── Tapering width ──────────────────────────────────────────────── */
   float halfW   = mix(0.62, 0.30, smoothstep(0.20, 0.85, yt));
-  float across  = (silkUV.x - sway + warp_l + warp_m) / halfW;
+  float across  = (silkUV.x - sway + totalWarp) / halfW;
   float localX  = (across + 1.0) * 0.5;
 
   /* ── Twist phase with higher frequency for richer band variation ────── */
@@ -93,16 +97,21 @@ void main() {
   col = mix(col, c_orange,   smoothstep(0.72 - w, 0.72 + w, colorPos));   /* warm again */
   col = mix(col, c_vivid_p,  smoothstep(0.88 - w, 0.88 + w, colorPos));
 
-  /* ── Internal subtle variation: prevents each zone from being flat ─── */
-  /* Apply a brightness/saturation modulation based on fine noise          */
-  float subtle = fbm(vec2(silkUV.x * 6.0, silkUV.y * 8.0 + t * 0.05)) * 0.16;
+  /* ── Internal variation: each colour zone gets subtle gradient ─────── */
+  float subtle = fbm(vec2(silkUV.x * 5.0, silkUV.y * 7.0 + t * 0.05)) * 0.18;
   col *= 1.0 + subtle;
 
-  /* ── Fine silk fibre — runs ALONG silk's length (sin in y dir) ──────
-     Very subtle so it doesn't dominate.                                  */
-  float fibre = sin(silkUV.y * 180.0 + warp_l * 25.0) * 0.5 + 0.5;
-  fibre = pow(fibre, 2.0) * 0.06;
-  col *= 1.0 + fibre;
+  /* ── Multi-scale silk fibre — runs ALONG silk's length ───────────────
+     Primary fibre: 200 strands. Cross fibre: 90 (weave pattern).         */
+  float fibre1 = sin(silkUV.y * 200.0 + warp_l * 25.0) * 0.5 + 0.5;
+  fibre1 = pow(fibre1, 1.8) * 0.07;
+  float fibre2 = sin(silkUV.y * 90.0 + warp_m * 10.0 + 1.0) * 0.5 + 0.5;
+  fibre2 = pow(fibre2, 2.5) * 0.04;
+  col *= 1.0 + fibre1 + fibre2;
+
+  /* Fine-grain dithering to break up gradient banding artefacts ─────── */
+  float dither = (h2(uv * 1000.0 + vec2(t)) - 0.5) * 0.012;
+  col += vec3(dither);
 
   /* ── Sparse fold lines at the multi-band transitions ────────────── */
   float fold = 0.0;
