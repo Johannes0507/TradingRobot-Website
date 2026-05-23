@@ -113,14 +113,17 @@ void main() {
   float dither = (h2(uv * 1000.0 + vec2(t)) - 0.5) * 0.012;
   col += vec3(dither);
 
-  /* ── Sparse fold lines at the multi-band transitions ────────────── */
+  /* ── Subtle fold lines — delicate silk crease highlights ─────────── */
   float fold = 0.0;
-  fold = max(fold, exp(-pow((colorPos - 0.18) / 0.010, 2.0)) * 0.50);
-  fold = max(fold, exp(-pow((colorPos - 0.48) / 0.010, 2.0)) * 0.65);
-  fold = max(fold, exp(-pow((colorPos - 0.62) / 0.010, 2.0)) * 0.55);
-  fold = max(fold, exp(-pow((colorPos - 0.88) / 0.010, 2.0)) * 0.70);
+  fold = max(fold, exp(-pow((colorPos - 0.18) / 0.008, 2.0)) * 0.45);
+  fold = max(fold, exp(-pow((colorPos - 0.48) / 0.008, 2.0)) * 0.55);
+  fold = max(fold, exp(-pow((colorPos - 0.62) / 0.008, 2.0)) * 0.50);
+  fold = max(fold, exp(-pow((colorPos - 0.88) / 0.008, 2.0)) * 0.60);
   fold *= 1.0 - smoothstep(0.55, 0.85, abs(across));
-  col = mix(col, vec3(1.0), fold * 0.65);
+  /* Modulate fold visibility by twist phase — only show when silk is in
+     a particular twist state (folds appear/disappear gracefully)         */
+  fold *= 0.6 + abs(cos(twistPhase * 0.5)) * 0.4;
+  col = mix(col, vec3(1.0), fold * 0.50);
 
   /* ── Silk depth shading — cos(twistPhase) simulates front/back face ─── */
   float facing = cos(twistPhase) * 0.5 + 0.5;
@@ -129,6 +132,11 @@ void main() {
   /* ── 3D depth: brighter near silk centerline (face-on) ───────────── */
   float depth = 1.0 - abs(across);
   col *= 0.92 + smoothstep(0.0, 0.7, depth) * 0.10;
+
+  /* ── Soft warm overall tone — gives silk a "lit from upper-left" feel
+     Subtle brightness gradient from upper to lower silk                  */
+  float lighting = 1.0 + (0.5 - yt) * 0.06;
+  col *= lighting;
 
   /* ── Silk silhouette: asymmetric — concentrated upper-right ──────── */
   float edgeMask = smoothstep(1.05, 0.55, abs(across));
