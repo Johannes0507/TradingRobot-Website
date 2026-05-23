@@ -1,29 +1,25 @@
 /**
- * FluidRibbon — Diagonal ocean waves with Hokusai-style foam crests
+ * FluidRibbon — Refined layered gradient washes
  *
- * Inspired by Japanese ukiyo-e wave aesthetics (The Great Wave off Kanagawa):
- *   • DIAGONAL flow direction — waves crash from upper-right to lower-left
- *   • WHITE FOAM crests like blooming roses / cotton clouds on wave tops
- *   • SPARKLE highlights — light catches foam like scattered pearls/diamonds
- *   • LAYERED depth — multiple waves stacked, async swelling motion
- *   • SMOOTH gradient base — colour zones flow like musical notes
+ * Color hierarchy aligned to LendAuto's design tokens:
+ *   --color-brand: #635bff  (primary purple — premium trust)
+ *   --color-coral: #fb7185  (warm coral — friendly)
+ *   --color-amber: #f59e0b  (warm amber — reliable)
+ *   --color-bg-tint: #f7f9fc (cool-leaning page tint)
  *
- * 三大設計面向 (3 design dimensions):
+ * Same `from-brand via-coral to-amber` gradient as the headline's
+ * "24×60×60 秒" accent text — visual coherence across the hero.
  *
- * 形態 (Form):
- *   - 波峰白色泡沫 (Gaussian highlights, varying width per wave)
- *   - 波下色彩漸層 (5-layer brand palette: lavender→amber→orange→coral→purple)
- *   - 對角線排列 (rotated UV gives diagonal wave direction)
+ * Design philosophy (designer-grade restraint):
+ *   • LIMITED PALETTE — only brand colours, no random hues
+ *   • TONAL VARIATIONS — each colour has light/mid/dark via shade shifts
+ *   • HIERARCHICAL — purple dominant, amber accent, coral as bridge
+ *   • SOFT TRANSITIONS — no hard edges, only smoothstep blends
+ *   • COMPOSITION — diagonal axis matches the headline gradient direction
+ *   • RESTRAINED MOTION — slow position drift, never flashy
  *
- * 動向 (Motion):
- *   - 多速度疊加 (each wave layer has unique speed/phase — async swell)
- *   - 連綿翻騰 (multi-octave sine for organic non-repeating wave shapes)
- *   - 緩慢流暢 (overall slow motion — never frantic)
- *
- * 光影 (Light/Shadow):
- *   - 浪頭白色高光 (bright Gaussian on each wave crest)
- *   - 浪下陰影 (subtle shadow under each crest for 3D depth)
- *   - 晶瑩閃爍 (cell-based sparkle pattern within foam areas)
+ * The result reads as a sophisticated abstract — not a Stripe knock-off,
+ * not a literal wave, just refined colour washes echoing the brand.
  */
 import { useEffect, useRef } from 'react';
 
@@ -42,138 +38,93 @@ varying vec2  v_uv;
 uniform float u_time;
 
 float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vn(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h2(i), h2(i+vec2(1,0)), f.x),
+             mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++) {
+    v += a * (vn(p) - 0.5);
+    p = p * 2.05 + 11.7;
+    a *= 0.5;
+  }
+  return v;
+}
 
 void main() {
   vec2  uv = v_uv;
-  /* Flip Y so 0=top (sky), 1=bottom (depths) — ocean metaphor              */
-  uv.y = 1.0 - uv.y;
   float t  = u_time;
 
   /* ─────────────────────────────────────────────────────────────────────
-     DIAGONAL ROTATION — waves flow diagonally (upper-right → lower-left)
-     Same direction as Stripe's silk, but applied to wave layers.
-     After rotation, wuv.x = "along wave length", wuv.y = "across waves".
+     DIAGONAL GRADIENT AXIS
+     Matches the headline's bg-gradient-to-r → diagonal direction creates
+     visual rhyme between hero text and animation.
      ───────────────────────────────────────────────────────────────────── */
-  float angle = 0.32;                              /* ~18° rotation        */
-  float ca    = cos(angle), sa = sin(angle);
-  vec2  c     = uv - vec2(0.5, 0.5);
-  vec2  wuv;
-  wuv.x = c.x *  ca + c.y * sa + 0.5;
-  wuv.y = -c.x * sa + c.y * ca + 0.5;
+  float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;     /* tilted right-down */
+
+  /* Add organic warp so the gradient layers curve slightly (not straight) */
+  float warp_l = fbm(vec2(uv.x * 1.2, uv.y * 1.4 + t * 0.05)) * 0.18;
+  float warp_m = fbm(vec2(uv.x * 3.0, uv.y * 3.5 + t * 0.03)) * 0.06;
+  float field  = diag + warp_l + warp_m + sin(t * 0.06) * 0.04;
 
   /* ─────────────────────────────────────────────────────────────────────
-     WAVE LAYERS — 5 stacked horizontal-ish waves in rotated space
-     Multi-octave sine for organic curves (low+mid+high freq).
-     Each wave has unique speed/phase for async motion.
+     BRAND PALETTE — exact token colours, with tonal variations
+     Each anchor colour has a "light tint" and "deep shade" for richness.
      ───────────────────────────────────────────────────────────────────── */
-  float w1 = 0.12
-           + sin(wuv.x * 3.2 + t * 0.34) * 0.028
-           + sin(wuv.x * 6.5 + t * 0.48 + 1.7) * 0.014
-           + sin(wuv.x * 11.0 + t * 0.65 + 3.4) * 0.005;
-
-  float w2 = 0.30
-           + sin(wuv.x * 2.8 + t * 0.40 + 0.8) * 0.042
-           + sin(wuv.x * 5.7 + t * 0.55 + 2.1) * 0.020
-           + sin(wuv.x * 10.0 + t * 0.70 + 4.0) * 0.008;
-
-  float w3 = 0.50
-           + sin(wuv.x * 2.4 + t * 0.36 + 1.6) * 0.058
-           + sin(wuv.x * 4.9 + t * 0.50 + 2.8) * 0.025
-           + sin(wuv.x * 8.8 + t * 0.62 + 4.9) * 0.010;
-
-  float w4 = 0.71
-           + sin(wuv.x * 2.0 + t * 0.42 + 2.4) * 0.065
-           + sin(wuv.x * 4.3 + t * 0.52 + 3.6) * 0.028
-           + sin(wuv.x * 8.0 + t * 0.66 + 5.7) * 0.011;
-
-  float w5 = 0.89
-           + sin(wuv.x * 1.6 + t * 0.46 + 3.0) * 0.040
-           + sin(wuv.x * 3.6 + t * 0.58 + 4.3) * 0.018;
+  vec3 c_tint        = vec3(0.969, 0.976, 0.988);    /* #f7f9fc bg-tint    */
+  vec3 c_brand_pale  = vec3(0.878, 0.878, 1.000);    /* light purple tint  */
+  vec3 c_brand       = vec3(0.388, 0.357, 1.000);    /* #635bff brand     */
+  vec3 c_brand_deep  = vec3(0.290, 0.235, 0.900);    /* deeper purple     */
+  vec3 c_coral       = vec3(0.984, 0.443, 0.522);    /* #fb7185 coral     */
+  vec3 c_amber       = vec3(0.961, 0.620, 0.043);    /* #f59e0b amber     */
+  vec3 c_amber_pale  = vec3(1.000, 0.851, 0.490);    /* light amber       */
 
   /* ─────────────────────────────────────────────────────────────────────
-     COLOUR LAYERS — ocean depth metaphor with brand palette
+     LAYERED GRADIENT — multi-stop blend along diagonal field
+     Composition (left/top → right/bottom):
+       1. cool bg-tint   (anchors with the page background)
+       2. light purple   (gentle introduction of brand)
+       3. brand purple   (dominant zone)
+       4. brand deep     (richest brand moment)
+       5. coral          (warm transition)
+       6. amber          (warm accent)
+       7. light amber    (soft exit toward page edge)
      ───────────────────────────────────────────────────────────────────── */
-  vec3 c_sky    = vec3(1.000, 1.000, 1.000);     /* sky / above water     */
-  vec3 c_mist   = vec3(0.770, 0.825, 0.985);     /* lavender mist         */
-  vec3 c_sunset = vec3(0.995, 0.760, 0.310);     /* amber horizon         */
-  vec3 c_wave   = vec3(0.955, 0.560, 0.080);     /* warm orange swell     */
-  vec3 c_deep   = vec3(0.945, 0.460, 0.560);     /* coral deep water      */
-  vec3 c_abyss  = vec3(0.380, 0.220, 0.985);     /* vivid purple abyss    */
-
-  float e = 0.014;
-  vec3 col = c_sky;
-  col = mix(col, c_mist,   smoothstep(w1 - e, w1 + e, wuv.y));
-  col = mix(col, c_sunset, smoothstep(w2 - e, w2 + e, wuv.y));
-  col = mix(col, c_wave,   smoothstep(w3 - e, w3 + e, wuv.y));
-  col = mix(col, c_deep,   smoothstep(w4 - e, w4 + e, wuv.y));
-  col = mix(col, c_abyss,  smoothstep(w5 - e, w5 + e, wuv.y));
+  vec3 col = c_tint;
+  col = mix(col, c_brand_pale, smoothstep(0.05, 0.20, field));
+  col = mix(col, c_brand,      smoothstep(0.20, 0.42, field));
+  col = mix(col, c_brand_deep, smoothstep(0.42, 0.55, field));
+  col = mix(col, c_coral,      smoothstep(0.55, 0.72, field));
+  col = mix(col, c_amber,      smoothstep(0.72, 0.88, field));
+  col = mix(col, c_amber_pale, smoothstep(0.88, 1.05, field));
 
   /* ─────────────────────────────────────────────────────────────────────
-     WHITE FOAM CRESTS — Hokusai-style fluffy white wave tops
-     Bright Gaussian on each wave's upper edge. Per-wave intensity varies
-     so foam looks natural (some waves "splash" more than others).
+     SECONDARY GRADIENT — overlapping wash adds depth (Rothko-like)
+     A second wash in a different direction creates rich tonal blending.
      ───────────────────────────────────────────────────────────────────── */
-  float foam = 0.0;
-  /* Width of foam band: vary slightly with x for organic ripples         */
-  float foamWidth = 0.011 + sin(wuv.x * 9.0 + t * 0.4) * 0.003;
+  float field2 = uv.y * 0.6 + uv.x * 0.2 - 0.10
+               + fbm(vec2(uv.x * 0.8, uv.y * 1.0 + t * 0.04)) * 0.12;
 
-  /* Foam strength per layer (deeper waves have less foam)                 */
-  foam += exp(-pow((wuv.y - w1 + 0.002) / foamWidth, 2.0)) * 0.55;
-  foam += exp(-pow((wuv.y - w2 + 0.002) / foamWidth, 2.0)) * 0.75;
-  foam += exp(-pow((wuv.y - w3 + 0.003) / foamWidth, 2.0)) * 0.85;
-  foam += exp(-pow((wuv.y - w4 + 0.003) / foamWidth, 2.0)) * 0.70;
-  foam += exp(-pow((wuv.y - w5 + 0.002) / foamWidth, 2.0)) * 0.50;
+  /* Multiply a subtle warm overlay (amber) where field2 > 0.5             */
+  float warmOverlay = smoothstep(0.50, 0.80, field2) * 0.18;
+  col = mix(col, col * vec3(1.05, 0.96, 0.88), warmOverlay);
 
-  /* Make foam look fluffy: add organic noise variation                    */
-  float foamNoise = h2(floor(wuv * 40.0) + floor(t * 2.5));
-  foam *= 0.75 + foamNoise * 0.35;
-
-  /* Apply white foam                                                       */
-  col = mix(col, vec3(1.0), foam * 0.85);
-
-  /* ─────────────────────────────────────────────────────────────────────
-     SPARKLE PEARLS — tiny bright cells within foam areas
-     Cell-based: each grid cell may or may not "sparkle" at any moment.
-     Slow twinkling so it doesn't feel frantic.
-     ───────────────────────────────────────────────────────────────────── */
-  vec2  sparkleGrid = floor(wuv * vec2(120.0, 80.0));
-  float sparkleTime = floor(t * 1.2);
-  float sparkleRand = h2(sparkleGrid + sparkleTime * 0.13);
-  float sparkleVal  = h2(sparkleGrid + sparkleTime * 0.31);
-  /* Only top 4% of cells sparkle, and only inside foam zones              */
-  float sparkle     = step(0.96, sparkleRand) * sparkleVal;
-  /* Spatial fade within cell (so sparkle is a soft dot, not block)        */
-  vec2  cellLocal   = fract(wuv * vec2(120.0, 80.0)) - 0.5;
-  float cellFalloff = 1.0 - smoothstep(0.0, 0.5, length(cellLocal));
-  sparkle *= cellFalloff;
-  /* Multiply by foam mask: sparkles only on foam                          */
-  float foamMask = clamp(foam, 0.0, 1.0);
-  col += vec3(1.4, 1.4, 1.5) * sparkle * foamMask * 0.9;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     UNDERWAVE SHADOW — subtle darkening just below each foam crest
-     Adds 3D depth so waves don't look flat.
-     ───────────────────────────────────────────────────────────────────── */
-  float shadow = 0.0;
-  shadow += exp(-pow((wuv.y - w2 - 0.018) / 0.014, 2.0)) * 0.08;
-  shadow += exp(-pow((wuv.y - w3 - 0.020) / 0.016, 2.0)) * 0.10;
-  shadow += exp(-pow((wuv.y - w4 - 0.020) / 0.016, 2.0)) * 0.10;
-  col *= 1.0 - shadow;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     GLOBAL LIGHTING — gentle gradient (sky brighter, depths darker)
-     ───────────────────────────────────────────────────────────────────── */
-  col *= 0.94 + (1.0 - wuv.y) * 0.10;
+  /* Multiply a subtle cool overlay (purple) where field2 < 0.5            */
+  float coolOverlay = smoothstep(0.50, 0.20, field2) * 0.12;
+  col = mix(col, col * vec3(0.92, 0.94, 1.05), coolOverlay);
 
   /* ─────────────────────────────────────────────────────────────────────
      CANVAS MASK — soft asymmetric fade
-     Use ORIGINAL uv (not flipped) for top/bottom canvas fades.
+     Gathered upper-right, soft drape to lower-left.
      ───────────────────────────────────────────────────────────────────── */
-  float origY    = v_uv.y;
-  float leftFade = smoothstep(0.0, 0.28, v_uv.x);
-  float topFade  = smoothstep(0.0, 0.04, origY);
-  float botFade  = smoothstep(1.0, 0.94, origY);
-  float mask     = leftFade * topFade * botFade;
+  float leftFade = smoothstep(0.0, 0.32, uv.x);
+  float diagFade = smoothstep(-0.05, 0.55, uv.x - (1.0 - uv.y) * 0.28);
+  float topFade  = smoothstep(0.0, 0.04, uv.y);
+  float botFade  = smoothstep(1.0, 0.94, uv.y);
+  float mask     = leftFade * diagFade * topFade * botFade;
 
   vec3 bg = vec3(1.0);
   col = mix(bg, col, mask);
