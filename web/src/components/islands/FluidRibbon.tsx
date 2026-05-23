@@ -1,22 +1,14 @@
 /**
- * FluidRibbon — Stripe-style diagonally-twisted silk
+ * FluidRibbon — Refined silk: smooth gradient + fine fibre texture
  *
- * Critical insight from frame analysis: the silk's LENGTH runs diagonally
- * from upper-left to lower-right of canvas. Its WIDTH (perpendicular)
- * gives the colour bands from upper-right to lower-left, matching Stripe.
+ * Stripe's silk has SMOOTH COLOUR ZONES (not discrete panels) but stays
+ * within a specific palette (no rainbow cycling). This implementation:
  *
- * Implementation:
- *   1. Rotate canvas UV to align silk's length with the rotated y axis
- *   2. Apply silk twist algorithm in rotated coords (centerline + width)
- *   3. Sharp panel transitions create distinct silk faces
- *   4. White folds at panel boundaries (silk crease highlights)
- *
- * Geometry:
- *   silk LENGTH direction in canvas: (0.91, 0.41) — right and down
- *   silk WIDTH direction in canvas: (-0.41, 0.91) — left and down
- *   colour bands run perpendicular to width = parallel to length-perp
- *     = along (-0.41, 0.91) direction in canvas
- *     = from UPPER-RIGHT to LOWER-LEFT (matches Stripe) ✓
+ *   1. Wide colour bands with VERY soft transitions (no hard panel edges)
+ *   2. Each band has internal subtle gradient via noise modulation
+ *   3. Sparse, delicate white silk fold lines (only 1-2 prominent)
+ *   4. Fine anisotropic silk thread texture along silk length
+ *   5. Curved silhouette evoking gathered silk drape
  */
 import { useEffect, useRef } from 'react';
 
@@ -30,6 +22,7 @@ void main() {
 `;
 
 const FRAG = `
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 varying vec2  v_uv;
 uniform float u_time;
@@ -41,106 +34,106 @@ float vn(vec2 p) {
   return mix(mix(h2(i), h2(i+vec2(1,0)), f.x),
              mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y);
 }
+float fbm(vec2 p) {
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 5; i++) {
+    v += a * (vn(p) - 0.5);
+    p = p * 2.07 + 11.7;
+    a *= 0.5;
+  }
+  return v;
+}
 
 void main() {
   vec2  uv = v_uv;
   float t  = u_time;
 
-  /* ── Rotate canvas UV to silk's natural frame ─────────────────────────
-     NEGATIVE rotation: silk length runs from upper-right → lower-left.
-     Centre moved up-right so silk extends off the canvas to right (silk's
-     vivid-purple edge is positioned at canvas top-right corner area).     */
-  /* Centre shifted slightly left so silk extends more into canvas left   */
-  vec2  c        = uv - vec2(0.68, 0.32);
-  float angle    = -0.28;                                 /* ~16° from vertical — matches Stripe band slope */
-  float ca       = cos(angle), sa = sin(angle);
-  vec2  silkUV;
-  silkUV.x = c.x *  ca + c.y * sa;                       /* across silk                 */
-  silkUV.y = -c.x * sa + c.y * ca;                       /* along silk                  */
+  /* ── Silk frame: rotated to align with Stripe's diagonal ────────────── */
+  vec2  centre = vec2(0.65, 0.32);
+  vec2  c      = uv - centre;
+  float angle  = -0.28;
+  float ca     = cos(angle), sa = sin(angle);
+  vec2  silkUV = vec2(c.x * ca + c.y * sa, -c.x * sa + c.y * ca);
+  float yt     = silkUV.y + 0.5;
 
-  /* ── Along-silk parameter (–0.5..0.5 across canvas height) ──────────── */
-  float yt = silkUV.y + 0.5;                              /* shift to 0..1 range        */
+  /* ── Centerline with organic sway ─────────────────────────────────── */
+  float sway = sin(yt * 1.5 + t * 0.10) * 0.030
+             + (fbm(vec2(yt * 1.2, t * 0.07))) * 0.045;
 
-  /* ── Very subtle curvature — Stripe's bands are mostly straight ─────── */
-  float curvature = sin(yt * 1.4 + t * 0.05) * 0.025
-                  + (vn(vec2(yt * 1.0, t * 0.04)) - 0.5) * 0.020;
+  /* ── Multi-scale noise warp on silk's WIDTH coordinate ─────────────── */
+  float warp_l = fbm(vec2(silkUV.x * 1.0, yt * 1.3 + t * 0.06)) * 0.16;
+  float warp_m = fbm(vec2(silkUV.x * 3.5 + 7.1, yt * 2.5 + t * 0.04)) * 0.05;
 
-  /* ── Centreline sway ─────────────────────────────────────────────── */
-  float sway = sin(yt * 1.6 + t * 0.10) * 0.025
-             + (vn(vec2(yt * 1.2, t * 0.07)) - 0.5) * 0.035;
-
-  /* ── Tapering silk width: wider overall so silk extends further left   */
-  float halfW = mix(0.65, 0.30, smoothstep(0.20, 0.85, yt));
-  float across  = (silkUV.x - sway + curvature) / halfW;
+  /* ── Tapering width ──────────────────────────────────────────────── */
+  float halfW   = mix(0.62, 0.30, smoothstep(0.20, 0.85, yt));
+  float across  = (silkUV.x - sway + warp_l + warp_m) / halfW;
   float localX  = (across + 1.0) * 0.5;
 
-  /* ── Twist phase: simple, natural silk twist ──────────────────────── */
-  /* Removed fan-from-corner — created concentric rings artefact.
-     Use only along-silk twist + organic fbm warp for natural drape.      */
-  float twistNoise  = (vn(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) - 0.5) * 0.85;
-  float twistPhase  = yt * 3.20                              /* base twist along length    */
-                    + twistNoise
-                    + t * 0.32;
-  float twist       = sin(twistPhase) * 0.38;
-  float colorPos    = clamp(localX + twist, 0.0, 1.0);
+  /* ── Twist phase with higher frequency for richer band variation ────── */
+  float twistNoise = fbm(vec2(silkUV.x * 1.4 + 3.0, yt * 1.5 + t * 0.08)) * 1.10;
+  float twistPhase = yt * 4.20 + twistNoise + t * 0.30;
+  float twist      = sin(twistPhase) * 0.48;
+  float colorPos   = clamp(localX + twist, 0.0, 1.0);
 
-  /* ── 5-panel colour gradient with sharp transitions ──────────────────── */
-  vec3 c1 = vec3(0.745, 0.800, 0.988);   /* lavender                       */
-  vec3 c2 = vec3(0.985, 0.700, 0.250);   /* amber                          */
-  vec3 c3 = vec3(0.945, 0.565, 0.082);   /* orange peak                    */
-  vec3 c4 = vec3(0.941, 0.451, 0.549);   /* coral                          */
-  vec3 c5 = vec3(0.314, 0.153, 0.969);   /* vivid purple                   */
+  /* ── Colour palette (sampled from video) ────────────────────────────── */
+  vec3 c_lavender = vec3(0.745, 0.800, 0.988);   /* rgb(190,204,252) */
+  vec3 c_amber    = vec3(0.985, 0.700, 0.250);   /* rgb(251,178, 64) */
+  vec3 c_orange   = vec3(0.945, 0.565, 0.082);   /* rgb(241,144, 21) */
+  vec3 c_coral    = vec3(0.941, 0.451, 0.549);   /* rgb(240,115,140) */
+  vec3 c_vivid_p  = vec3(0.314, 0.153, 0.969);   /* rgb( 80, 39,247) */
 
-  /* Softer panel transitions for flowing silk feel (was 0.022 → 0.045) */
-  float w  = 0.045;
-  vec3  color = c1;
-  color = mix(color, c2, smoothstep(0.13 - w, 0.13 + w, colorPos));  /* lavender→amber */
-  color = mix(color, c3, smoothstep(0.28 - w, 0.28 + w, colorPos));  /* amber→orange   */
-  color = mix(color, c4, smoothstep(0.68 - w, 0.68 + w, colorPos));  /* orange→coral   */
-  color = mix(color, c5, smoothstep(0.86 - w, 0.86 + w, colorPos));  /* coral→vivid_p  */
+  /* ── 7-stop palette: lavender → orange → coral → lavender → vivid_p
+     creates alternating warm/cool bands (Stripe's signature pattern)     */
+  float w = 0.040;
+  vec3 col = c_lavender;
+  col = mix(col, c_amber,    smoothstep(0.08 - w, 0.08 + w, colorPos));
+  col = mix(col, c_orange,   smoothstep(0.18 - w, 0.18 + w, colorPos));
+  col = mix(col, c_coral,    smoothstep(0.48 - w, 0.48 + w, colorPos));
+  col = mix(col, c_lavender, smoothstep(0.62 - w, 0.62 + w, colorPos));   /* back to lavender */
+  col = mix(col, c_orange,   smoothstep(0.72 - w, 0.72 + w, colorPos));   /* warm again */
+  col = mix(col, c_vivid_p,  smoothstep(0.88 - w, 0.88 + w, colorPos));
 
-  /* ── Subtle silk fold creases — thin, slightly bright lines ─────────
-     Stripe's white lines are present but DON'T dominate; they're suggestive
-     of silk creases rather than hard divider lines.                       */
+  /* ── Internal subtle variation: prevents each zone from being flat ─── */
+  /* Apply a brightness/saturation modulation based on fine noise          */
+  float subtle = fbm(vec2(silkUV.x * 6.0, silkUV.y * 8.0 + t * 0.05)) * 0.16;
+  col *= 1.0 + subtle;
+
+  /* ── Fine silk fibre — runs ALONG silk's length (sin in y dir) ──────
+     Very subtle so it doesn't dominate.                                  */
+  float fibre = sin(silkUV.y * 180.0 + warp_l * 25.0) * 0.5 + 0.5;
+  fibre = pow(fibre, 2.0) * 0.06;
+  col *= 1.0 + fibre;
+
+  /* ── Sparse fold lines at the multi-band transitions ────────────── */
   float fold = 0.0;
-  fold = max(fold, exp(-pow((colorPos - 0.13) / 0.012, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.28) / 0.012, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.68) / 0.012, 2.0)));
-  fold = max(fold, exp(-pow((colorPos - 0.86) / 0.012, 2.0)));
-  fold *= 1.0 - smoothstep(0.65, 0.95, abs(across));
-  color = mix(color, vec3(1.0), fold * 0.55);    /* much softer 0.55 vs 0.95 */
+  fold = max(fold, exp(-pow((colorPos - 0.18) / 0.010, 2.0)) * 0.50);
+  fold = max(fold, exp(-pow((colorPos - 0.48) / 0.010, 2.0)) * 0.65);
+  fold = max(fold, exp(-pow((colorPos - 0.62) / 0.010, 2.0)) * 0.55);
+  fold = max(fold, exp(-pow((colorPos - 0.88) / 0.010, 2.0)) * 0.70);
+  fold *= 1.0 - smoothstep(0.55, 0.85, abs(across));
+  col = mix(col, vec3(1.0), fold * 0.65);
 
-  /* ── Internal silk variation: simulates real silk fabric texture ─────
-     Each "fibre" runs along silk length, giving anisotropic sheen.        */
-  float fibre = sin(silkUV.y * 80.0 + twistNoise * 4.0) * 0.5 + 0.5;
-  fibre = pow(fibre, 1.5) * 0.10;
-  color = mix(color, color * 1.12, fibre);
-
-  /* ── 3D silk shading: light from upper-left direction ──────────────── */
-  float silkDepth = 1.0 - abs(across);
-  silkDepth = smoothstep(0.0, 0.55, silkDepth);
-  color *= 0.86 + silkDepth * 0.14;
-
-  /* ── Cos-based shading: simulates silk's curve catching light ─────── */
-  /* cos(twistPhase) ≈ which face is visible: front (bright) or back (dim) */
+  /* ── Silk depth shading — cos(twistPhase) simulates front/back face ─── */
   float facing = cos(twistPhase) * 0.5 + 0.5;
-  color *= 0.92 + facing * 0.16;
+  col *= 0.90 + facing * 0.12;
 
-  /* ── Panel centre brightening (silk fibre highlight peak per panel) ─── */
-  float panelCtr = 1.0 - abs(colorPos * 2.0 - 1.0);
-  color *= 0.96 + panelCtr * 0.07;
+  /* ── 3D depth: brighter near silk centerline (face-on) ───────────── */
+  float depth = 1.0 - abs(across);
+  col *= 0.92 + smoothstep(0.0, 0.7, depth) * 0.10;
 
-  /* ── Silk silhouette: GENTLE fade for smooth blend to white page bg ─── */
-  float mask = smoothstep(1.05, 0.40, abs(across));
+  /* ── Silk silhouette: SOFT elliptical mask + soft edge fade ─────── */
+  /* Edge of silk fades smoothly (no hard cutoff)                       */
+  float edgeMask = smoothstep(1.05, 0.55, abs(across));
+  /* Combine with top/bottom fades                                       */
+  float topFade  = smoothstep(0.0, 0.05, uv.y);
+  float botFade  = smoothstep(1.0, 0.92, uv.y);
+  float mask     = edgeMask * topFade * botFade;
 
-  /* ── Top/bottom canvas fades (using canvas uv.y, not silkUV.y) ────── */
-  mask *= smoothstep(0.0, 0.05, uv.y) * smoothstep(1.0, 0.92, uv.y);
-
-  /* ── Composite ──────────────────────────────────────────────────────── */
+  /* ── Composite with white background ────────────────────────────── */
   vec3 bg = vec3(1.0);
-  color = mix(bg, color, mask);
+  col = mix(bg, col, mask);
 
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(col, 1.0);
 }
 `;
 
@@ -174,6 +167,7 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
       canvas.getContext('experimental-webgl')
     ) as WebGLRenderingContext | null;
     if (!gl) return;
+    gl.getExtension('OES_standard_derivatives');
 
     const vs = compileShader(gl, gl.VERTEX_SHADER,   VERT);
     const fs = compileShader(gl, gl.FRAGMENT_SHADER, FRAG);
