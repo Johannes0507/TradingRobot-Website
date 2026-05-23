@@ -1,23 +1,26 @@
 /**
- * FluidRibbon — Aurora flow for LendAuto hero
+ * FluidRibbon — Ocean Wave Layers
  *
- * Designed for our specific context (not a Stripe knock-off):
- *   • Hero is information-dense (pill + headline + sub + CTAs + KPI strip)
- *   • Animation must ACCENT, not COMPETE for attention
- *   • Brand feel: professional (financial) + active (24/7 automation) + premium
+ * Inspired by the best ocean wave designs in the market (Apple liquid waves,
+ * Spotify-wrapped flowing colour waves, Klint Finley wave shaders).
  *
- * Visual: a soft "aurora flow" — continuous gradient field with subtle
- * flowing motion. Stripe-inspired warm/cool palette but stripped of the
- * dramatic silk effect; reads as a gentle premium accent.
+ * Concept: 5 horizontal wave layers stacked vertically — like looking at
+ * the sea from above. Each layer has its own colour from our brand palette,
+ * with subtle highlights on the wave crests (light catching foam).
  *
- * Implementation principles:
- *   - SINGLE continuous gradient field (no discrete panels)
- *   - Multi-octave organic warp (waves of motion)
- *   - Smooth multi-stop palette: lavender → amber → orange → coral → vivid_p
- *   - Soft asymmetric mask (gathered upper-right, drifts lower-left)
- *   - Subtle vertical streaks suggest "always-on data flow"
- *   - Minimal noise/dithering for clean rendering
- *   - Very slow motion (~60s perceived cycle) — never distracting
+ * Design pillars:
+ *   • 質感 (texture)     — multi-octave sine waves give organic curves
+ *   • 光影 (light/shadow) — Gaussian highlights on wave crests
+ *   • 動向 (motion)       — slow horizontal flow at varying speeds per layer
+ *   • 美感 (aesthetic)    — smooth gradient blends, soft mask fade
+ *
+ * Colour stack (top → bottom = sky → ocean depths):
+ *   sky:      pale white
+ *   mist:     lavender
+ *   sunset:   amber
+ *   wave:     warm orange
+ *   deep:     coral
+ *   abyss:    vivid purple
  */
 import { useEffect, useRef } from 'react';
 
@@ -35,96 +38,113 @@ precision highp float;
 varying vec2  v_uv;
 uniform float u_time;
 
-float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float vn(vec2 p) {
-  vec2 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(h2(i), h2(i+vec2(1,0)), f.x),
-             mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y);
-}
-float fbm(vec2 p) {
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 5; i++) {
-    v += a * (vn(p) - 0.5);
-    p = p * 2.07 + 11.7;
-    a *= 0.5;
-  }
-  return v;
-}
-
 void main() {
   vec2  uv = v_uv;
+  /* Flip Y so 0=top (sky), 1=bottom (deep ocean) — matches ocean metaphor */
+  uv.y = 1.0 - uv.y;
   float t  = u_time;
 
   /* ─────────────────────────────────────────────────────────────────────
-     1. POSITION: gentle diagonal gradient from upper-right to lower-left
-     The "aurora" sweeps diagonally — same orientation as Stripe but
-     simpler (no rotation matrix, just a dot product).
+     WAVE LAYERS — multi-octave sin/cos for organic curves
+     Each wave's Y position = base + sum of sine waves at varying freq/phase.
+     Slower frequencies create the BIG SHAPE; higher frequencies add DETAIL.
+     Per-layer time phases differ so layers swell asynchronously (natural).
      ───────────────────────────────────────────────────────────────────── */
-  float baseField = uv.x * 0.78 - uv.y * 0.62;        /* diagonal direction */
+
+  /* Wave 1 (uppermost: sky→mist) — gentle, high frequency */
+  float w1 = 0.12
+           + sin(uv.x * 2.8 + t * 0.32) * 0.025
+           + sin(uv.x * 6.2 + t * 0.45 + 1.7) * 0.014
+           + sin(uv.x * 11.0 + t * 0.60 + 3.4) * 0.005;
+
+  /* Wave 2 (mist→sunset) — medium amplitude */
+  float w2 = 0.30
+           + sin(uv.x * 2.4 + t * 0.36 + 0.9) * 0.038
+           + sin(uv.x * 5.3 + t * 0.50 + 2.2) * 0.018
+           + sin(uv.x * 9.8 + t * 0.65 + 4.1) * 0.007;
+
+  /* Wave 3 (sunset→warm orange) — larger waves */
+  float w3 = 0.50
+           + sin(uv.x * 2.0 + t * 0.30 + 1.8) * 0.055
+           + sin(uv.x * 4.7 + t * 0.42 + 3.0) * 0.022
+           + sin(uv.x * 8.5 + t * 0.55 + 5.0) * 0.009;
+
+  /* Wave 4 (warm→deep coral) — broad swells */
+  float w4 = 0.71
+           + sin(uv.x * 1.7 + t * 0.34 + 2.5) * 0.062
+           + sin(uv.x * 4.1 + t * 0.46 + 3.7) * 0.026
+           + sin(uv.x * 7.8 + t * 0.58 + 5.8) * 0.010;
+
+  /* Wave 5 (deep→abyss) — slowest, deepest */
+  float w5 = 0.89
+           + sin(uv.x * 1.4 + t * 0.40 + 3.2) * 0.038
+           + sin(uv.x * 3.5 + t * 0.50 + 4.5) * 0.017;
 
   /* ─────────────────────────────────────────────────────────────────────
-     2. WARP: multi-octave noise layers create organic flow
-     XL: wide arches (the big shape)
-     L:  medium ripples
-     M:  fine detail
-     Tiny temporal drift on each — gives life without distraction.
+     COLOUR PALETTE — brand colours mapped to ocean depth metaphor
      ───────────────────────────────────────────────────────────────────── */
-  vec2  flow      = vec2(t * 0.030, t * 0.018);
-  float warp_xl   = fbm(uv *  0.9 + flow)         * 0.32;
-  float warp_l    = fbm(uv *  2.2 + flow * 1.4 + 5.0) * 0.14;
-  float warp_m    = fbm(uv *  5.5 + flow * 1.8 + 9.0) * 0.04;
-
-  float field = baseField + warp_xl + warp_l + warp_m;
+  vec3 c_sky    = vec3(1.000, 1.000, 1.000);
+  vec3 c_mist   = vec3(0.760, 0.815, 0.985);   /* pale lavender mist     */
+  vec3 c_sunset = vec3(0.995, 0.760, 0.310);   /* amber sunset           */
+  vec3 c_wave   = vec3(0.955, 0.560, 0.080);   /* warm orange wave       */
+  vec3 c_deep   = vec3(0.945, 0.460, 0.560);   /* coral depth            */
+  vec3 c_abyss  = vec3(0.380, 0.220, 0.985);   /* vivid purple abyss     */
 
   /* ─────────────────────────────────────────────────────────────────────
-     3. COLOR: smooth 5-stop continuous gradient (no hard panel edges)
-     Palette refined for our brand (warm-trust + cool-tech):
-       lavender — premium tech feel
-       amber    — financial warmth
-       orange   — active/working
-       coral    — energy/conversion
-       vivid_p  — distinctive accent
+     LAYER BLENDING — smooth transitions, no hard edges
+     Each smoothstep transitions a small band around the wave Y position.
      ───────────────────────────────────────────────────────────────────── */
-  vec3 c_lavender = vec3(0.760, 0.815, 0.985);   /* slightly brighter than measured */
-  vec3 c_amber    = vec3(0.995, 0.760, 0.310);
-  vec3 c_orange   = vec3(0.955, 0.560, 0.080);
-  vec3 c_coral    = vec3(0.945, 0.460, 0.560);
-  vec3 c_vivid_p  = vec3(0.380, 0.220, 0.985);
-
-  /* Map field range [~-0.7 to ~+1.5] smoothly through palette */
-  float n = (field + 0.30) / 1.10;                 /* normalize approx 0..1 */
-  n = clamp(n, 0.0, 1.0);
-
-  vec3 col;
-  if (n < 0.25)      col = mix(c_lavender, c_amber,   smoothstep(0.00, 0.25, n));
-  else if (n < 0.50) col = mix(c_amber,    c_orange,  smoothstep(0.25, 0.50, n));
-  else if (n < 0.72) col = mix(c_orange,   c_coral,   smoothstep(0.50, 0.72, n));
-  else               col = mix(c_coral,    c_vivid_p, smoothstep(0.72, 1.00, n));
+  float e = 0.014;
+  vec3 col = c_sky;
+  col = mix(col, c_mist,   smoothstep(w1 - e, w1 + e, uv.y));
+  col = mix(col, c_sunset, smoothstep(w2 - e, w2 + e, uv.y));
+  col = mix(col, c_wave,   smoothstep(w3 - e, w3 + e, uv.y));
+  col = mix(col, c_deep,   smoothstep(w4 - e, w4 + e, uv.y));
+  col = mix(col, c_abyss,  smoothstep(w5 - e, w5 + e, uv.y));
 
   /* ─────────────────────────────────────────────────────────────────────
-     4. ASYMMETRIC MASK
-     Gathered upper-right, drapes off lower-left — the silk-cloth shape
-     but achieved through smooth field rather than discrete silhouette.
-
-     mask combines:
-       (a) radial fade from upper-right anchor (0.85, 0.20)
-       (b) diagonal fade — silk drapes off lower-left
-       (c) top/bottom canvas edge fades
+     LIGHT HIGHLIGHTS — bright Gaussian on each wave crest
+     Light catches the top edge of each wave like foam catching sunlight.
+     Different intensities per wave: stronger on dominant waves.
      ───────────────────────────────────────────────────────────────────── */
-  vec2  anchor = vec2(0.85, 0.20);
-  float dRad   = length((uv - anchor) * vec2(0.95, 1.20));
-  float radialMask = smoothstep(1.10, 0.30, dRad);
-
-  float diagFade = smoothstep(-0.10, 0.55, uv.x - (1.0 - uv.y) * 0.25);
-
-  float mask = radialMask * diagFade
-             * smoothstep(0.0, 0.04, uv.y)
-             * smoothstep(1.0, 0.94, uv.y);
+  float light = 0.0;
+  light += exp(-pow((uv.y - w1 + 0.004) / 0.009, 2.0)) * 0.18;
+  light += exp(-pow((uv.y - w2 + 0.004) / 0.010, 2.0)) * 0.22;
+  light += exp(-pow((uv.y - w3 + 0.004) / 0.012, 2.0)) * 0.26;
+  light += exp(-pow((uv.y - w4 + 0.005) / 0.012, 2.0)) * 0.22;
+  light += exp(-pow((uv.y - w5 + 0.004) / 0.010, 2.0)) * 0.16;
+  col = mix(col, vec3(1.0), light);
 
   /* ─────────────────────────────────────────────────────────────────────
-     5. COMPOSITE
+     DEPTH SHADOW — subtle darkening below each wave (under-curve shadow)
+     Creates 3D depth feel on the wave underside.
      ───────────────────────────────────────────────────────────────────── */
+  float shadow = 0.0;
+  shadow += exp(-pow((uv.y - w2 - 0.012) / 0.012, 2.0)) * 0.10;
+  shadow += exp(-pow((uv.y - w3 - 0.014) / 0.014, 2.0)) * 0.10;
+  shadow += exp(-pow((uv.y - w4 - 0.014) / 0.014, 2.0)) * 0.10;
+  col *= 1.0 - shadow;
+
+  /* ─────────────────────────────────────────────────────────────────────
+     SUBTLE LIGHT GRADIENT — overall lighting from upper-left
+     Top of canvas slightly brighter, bottom slightly cooler.
+     ───────────────────────────────────────────────────────────────────── */
+  col *= 0.95 + (1.0 - uv.y) * 0.08;
+
+  /* ─────────────────────────────────────────────────────────────────────
+     CANVAS MASK — soft fades at edges
+       • Left edge: gradual fade from canvas left (where text is) into colour
+       • Top: very small fade (animation goes to top edge for full bleed)
+       • Bottom: small fade
+     ───────────────────────────────────────────────────────────────────── */
+  /* Mask uses ORIGINAL uv.y (before flip) for top/bottom — use v_uv.y    */
+  float origY    = v_uv.y;
+  float leftFade = smoothstep(0.0, 0.32, uv.x);
+  float topFade  = smoothstep(0.0, 0.04, origY);
+  float botFade  = smoothstep(1.0, 0.94, origY);
+  float mask     = leftFade * topFade * botFade;
+
+  /* ── Composite ──────────────────────────────────────────────────────── */
   vec3 bg = vec3(1.0);
   col = mix(bg, col, mask);
 
