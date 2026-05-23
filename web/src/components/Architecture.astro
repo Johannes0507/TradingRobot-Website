@@ -46,55 +46,55 @@ const pillars = [
           <div class="text-xs font-mono text-mute uppercase tracking-wider mb-5">
             資料流架構
           </div>
-          <svg viewBox="0 0 720 280" class="w-full h-auto" role="img" aria-label="LendAuto 系統架構圖">
+          <svg viewBox="0 0 720 280" class="w-full h-auto arch-svg" role="img" aria-label="LendAuto 系統架構圖">
             <!-- Boxes -->
-            <g font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36">
+            <g font-family="JetBrains Mono, monospace" font-size="13">
               <!-- User -->
-              <rect x="20" y="50" width="160" height="80" rx="12" fill="#ffffff" stroke="#1a1f3614" />
-              <text x="100" y="80" text-anchor="middle" font-weight="700">你的 Bitfinex</text>
-              <text x="100" y="100" text-anchor="middle" font-weight="700">Account</text>
-              <text x="100" y="118" text-anchor="middle" fill="#6b7280" font-size="11">資金 custody</text>
+              <rect x="20" y="50" width="160" height="80" rx="12" class="arch-bg" />
+              <text x="100" y="80" text-anchor="middle" font-weight="700" class="arch-ink">你的 Bitfinex</text>
+              <text x="100" y="100" text-anchor="middle" font-weight="700" class="arch-ink">Account</text>
+              <text x="100" y="118" text-anchor="middle" font-size="11" class="arch-mute">資金 custody</text>
 
               <!-- LendAuto Server -->
-              <rect x="280" y="50" width="160" height="80" rx="12" fill="#ffffff" stroke="#635bff40" />
-              <text x="360" y="80" text-anchor="middle" font-weight="700" fill="#635bff">LendAuto</text>
-              <text x="360" y="100" text-anchor="middle" font-weight="700" fill="#635bff">Server</text>
-              <text x="360" y="118" text-anchor="middle" fill="#6b7280" font-size="11">掛單代理</text>
+              <rect x="280" y="50" width="160" height="80" rx="12" class="arch-bg arch-brand-stroke" />
+              <text x="360" y="80" text-anchor="middle" font-weight="700" class="arch-brand">LendAuto</text>
+              <text x="360" y="100" text-anchor="middle" font-weight="700" class="arch-brand">Server</text>
+              <text x="360" y="118" text-anchor="middle" font-size="11" class="arch-mute">掛單代理</text>
 
               <!-- Bitfinex API -->
-              <rect x="540" y="50" width="160" height="80" rx="12" fill="#ffffff" stroke="#1a1f3614" />
-              <text x="620" y="80" text-anchor="middle" font-weight="700">Bitfinex</text>
-              <text x="620" y="100" text-anchor="middle" font-weight="700">Funding API</text>
-              <text x="620" y="118" text-anchor="middle" fill="#6b7280" font-size="11">scope: funding</text>
+              <rect x="540" y="50" width="160" height="80" rx="12" class="arch-bg" />
+              <text x="620" y="80" text-anchor="middle" font-weight="700" class="arch-ink">Bitfinex</text>
+              <text x="620" y="100" text-anchor="middle" font-weight="700" class="arch-ink">Funding API</text>
+              <text x="620" y="118" text-anchor="middle" font-size="11" class="arch-mute">scope: funding</text>
 
               <!-- Encrypted key box -->
-              <rect x="280" y="180" width="160" height="60" rx="12" fill="#f59e0b14" stroke="#f59e0b40" />
-              <text x="360" y="205" text-anchor="middle" font-weight="700" fill="#f59e0b">加密的 API Key</text>
-              <text x="360" y="225" text-anchor="middle" fill="#6b7280" font-size="11">AES-256-GCM · 只能掛 funding 單</text>
+              <rect x="280" y="180" width="160" height="60" rx="12" class="arch-amber-bg" />
+              <text x="360" y="205" text-anchor="middle" font-weight="700" class="arch-amber">加密的 API Key</text>
+              <text x="360" y="225" text-anchor="middle" font-size="11" class="arch-mute">AES-256-GCM · 只能掛 funding 單</text>
 
               <!-- Forbidden withdrawal -->
-              <text x="100" y="200" text-anchor="middle" fill="#ef4444" font-weight="700">提款路徑</text>
-              <text x="100" y="220" text-anchor="middle" fill="#ef4444" font-size="11">✗ 不存在</text>
+              <text x="100" y="200" text-anchor="middle" font-weight="700" class="arch-danger">提款路徑</text>
+              <text x="100" y="220" text-anchor="middle" font-size="11" class="arch-danger">✗ 不存在</text>
             </g>
 
             <!-- Arrows -->
-            <g stroke="#1a1f3640" stroke-width="2" fill="none">
+            <g stroke-width="2" fill="none" class="arch-arrow">
               <!-- User <-> Server (top) -->
               <path d="M 180 90 L 280 90" marker-end="url(#arrow)" />
               <!-- Server <-> Bitfinex API (top) -->
               <path d="M 440 90 L 540 90" marker-end="url(#arrow)" />
               <!-- Server uses encrypted key -->
-              <path d="M 360 130 L 360 180" stroke="#f59e0b80" />
+              <path d="M 360 130 L 360 180" class="arch-amber-stroke" />
             </g>
 
             <!-- No-path X arrow from user to "提款路徑" -->
-            <g stroke="#ef4444" stroke-width="2" fill="none" stroke-dasharray="6 4">
+            <g stroke-width="2" fill="none" stroke-dasharray="6 4" class="arch-danger-stroke">
               <path d="M 100 130 L 100 175" />
             </g>
 
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a1f3680" />
+                <path d="M 0 0 L 10 5 L 0 10 z" class="arch-arrow-head" />
               </marker>
             </defs>
           </svg>
@@ -150,3 +150,20 @@ const pillars = [
     </div>
   </div>
 </section>
+
+<style>
+  /* Architecture SVG — token-driven fills/strokes (no hard-coded hex) */
+  .arch-svg .arch-bg          { fill: var(--color-bg);     stroke: color-mix(in srgb, var(--color-ink) 8%, transparent); }
+  .arch-svg .arch-ink         { fill: var(--color-ink); }
+  .arch-svg .arch-mute        { fill: var(--color-mute); }
+  .arch-svg .arch-brand       { fill: var(--color-brand); }
+  .arch-svg .arch-brand-stroke{ stroke: color-mix(in srgb, var(--color-brand) 25%, transparent); }
+  .arch-svg .arch-amber       { fill: var(--color-amber); }
+  .arch-svg .arch-amber-bg    { fill: color-mix(in srgb, var(--color-amber) 8%, transparent);
+                                 stroke: color-mix(in srgb, var(--color-amber) 25%, transparent); }
+  .arch-svg .arch-amber-stroke{ stroke: color-mix(in srgb, var(--color-amber) 50%, transparent); }
+  .arch-svg .arch-danger      { fill: var(--color-danger); }
+  .arch-svg .arch-danger-stroke { stroke: var(--color-danger); }
+  .arch-svg .arch-arrow       { stroke: color-mix(in srgb, var(--color-ink) 25%, transparent); }
+  .arch-svg .arch-arrow-head  { fill: color-mix(in srgb, var(--color-ink) 50%, transparent); }
+</style>

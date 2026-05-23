@@ -7,14 +7,18 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 ---
 
 <section class="relative pt-[112px] lg:pt-[140px] pb-[64px] lg:pb-[80px] overflow-hidden">
-  <!-- Aurora flow — right 55% of viewport, designed for our content density -->
-  <div class="absolute top-0 right-0 w-[55%] h-full overflow-hidden pointer-events-none z-0">
+  <!-- Aurora flow — desktop/tablet only; hidden on mobile to keep text readable -->
+  <div
+    aria-hidden="true"
+    class="hidden md:block absolute top-0 right-0 w-[60%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0"
+  >
     <FluidRibbon client:only="react" />
   </div>
 
-  <!-- Grid lines overlay (radial mask for vignette) -->
+  <!-- Grid lines overlay (radial mask for vignette) — desktop only, decorative -->
   <div
-    class="absolute inset-0 pointer-events-none"
+    aria-hidden="true"
+    class="hidden md:block absolute inset-0 pointer-events-none"
     style="
       background-image: linear-gradient(rgb(15 23 42 / 0.04) 1px, transparent 1px),
                         linear-gradient(90deg, rgb(15 23 42 / 0.04) 1px, transparent 1px);
@@ -30,7 +34,7 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
     <div class="max-w-2xl">
       <!-- Announcement pill — descriptive, not affiliation claim -->
       <div
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-line bg-bg/80 backdrop-blur-sm text-sm text-ink-soft mb-8"
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-line bg-bg text-sm text-ink-soft mb-8"
       >
         <span class="w-2 h-2 rounded-full bg-success"></span>
         <span class="font-mono">fUSD / fUST 自動報價</span>
@@ -41,11 +45,7 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
         class="text-5xl lg:text-7xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-6"
       >
         把 Bitfinex funding 報價，<br />
-        交給機器人
-        <span
-          class="bg-gradient-to-r from-brand via-coral to-amber bg-clip-text text-transparent"
-          >24×60×60 秒</span
-        >盯
+        交給機器人 <span class="text-brand">24×60×60 秒</span>盯
       </h1>
 
       <!-- Subhead -->

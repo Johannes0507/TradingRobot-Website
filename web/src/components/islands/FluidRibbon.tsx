@@ -218,16 +218,58 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
-    const start = performance.now();
+    let running = false;
+    let pausedElapsed = 0;
+    let lastStart = performance.now();
+
     function tick() {
-      const elapsed = reduceMotion ? 0 : ((performance.now()-start)/1000) * speed;
+      const elapsed = reduceMotion ? 0
+        : pausedElapsed + ((performance.now() - lastStart) / 1000) * speed;
       gl!.uniform1f(uTime, elapsed);
       gl!.clear(gl!.COLOR_BUFFER_BIT);
       gl!.drawArrays(gl!.TRIANGLES, 0, 6);
       raf = requestAnimationFrame(tick);
     }
-    tick();
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); gl.deleteBuffer(buf); gl.deleteProgram(prog); };
+
+    function startLoop() {
+      if (running) return;
+      running = true;
+      lastStart = performance.now();
+      tick();
+    }
+    function stopLoop() {
+      if (!running) return;
+      running = false;
+      pausedElapsed += ((performance.now() - lastStart) / 1000) * speed;
+      cancelAnimationFrame(raf);
+    }
+
+    /* Pause animation when hero is off-screen (saves CPU/GPU/battery) */
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) startLoop();
+          else stopLoop();
+        }
+      },
+      { threshold: 0 }
+    );
+    io.observe(canvas);
+
+    /* Also pause when tab hidden */
+    function onVisibility() {
+      if (document.hidden) stopLoop();
+      else if (canvas!.getBoundingClientRect().bottom > 0) startLoop();
+    }
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+      gl.deleteBuffer(buf); gl.deleteProgram(prog);
+    };
   }, [speed]);
 
   return <canvas ref={canvasRef} className={className} style={{ display:'block', width:'100%', height:'100%', ...style }} />;

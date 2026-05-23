@@ -42,6 +42,8 @@ body {
    Runs on compositor thread, zero JS, 60fps.
    Firefox without flag → no animation, content shows immediately (graceful).
    Respects prefers-reduced-motion.
+   Removed blur filter — compositor-expensive on mid-range devices.
+   opacity + translateY animate cheaply via transform/opacity only.
    ============================================ */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
@@ -57,12 +59,10 @@ body {
   from {
     opacity: 0;
     transform: translateY(14px);
-    filter: blur(6px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 

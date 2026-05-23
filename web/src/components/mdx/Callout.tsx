@@ -9,30 +9,32 @@ export interface CalloutProps {
   children?: ReactNode;
 }
 
+/* Use design tokens via color-mix for tinted backgrounds.
+   Each variant derives bg/border from a single token, no hard-coded hex. */
 const styles = {
   info: {
-    bg: 'rgb(99 91 255 / 0.05)',
-    border: 'rgb(99 91 255 / 0.25)',
+    bg: 'color-mix(in srgb, var(--color-brand) 5%, transparent)',
+    border: 'color-mix(in srgb, var(--color-brand) 25%, transparent)',
     icon: 'ℹ',
-    color: '#635bff',
+    color: 'var(--color-brand)',
   },
   warn: {
-    bg: 'rgb(245 158 11 / 0.07)',
-    border: 'rgb(245 158 11 / 0.30)',
+    bg: 'color-mix(in srgb, var(--color-warn) 7%, transparent)',
+    border: 'color-mix(in srgb, var(--color-warn) 30%, transparent)',
     icon: '⚠',
-    color: '#b45309',
+    color: 'color-mix(in srgb, var(--color-warn) 80%, var(--color-ink))',
   },
   danger: {
-    bg: 'rgb(239 68 68 / 0.07)',
-    border: 'rgb(239 68 68 / 0.30)',
+    bg: 'color-mix(in srgb, var(--color-danger) 7%, transparent)',
+    border: 'color-mix(in srgb, var(--color-danger) 30%, transparent)',
     icon: '✕',
-    color: '#b91c1c',
+    color: 'color-mix(in srgb, var(--color-danger) 80%, var(--color-ink))',
   },
   success: {
-    bg: 'rgb(16 185 129 / 0.07)',
-    border: 'rgb(16 185 129 / 0.30)',
+    bg: 'color-mix(in srgb, var(--color-success) 7%, transparent)',
+    border: 'color-mix(in srgb, var(--color-success) 30%, transparent)',
     icon: '✓',
-    color: '#047857',
+    color: 'color-mix(in srgb, var(--color-success) 80%, var(--color-ink))',
   },
 };
 
