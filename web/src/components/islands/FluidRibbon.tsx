@@ -103,22 +103,7 @@ void main() {
   else               col = mix(c_coral,    c_vivid_p, smoothstep(0.72, 1.00, n));
 
   /* ─────────────────────────────────────────────────────────────────────
-     4. SUBTLE FLOW STREAKS: vertical light bands suggest "data flowing"
-     Implies 24/7 activity without being a literal market chart.
-     ───────────────────────────────────────────────────────────────────── */
-  float streak = sin(uv.y * 14.0 + warp_xl * 8.0 + t * 0.3) * 0.5 + 0.5;
-  streak = pow(streak, 3.0) * 0.06;
-  col *= 1.0 + streak;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     5. SILK CREASE — ONE subtle bright line at the orange-coral seam
-     The boundary where field ≈ 0.65. Adds a single elegant highlight.
-     ───────────────────────────────────────────────────────────────────── */
-  float crease = exp(-pow((n - 0.65) / 0.020, 2.0)) * 0.30;
-  col = mix(col, vec3(1.0), crease);
-
-  /* ─────────────────────────────────────────────────────────────────────
-     6. ASYMMETRIC MASK
+     4. ASYMMETRIC MASK
      Gathered upper-right, drapes off lower-left — the silk-cloth shape
      but achieved through smooth field rather than discrete silhouette.
 
@@ -138,12 +123,7 @@ void main() {
              * smoothstep(1.0, 0.94, uv.y);
 
   /* ─────────────────────────────────────────────────────────────────────
-     7. SUBTLE GRADIENT DITHER to break up banding
-     ───────────────────────────────────────────────────────────────────── */
-  col += (h2(uv * 700.0 + vec2(t)) - 0.5) * 0.010;
-
-  /* ─────────────────────────────────────────────────────────────────────
-     8. COMPOSITE
+     5. COMPOSITE
      ───────────────────────────────────────────────────────────────────── */
   vec3 bg = vec3(1.0);
   col = mix(bg, col, mask);
