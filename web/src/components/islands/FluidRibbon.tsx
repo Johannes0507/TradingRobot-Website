@@ -1,25 +1,23 @@
 /**
- * FluidRibbon — Refined layered gradient washes
+ * FluidRibbon — Brand-gradient base with petal-texture overlay
  *
- * Color hierarchy aligned to LendAuto's design tokens:
- *   --color-brand: #635bff  (primary purple — premium trust)
- *   --color-coral: #fb7185  (warm coral — friendly)
- *   --color-amber: #f59e0b  (warm amber — reliable)
- *   --color-bg-tint: #f7f9fc (cool-leaning page tint)
+ * Multi-layer composition:
+ *   1. BASE — designer-grade brand gradient (purple → coral → amber)
+ *      Cool tint anchors with page, warm corner toward viewport edge.
+ *   2. PETAL OVERLAY — radial petal pattern from upper-right focal point
+ *      5 petals radiating, soft translucent edges, like an open bloom.
+ *   3. PETAL VEINS — subtle striations within petals (delicate texture)
+ *   4. FLOWING MOTION — slow rotation + organic warp for life
  *
- * Same `from-brand via-coral to-amber` gradient as the headline's
- * "24×60×60 秒" accent text — visual coherence across the hero.
+ * Visual reference: blooming flower seen from above, captured in our
+ * exact brand palette. The petals are SOFT and TRANSLUCENT, not opaque
+ * shapes — they enhance the gradient, not overwrite it.
  *
- * Design philosophy (designer-grade restraint):
- *   • LIMITED PALETTE — only brand colours, no random hues
- *   • TONAL VARIATIONS — each colour has light/mid/dark via shade shifts
- *   • HIERARCHICAL — purple dominant, amber accent, coral as bridge
- *   • SOFT TRANSITIONS — no hard edges, only smoothstep blends
- *   • COMPOSITION — diagonal axis matches the headline gradient direction
- *   • RESTRAINED MOTION — slow position drift, never flashy
- *
- * The result reads as a sophisticated abstract — not a Stripe knock-off,
- * not a literal wave, just refined colour washes echoing the brand.
+ * Brand colors (from design tokens):
+ *   --color-bg-tint  #f7f9fc  (page anchor)
+ *   --color-brand    #635bff  (primary purple, dominant)
+ *   --color-coral    #fb7185  (warm transition)
+ *   --color-amber    #f59e0b  (warm accent)
  */
 import { useEffect, useRef } from 'react';
 
@@ -36,6 +34,8 @@ const FRAG = `
 precision highp float;
 varying vec2  v_uv;
 uniform float u_time;
+
+const float PI = 3.14159265359;
 
 float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float vn(vec2 p) {
@@ -59,40 +59,25 @@ void main() {
   float t  = u_time;
 
   /* ─────────────────────────────────────────────────────────────────────
-     DIAGONAL GRADIENT AXIS
-     Matches the headline's bg-gradient-to-r → diagonal direction creates
-     visual rhyme between hero text and animation.
+     STEP 1 — BASE DIAGONAL GRADIENT (brand palette)
+     Same direction as the headline gradient for visual coherence.
      ───────────────────────────────────────────────────────────────────── */
-  float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;     /* tilted right-down */
+  float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;
 
-  /* Add organic warp so the gradient layers curve slightly (not straight) */
-  float warp_l = fbm(vec2(uv.x * 1.2, uv.y * 1.4 + t * 0.05)) * 0.18;
-  float warp_m = fbm(vec2(uv.x * 3.0, uv.y * 3.5 + t * 0.03)) * 0.06;
-  float field  = diag + warp_l + warp_m + sin(t * 0.06) * 0.04;
+  /* Multi-octave organic warp */
+  float warp_l = fbm(vec2(uv.x * 1.0, uv.y * 1.3 + t * 0.04)) * 0.18;
+  float warp_m = fbm(vec2(uv.x * 2.6, uv.y * 3.0 + t * 0.025)) * 0.07;
+  float field  = diag + warp_l + warp_m + sin(t * 0.05) * 0.03;
 
-  /* ─────────────────────────────────────────────────────────────────────
-     BRAND PALETTE — exact token colours, with tonal variations
-     Each anchor colour has a "light tint" and "deep shade" for richness.
-     ───────────────────────────────────────────────────────────────────── */
-  vec3 c_tint        = vec3(0.969, 0.976, 0.988);    /* #f7f9fc bg-tint    */
-  vec3 c_brand_pale  = vec3(0.878, 0.878, 1.000);    /* light purple tint  */
-  vec3 c_brand       = vec3(0.388, 0.357, 1.000);    /* #635bff brand     */
-  vec3 c_brand_deep  = vec3(0.290, 0.235, 0.900);    /* deeper purple     */
-  vec3 c_coral       = vec3(0.984, 0.443, 0.522);    /* #fb7185 coral     */
-  vec3 c_amber       = vec3(0.961, 0.620, 0.043);    /* #f59e0b amber     */
-  vec3 c_amber_pale  = vec3(1.000, 0.851, 0.490);    /* light amber       */
+  /* Brand palette with tonal variations */
+  vec3 c_tint        = vec3(0.969, 0.976, 0.988);
+  vec3 c_brand_pale  = vec3(0.878, 0.878, 1.000);
+  vec3 c_brand       = vec3(0.388, 0.357, 1.000);
+  vec3 c_brand_deep  = vec3(0.290, 0.235, 0.900);
+  vec3 c_coral       = vec3(0.984, 0.443, 0.522);
+  vec3 c_amber       = vec3(0.961, 0.620, 0.043);
+  vec3 c_amber_pale  = vec3(1.000, 0.851, 0.490);
 
-  /* ─────────────────────────────────────────────────────────────────────
-     LAYERED GRADIENT — multi-stop blend along diagonal field
-     Composition (left/top → right/bottom):
-       1. cool bg-tint   (anchors with the page background)
-       2. light purple   (gentle introduction of brand)
-       3. brand purple   (dominant zone)
-       4. brand deep     (richest brand moment)
-       5. coral          (warm transition)
-       6. amber          (warm accent)
-       7. light amber    (soft exit toward page edge)
-     ───────────────────────────────────────────────────────────────────── */
   vec3 col = c_tint;
   col = mix(col, c_brand_pale, smoothstep(0.05, 0.20, field));
   col = mix(col, c_brand,      smoothstep(0.20, 0.42, field));
@@ -102,23 +87,61 @@ void main() {
   col = mix(col, c_amber_pale, smoothstep(0.88, 1.05, field));
 
   /* ─────────────────────────────────────────────────────────────────────
-     SECONDARY GRADIENT — overlapping wash adds depth (Rothko-like)
-     A second wash in a different direction creates rich tonal blending.
+     STEP 2 — PETAL RADIAL FIELD
+     Focal point upper-right (off-canvas). 5 petals radiate inward.
      ───────────────────────────────────────────────────────────────────── */
-  float field2 = uv.y * 0.6 + uv.x * 0.2 - 0.10
-               + fbm(vec2(uv.x * 0.8, uv.y * 1.0 + t * 0.04)) * 0.12;
+  vec2  focal   = vec2(1.05, -0.05);
+  vec2  d       = uv - focal;
+  float r       = length(d);
+  float theta   = atan(d.y, d.x);
 
-  /* Multiply a subtle warm overlay (amber) where field2 > 0.5             */
-  float warmOverlay = smoothstep(0.50, 0.80, field2) * 0.18;
-  col = mix(col, col * vec3(1.05, 0.96, 0.88), warmOverlay);
+  /* Slow rotation + organic angular warp                                  */
+  float wobble  = fbm(vec2(theta * 1.5, r * 1.8 + t * 0.06)) * 0.30;
+  float theta2  = theta + t * 0.04 + wobble;
 
-  /* Multiply a subtle cool overlay (purple) where field2 < 0.5            */
-  float coolOverlay = smoothstep(0.50, 0.20, field2) * 0.12;
-  col = mix(col, col * vec3(0.92, 0.94, 1.05), coolOverlay);
+  /* Petal modulation: n petals around full circle                         */
+  float n_petals = 5.0;
+  float petals   = cos(theta2 * n_petals);
+  petals         = pow(max(petals, 0.0), 1.4);    /* sharpen peaks slightly */
+
+  /* Radial envelope: petals strongest at moderate distance, fade at tip   */
+  float radial = smoothstep(0.1, 0.55, r) * smoothstep(1.30, 0.75, r);
+
+  float petalField = petals * radial;
 
   /* ─────────────────────────────────────────────────────────────────────
-     CANVAS MASK — soft asymmetric fade
-     Gathered upper-right, soft drape to lower-left.
+     STEP 3 — APPLY PETAL HIGHLIGHTS
+     Soft translucent overlay — petals lighten and slightly warm the base.
+     Multiply blending preserves the brand gradient underneath.
+     ───────────────────────────────────────────────────────────────────── */
+  /* Inner petal tone: warm cream */
+  vec3 petalInner = vec3(1.000, 0.965, 0.910);
+  col = mix(col, petalInner, petalField * 0.35);
+
+  /* Outer petal tint: slight pink warmth at petal edges                   */
+  float petalEdge = (1.0 - petals) * radial * smoothstep(0.8, 1.2, r);
+  col = mix(col, c_coral * 1.05, petalEdge * 0.10);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     STEP 4 — PETAL VEINS
+     Delicate radial striations within petals — like flower veins.
+     ───────────────────────────────────────────────────────────────────── */
+  float veinPhase = theta * n_petals * 3.0 + r * 8.0;
+  float vein      = sin(veinPhase) * 0.5 + 0.5;
+  vein            = pow(vein, 4.0);
+  /* Only show veins within petal areas                                    */
+  vein *= petalField;
+  col *= 1.0 + vein * 0.06;
+
+  /* ─────────────────────────────────────────────────────────────────────
+     STEP 5 — SUBTLE ROTATIONAL SHIMMER
+     Adds gentle "breath" — petal field slightly pulsates over time.
+     ───────────────────────────────────────────────────────────────────── */
+  float breath = sin(t * 0.18) * 0.04 + 1.0;
+  col = mix(col, col * breath, petalField * 0.3);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     STEP 6 — CANVAS MASK (soft asymmetric)
      ───────────────────────────────────────────────────────────────────── */
   float leftFade = smoothstep(0.0, 0.32, uv.x);
   float diagFade = smoothstep(-0.05, 0.55, uv.x - (1.0 - uv.y) * 0.28);
