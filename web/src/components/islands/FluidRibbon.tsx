@@ -51,27 +51,27 @@ void main() {
   /* Diagonal field — same direction as the headline brand gradient */
   float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;
 
-  /* Multi-octave organic warp (only on the field, not on top of overlays) */
-  float warp_l = fbm(vec2(uv.x * 1.0, uv.y * 1.3 + t * 0.040)) * 0.18;
-  float warp_m = fbm(vec2(uv.x * 2.6, uv.y * 3.0 + t * 0.025)) * 0.07;
-  float field  = diag + warp_l + warp_m + sin(t * 0.05) * 0.03;
+  /* Single VERY gentle warp — barely curves the gradient, no blobs.
+     Reduced amplitudes prevent visible "shape" artefacts.                */
+  float warp = fbm(vec2(uv.x * 0.7, uv.y * 0.9 + t * 0.025)) * 0.06;
+  float field = clamp(diag + warp, 0.0, 1.0);
 
-  /* Brand palette with tonal variations */
-  vec3 c_tint        = vec3(0.969, 0.976, 0.988);
-  vec3 c_brand_pale  = vec3(0.878, 0.878, 1.000);
-  vec3 c_brand       = vec3(0.388, 0.357, 1.000);
-  vec3 c_brand_deep  = vec3(0.290, 0.235, 0.900);
-  vec3 c_coral       = vec3(0.984, 0.443, 0.522);
-  vec3 c_amber       = vec3(0.961, 0.620, 0.043);
-  vec3 c_amber_pale  = vec3(1.000, 0.851, 0.490);
+  /* Brand palette — ONLY 4 anchors, no tonal sub-shades.
+     Each colour transitions smoothly to the next via continuous lerp. */
+  vec3 c_tint   = vec3(0.969, 0.976, 0.988);
+  vec3 c_brand  = vec3(0.388, 0.357, 1.000);
+  vec3 c_coral  = vec3(0.984, 0.443, 0.522);
+  vec3 c_amber  = vec3(0.961, 0.620, 0.043);
 
-  vec3 col = c_tint;
-  col = mix(col, c_brand_pale, smoothstep(0.05, 0.20, field));
-  col = mix(col, c_brand,      smoothstep(0.20, 0.42, field));
-  col = mix(col, c_brand_deep, smoothstep(0.42, 0.55, field));
-  col = mix(col, c_coral,      smoothstep(0.55, 0.72, field));
-  col = mix(col, c_amber,      smoothstep(0.72, 0.88, field));
-  col = mix(col, c_amber_pale, smoothstep(0.88, 1.05, field));
+  /* Continuous piecewise lerp (no smoothstep — eliminates wavy edges) */
+  vec3 col;
+  if (field < 0.30) {
+    col = mix(c_tint, c_brand, field / 0.30);
+  } else if (field < 0.60) {
+    col = mix(c_brand, c_coral, (field - 0.30) / 0.30);
+  } else {
+    col = mix(c_coral, c_amber, clamp((field - 0.60) / 0.30, 0.0, 1.0));
+  }
 
   /* Soft asymmetric mask — gathered upper-right, drape to lower-left */
   float leftFade = smoothstep(0.0, 0.32, uv.x);
