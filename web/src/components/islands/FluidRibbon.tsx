@@ -48,13 +48,14 @@ void main() {
   vec2  uv = v_uv;
   float t  = u_time;
 
-  /* Radial field — colour bands form circular ARCS not straight lines.
-     Centre at lower-left off-canvas, so visible bands look like
-     half-circles opening toward the upper-right.                          */
-  vec2  center = vec2(-0.30, 1.30);
+  /* Radial field — colour bands form circular ARCS from upper-right corner.
+     Centre off-canvas at top-right, so the visible arcs curve around
+     this corner like ripples concentrated there.                          */
+  vec2  center = vec2(1.30, -0.30);
   float r      = distance(uv, center);
-  /* r ranges roughly 0.4 (closest to centre) to 1.85 (top-right corner) */
-  float radial = (r - 0.40) / 1.30;        /* normalize ~0..1            */
+  /* r ranges ~0.42 (closest to corner) to ~1.85 (lower-left).
+     Invert so colour intensity peaks AT the corner (upper-right).         */
+  float radial = (1.85 - r) / 1.45;        /* normalize ~0..1            */
 
   /* Very gentle warp adds organic curve to the arcs without creating
      distinct blob shapes.                                                 */
