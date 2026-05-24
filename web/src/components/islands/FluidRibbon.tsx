@@ -48,13 +48,18 @@ void main() {
   vec2  uv = v_uv;
   float t  = u_time;
 
-  /* Diagonal field — same direction as the headline brand gradient */
-  float diag = uv.x * 0.92 - uv.y * 0.38 + 0.30;
+  /* Radial field — colour bands form circular ARCS not straight lines.
+     Centre at lower-left off-canvas, so visible bands look like
+     half-circles opening toward the upper-right.                          */
+  vec2  center = vec2(-0.30, 1.30);
+  float r      = distance(uv, center);
+  /* r ranges roughly 0.4 (closest to centre) to 1.85 (top-right corner) */
+  float radial = (r - 0.40) / 1.30;        /* normalize ~0..1            */
 
-  /* Single VERY gentle warp — barely curves the gradient, no blobs.
-     Reduced amplitudes prevent visible "shape" artefacts.                */
-  float warp = fbm(vec2(uv.x * 0.7, uv.y * 0.9 + t * 0.025)) * 0.06;
-  float field = clamp(diag + warp, 0.0, 1.0);
+  /* Very gentle warp adds organic curve to the arcs without creating
+     distinct blob shapes.                                                 */
+  float warp  = fbm(vec2(uv.x * 0.7, uv.y * 0.9 + t * 0.025)) * 0.05;
+  float field = clamp(radial + warp, 0.0, 1.0);
 
   /* Brand palette — ONLY 4 anchors, no tonal sub-shades.
      Each colour transitions smoothly to the next via continuous lerp. */
