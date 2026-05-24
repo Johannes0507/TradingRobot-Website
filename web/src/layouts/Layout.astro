@@ -64,6 +64,12 @@ const ogImageURL = new URL(ogImage, Astro.site).toString();
     >
       跳到主要內容
     </a>
+
+    <!-- Stripe-style vertical grid hairlines: full-page architectural lines
+         at the max-w-7xl container edges. Sections can have edges aligning
+         with these lines for an intentional "infrastructure" feel. -->
+    <div class="page-rails" aria-hidden="true"></div>
+
     <slot />
   </body>
 </html>

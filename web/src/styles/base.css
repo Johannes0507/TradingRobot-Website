@@ -22,6 +22,7 @@ body {
 
 body {
   overflow-x: hidden;
+  position: relative;        /* so .page-rails inset:0 fills full body height */
 }
 
 /* Default focus ring — accessible + brand-tinted */
@@ -150,6 +151,44 @@ h1, h2, h3, h4 {
   background: currentColor;
   opacity: 0.55;
   flex-shrink: 0;
+}
+
+/* ============================================
+   Page rails — Stripe-style vertical hairlines
+   Extending top-to-bottom of the page, aligned with max-w-7xl (1280px)
+   container edges. Provides architectural grid feel — content can align
+   ON the rails (rest on them) or sit BETWEEN them.
+   Hidden on mobile (<md) since the container has no visible margins there.
+   ============================================ */
+.page-rails {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .page-rails {
+    display: block;
+  }
+  .page-rails::before,
+  .page-rails::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--color-line-strong);
+  }
+  /* Left rail: aligns with left edge of max-w-7xl container */
+  .page-rails::before {
+    left: max(24px, calc((100% - 1280px) / 2));
+  }
+  /* Right rail: aligns with right edge of max-w-7xl container */
+  .page-rails::after {
+    right: max(24px, calc((100% - 1280px) / 2));
+  }
 }
 
 /* ============================================
