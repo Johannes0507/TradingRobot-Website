@@ -14,34 +14,35 @@
      COLORS — Text / Surface / Brand
      ============================================ */
 
-  /* Text tones — deep cool navy family (v2 Lumen Light palette) */
-  --color-ink: #0e1424;
-  --color-ink-soft: #232a40;
-  --color-mute: #5a6480;
-  --color-mute-soft: #8b94ad;
+  /* Text tones — Stripe-style deep navy family (v2 Lumen Stripe Study) */
+  --color-ink: #0a2540;          /* deep navy — characterful, not black */
+  --color-ink-soft: #1c3354;
+  --color-mute: #425466;
+  --color-mute-soft: #8898aa;
 
   /* Surfaces — soft off-white base with pure-white cards for layering */
-  --color-bg: #f6f7fb;
-  --color-bg-soft: #eef0f7;
-  --color-bg-tint: #ffffff;     /* renamed role: pure white card surface */
+  --color-bg: #f6f9fc;           /* v2 base bg */
+  --color-bg-soft: #eef2f7;
+  --color-bg-tint: #ffffff;
   --color-surface: #ffffff;
 
-  /* Borders / dividers — derived from ink (cool navy hairlines) */
-  --color-line-soft: rgb(14 20 36 / 0.05);
-  --color-line: rgb(14 20 36 / 0.08);
-  --color-line-strong: rgb(14 20 36 / 0.14);
+  /* Borders / dividers — derived from ink */
+  --color-line-soft: rgb(10 37 64 / 0.05);
+  --color-line: rgb(10 37 64 / 0.10);
+  --color-line-strong: rgb(10 37 64 / 0.16);
 
-  /* Brand accents — periwinkle → violet → pink → warm yellow
-     (v2 palette: softer, more sophisticated than vivid jewel tones) */
-  --color-brand: #5b7cfa;        /* periwinkle — primary */
-  --color-violet: #9d6cff;       /* violet — secondary brand */
-  --color-coral: #ff7eb6;        /* warm pink — friendly */
-  --color-amber: #ffc46b;        /* warm yellow — reliable */
-  --color-teal: #14b87a;         /* fresh green — growth / money */
+  /* Brand — v2 core (Stripe iconic) + warm pair (retained from prior palette).
+     The two families create a "cool core + warm hand-feel" contrast. */
+  --color-brand: #635bff;        /* Stripe iconic purple — primary identity */
+  --color-cyan: #00d4ff;         /* electric blue — tech accent */
+  --color-violet: #7a5cff;       /* deeper violet for mesh range */
+  --color-coral: #ff7eb6;        /* warm pink — retained */
+  --color-amber: #ffc46b;        /* warm yellow — retained */
+  --color-mint: #14d9a8;         /* fresh mint — growth / money / success */
 
-  /* Semantic */
-  --color-success: #10b981;
-  --color-warn: #f59e0b;
+  /* Semantic — alias the brand tokens so palette stays consistent */
+  --color-success: #14d9a8;      /* = mint */
+  --color-warn: #ffd166;
   --color-danger: #ef4444;
 
   /* ============================================

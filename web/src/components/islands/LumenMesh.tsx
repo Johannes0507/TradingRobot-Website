@@ -255,15 +255,15 @@ export default function LumenMesh({
 
     let colors: [number, number, number][] = [
       hexToRgb('#f6f9fc'),
-      hexToRgb('#5b7cfa'),
-      hexToRgb('#9d6cff'),
+      hexToRgb('#635bff'),
+      hexToRgb('#7a5cff'),
       hexToRgb('#ff7eb6'),
     ];
     const refreshColors = () => {
       colors = [
         hexToRgb(readCssVar(canvas, '--gradientcolorzero',  '#f6f9fc')),
-        hexToRgb(readCssVar(canvas, '--gradientcolorone',   '#5b7cfa')),
-        hexToRgb(readCssVar(canvas, '--gradientcolortwo',   '#9d6cff')),
+        hexToRgb(readCssVar(canvas, '--gradientcolorone',   '#635bff')),
+        hexToRgb(readCssVar(canvas, '--gradientcolortwo',   '#7a5cff')),
         hexToRgb(readCssVar(canvas, '--gradientcolorthree', '#ff7eb6')),
       ];
     };

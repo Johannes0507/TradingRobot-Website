@@ -49,8 +49,8 @@ const gradientId = `spark-${Math.random().toString(36).slice(2, 9)}`;
   <defs>
     <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#635bff" />
-      <stop offset="50%" stop-color="#fb7185" />
-      <stop offset="100%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#ff7eb6" />
+      <stop offset="100%" stop-color="#ffc46b" />
     </linearGradient>
   </defs>
 
@@ -66,7 +66,7 @@ const gradientId = `spark-${Math.random().toString(36).slice(2, 9)}`;
   {
     markHighLow && (
       <>
-        <circle cx={highIdx * stepX} cy={toY(max)} r="4" fill="#fb7185" />
+        <circle cx={highIdx * stepX} cy={toY(max)} r="4" fill="#ff7eb6" />
         <circle cx={lowIdx * stepX} cy={toY(min)} r="4" fill="#635bff" />
       </>
     )

@@ -16,14 +16,14 @@ const features = [
     title: '毫秒級執行',
     desc: 'Go 語言寫的引擎，24 小時不停偵測、不停調倉。',
     tech: 'Go 1.26 · WebSocket 即時連線',
-    tint: 'teal',
+    tint: 'mint',
   },
 ];
 
 const tintMap: Record<string, { bg: string; text: string; gradient: string }> = {
   brand: { bg: 'bg-brand/10', text: 'text-brand', gradient: 'from-brand to-brand/70' },
   coral: { bg: 'bg-coral/10', text: 'text-coral', gradient: 'from-coral to-coral/70' },
-  teal: { bg: 'bg-teal/10', text: 'text-teal', gradient: 'from-teal to-teal/70' },
+  mint:  { bg: 'bg-mint/10',  text: 'text-mint',  gradient: 'from-mint to-mint/70' },
 };
 ---
 
@@ -57,7 +57,7 @@ const tintMap: Record<string, { bg: string; text: string; gradient: string }> = 
             <div class="relative p-8 rounded-xl bg-bg border border-line-soft overflow-hidden group hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
               <div
                 class="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none opacity-50 group-hover:opacity-80 transition-opacity"
-                style={`background: radial-gradient(circle, ${f.tint === 'brand' ? '#635bff' : f.tint === 'coral' ? '#fb7185' : '#14b8a6'}20 0%, transparent 70%);`}
+                style={`background: radial-gradient(circle, ${f.tint === 'brand' ? '#635bff' : f.tint === 'coral' ? '#ff7eb6' : '#14d9a8'}20 0%, transparent 70%);`}
               />
               <div
                 class={`relative w-13 h-13 w-[52px] h-[52px] rounded-xl bg-gradient-to-br ${tint.gradient} flex items-center justify-center text-white mb-5 shadow-lg`}
