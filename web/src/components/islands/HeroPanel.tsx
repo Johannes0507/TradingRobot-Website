@@ -66,7 +66,6 @@ export default function HeroPanel() {
     <div className="hero-stage" ref={stageRef}>
       {/* Background shapes */}
       <div className="hero-stage-bg" aria-hidden="true">
-        <i className="b2" />
         <i className="b1" />
       </div>
 
