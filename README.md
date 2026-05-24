@@ -7,7 +7,7 @@ Marketing website for **LendAuto** — automated Bitfinex margin funding quoting
 ## Stack
 
 - **Astro 6** (SSG) — content-first, ships ~0 JS for static pages
-- **React 19 islands** — only for interactive bits (WebGL hero, copy buttons)
+- **React 19 islands** — only for interactive bits (WebGL mesh, holographic card tilt, sticky-scroll, copy buttons)
 - **Tailwind v4** — design tokens via `@theme`, shareable with the v2 product app
 - **TypeScript strict** + **MDX** content collections
 
@@ -18,7 +18,7 @@ Marketing website for **LendAuto** — automated Bitfinex margin funding quoting
 │   ├── src/
 │   │   ├── pages/        # Routes (index, /blog, /guides, llms.txt, rss.xml)
 │   │   ├── components/   # .astro section components
-│   │   │   ├── islands/   #   React 19 islands (FluidRibbon, forms, RoiCalculator)
+│   │   │   ├── islands/   #   React 19 islands (LumenMesh, HeroPanel, StickyScrollStage, forms, RoiCalculator)
 │   │   │   └── mdx/       #   MDX-only components (Step, Mockup, Callout, mockups/)
 │   │   ├── content/      # MDX guides + blog posts
 │   │   ├── layouts/      # Base Layout (meta, OG, Schema.org)
@@ -49,6 +49,8 @@ Marketing website for **LendAuto** — automated Bitfinex margin funding quoting
 - **Mock-data swap point** (`web/src/lib/mock-data.ts`): every market/KPI/ROI number on the homepage flows through this single module. The GCP phase later replaces it with a build-time generator producing the same export shape; components don't change. See `docs/specs/2026-05-18-frontend-design-exploration.md` §6.1.
 - **Image-led guides**: `/guides/*` use custom SVG mockups of the relevant Bitfinex / LendAuto screens (not real screenshots — legal safety + maintainability). Built with `Step` + `Mockup` MDX components and per-screen mockup files under `components/mdx/mockups/`.
 - **Visual reference**: stripe.com is the canonical visual target. Anti-patterns documented in `docs/specs/2026-05-18-frontend-design-exploration.md` §3.
+- **Design tokens — v2 Lumen palette** (`tokens.css`): ink `#0a2540` deep navy, brand `#635bff` Stripe iconic purple, mint `#14d9a8`, warm coral/amber retained. Brand colour is reserved for interactive elements only (icons, mesh, links, focus rings) — eyebrows / headlines / step labels stay in ink/mute per the Stripe restraint convention.
+- **Hero animation stack**: `LumenMesh.tsx` WebGL displaced-plane mesh gradient as the background; `HeroPanel.tsx` single holographic card with 3D mouse tilt + cursor-following specular glare. Ported from `docs/reference/Stripe Website v2/`.
 
 ## Development
 
