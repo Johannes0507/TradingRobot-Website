@@ -1,115 +1,29 @@
 /**
- * FluidRibbon — Clean brand-gradient washes
+ * FluidRibbon — Canvas 2D radial-blob mesh (Lumen/Stripe-inspired)
  *
- * Pure smooth multi-stop gradient aligned to design tokens.
- * No discrete shapes, no petal overlays, no specular crests.
- * Just colour fields flowing organically.
+ * Why Canvas 2D radial gradients instead of WebGL shader:
+ *   - WebGL multi-stop smoothstep blending produces visible band edges
+ *     when warped by noise (we hit this artefact repeatedly)
+ *   - 4 large radialGradient blobs with 'lighter' composite mode produce
+ *     a true continuous mesh with no discrete band boundaries
+ *   - Light theme: blob colours are brand tokens at low opacity over white
  *
- * Brand colours (tokens.css):
- *   --color-bg-tint  #f7f9fc
- *   --color-brand    #635bff
- *   --color-coral    #fb7185
- *   --color-amber    #f59e0b
+ * Reference: Lumen.html (docs/reference) — same technique, dark→light port.
  */
 import { useEffect, useRef } from 'react';
-
-const VERT = `
-attribute vec2 a_pos;
-varying   vec2 v_uv;
-void main() {
-  v_uv        = a_pos * 0.5 + 0.5;
-  gl_Position = vec4(a_pos, 0.0, 1.0);
-}
-`;
-
-const FRAG = `
-precision highp float;
-varying vec2  v_uv;
-uniform float u_time;
-
-float h2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-float vn(vec2 p) {
-  vec2 i = floor(p), f = fract(p);
-  f = f * f * (3.0 - 2.0 * f);
-  return mix(mix(h2(i), h2(i+vec2(1,0)), f.x),
-             mix(h2(i+vec2(0,1)), h2(i+vec2(1,1)), f.x), f.y);
-}
-float fbm(vec2 p) {
-  float v = 0.0, a = 0.5;
-  for (int i = 0; i < 4; i++) {
-    v += a * (vn(p) - 0.5);
-    p = p * 2.05 + 11.7;
-    a *= 0.5;
-  }
-  return v;
-}
-
-void main() {
-  vec2  uv = v_uv;
-  float t  = u_time;
-
-  /* Radial field — colour bands form circular ARCS from upper-right corner.
-     Centre off-canvas at top-right, so the visible arcs curve around
-     this corner like ripples concentrated there.                          */
-  vec2  center = vec2(1.30, -0.30);
-  float r      = distance(uv, center);
-  /* r ranges ~0.42 (closest to corner) to ~1.85 (lower-left).
-     Invert so colour intensity peaks AT the corner (upper-right).         */
-  float radial = (1.85 - r) / 1.45;        /* normalize ~0..1            */
-
-  /* Very gentle warp adds organic curve to the arcs without creating
-     distinct blob shapes.                                                 */
-  float warp  = fbm(vec2(uv.x * 0.7, uv.y * 0.9 + t * 0.025)) * 0.05;
-  float field = clamp(radial + warp, 0.0, 1.0);
-
-  /* Brand palette — ONLY 4 anchors, no tonal sub-shades.
-     Each colour transitions smoothly to the next via continuous lerp. */
-  vec3 c_tint   = vec3(0.969, 0.976, 0.988);
-  vec3 c_brand  = vec3(0.388, 0.357, 1.000);
-  vec3 c_coral  = vec3(0.984, 0.443, 0.522);
-  vec3 c_amber  = vec3(0.961, 0.620, 0.043);
-
-  /* Continuous piecewise lerp (no smoothstep — eliminates wavy edges) */
-  vec3 col;
-  if (field < 0.30) {
-    col = mix(c_tint, c_brand, field / 0.30);
-  } else if (field < 0.60) {
-    col = mix(c_brand, c_coral, (field - 0.30) / 0.30);
-  } else {
-    col = mix(c_coral, c_amber, clamp((field - 0.60) / 0.30, 0.0, 1.0));
-  }
-
-  /* Soft asymmetric mask — gathered upper-right, drape to lower-left */
-  float leftFade = smoothstep(0.0, 0.32, uv.x);
-  float diagFade = smoothstep(-0.05, 0.55, uv.x - (1.0 - uv.y) * 0.28);
-  float topFade  = smoothstep(0.0, 0.04, uv.y);
-  float botFade  = smoothstep(1.0, 0.94, uv.y);
-  float mask     = leftFade * diagFade * topFade * botFade;
-
-  vec3 bg = vec3(1.0);
-  col = mix(bg, col, mask);
-
-  gl_FragColor = vec4(col, 1.0);
-}
-`;
-
-function compileShader(gl: WebGLRenderingContext, type: number, src: string): WebGLShader | null {
-  const sh = gl.createShader(type);
-  if (!sh) return null;
-  gl.shaderSource(sh, src);
-  gl.compileShader(sh);
-  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-    console.error('[FluidRibbon]', gl.getShaderInfoLog(sh));
-    gl.deleteShader(sh);
-    return null;
-  }
-  return sh;
-}
 
 export interface FluidRibbonProps {
   speed?: number;
   className?: string;
   style?: React.CSSProperties;
+}
+
+interface Blob {
+  x: number; y: number;
+  r: number;
+  color: [number, number, number];
+  sx: number; sy: number;
+  phase: number;
 }
 
 export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibbonProps) {
@@ -118,36 +32,26 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = (
-      canvas.getContext('webgl', { premultipliedAlpha: false, antialias: true }) ||
-      canvas.getContext('experimental-webgl')
-    ) as WebGLRenderingContext | null;
-    if (!gl) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const vs = compileShader(gl, gl.VERTEX_SHADER,   VERT);
-    const fs = compileShader(gl, gl.FRAGMENT_SHADER, FRAG);
-    if (!vs || !fs) return;
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
-    gl.useProgram(prog);
+    /* Light-theme blob palette — brand tokens at low opacity */
+    const blobs: Blob[] = [
+      { x: 0.22, y: 0.25, r: 0.62, color: [99, 91, 255],  sx: 0.00030, sy: 0.00020, phase: 0   }, // brand purple
+      { x: 0.78, y: 0.40, r: 0.58, color: [251, 113, 133], sx: -0.00022, sy: 0.00026, phase: 2 }, // coral
+      { x: 0.55, y: 0.78, r: 0.50, color: [245, 158, 11],  sx: 0.00018, sy: -0.00028, phase: 4 }, // amber
+      { x: 0.88, y: 0.15, r: 0.42, color: [167, 139, 250], sx: -0.00026, sy: -0.00012, phase: 1 }, // light purple
+    ];
 
-    const quad = new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]);
-    const buf  = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(prog, 'a_pos');
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-    const uTime = gl.getUniformLocation(prog, 'u_time');
-
+    let W = 0, H = 0, dpr = 1;
     function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const r   = canvas!.getBoundingClientRect();
-      const w   = Math.max(1, Math.floor(r.width  * dpr));
-      const h   = Math.max(1, Math.floor(r.height * dpr));
-      if (canvas!.width !== w || canvas!.height !== h) { canvas!.width=w; canvas!.height=h; }
-      gl!.viewport(0, 0, w, h);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas!.getBoundingClientRect();
+      W = rect.width;
+      H = rect.height;
+      canvas!.width  = Math.max(1, Math.floor(W * dpr));
+      canvas!.height = Math.max(1, Math.floor(H * dpr));
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     resize();
     const ro = new ResizeObserver(resize);
@@ -156,58 +60,106 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
     let running = false;
-    let pausedElapsed = 0;
-    let lastStart = performance.now();
+    let t = 0;
+    let last = performance.now();
 
-    function tick() {
-      const elapsed = reduceMotion ? 0
-        : pausedElapsed + ((performance.now() - lastStart) / 1000) * speed;
-      gl!.uniform1f(uTime, elapsed);
-      gl!.clear(gl!.COLOR_BUFFER_BIT);
-      gl!.drawArrays(gl!.TRIANGLES, 0, 6);
-      raf = requestAnimationFrame(tick);
+    function draw() {
+      const now = performance.now();
+      const dt = reduceMotion ? 0 : (now - last) * speed;
+      last = now;
+      t += dt;
+
+      ctx!.clearRect(0, 0, W, H);
+
+      /* Soft cream-tinted base so blobs don't blow out the page white */
+      ctx!.fillStyle = 'rgba(255, 255, 255, 1)';
+      ctx!.fillRect(0, 0, W, H);
+
+      /* Composite mode 'multiply' on light bg gives the gentle wash without
+         the harsh saturation that 'lighter' produces on white.            */
+      ctx!.globalCompositeOperation = 'multiply';
+
+      for (const b of blobs) {
+        const cx = (b.x + Math.sin(t * b.sx + b.phase) * 0.10) * W;
+        const cy = (b.y + Math.cos(t * b.sy + b.phase) * 0.08) * H;
+        const r  = b.r * Math.min(W, H);
+        const grad = ctx!.createRadialGradient(cx, cy, 0, cx, cy, r);
+        const [R, G, B] = b.color;
+        grad.addColorStop(0,    `rgba(${R}, ${G}, ${B}, 0.55)`);
+        grad.addColorStop(0.45, `rgba(${R}, ${G}, ${B}, 0.18)`);
+        grad.addColorStop(1,    `rgba(${R}, ${G}, ${B}, 0)`);
+        ctx!.fillStyle = grad;
+        ctx!.fillRect(0, 0, W, H);
+      }
+
+      ctx!.globalCompositeOperation = 'source-over';
+
+      /* Soft left-edge fade to white (so canvas blends with text area) */
+      const leftFade = ctx!.createLinearGradient(0, 0, W * 0.35, 0);
+      leftFade.addColorStop(0,   'rgba(255,255,255,1)');
+      leftFade.addColorStop(0.7, 'rgba(255,255,255,0.45)');
+      leftFade.addColorStop(1,   'rgba(255,255,255,0)');
+      ctx!.fillStyle = leftFade;
+      ctx!.fillRect(0, 0, W * 0.35, H);
+
+      /* Top + bottom soft fades (avoid hard horizontal edges) */
+      const topFade = ctx!.createLinearGradient(0, 0, 0, 30);
+      topFade.addColorStop(0, 'rgba(255,255,255,1)');
+      topFade.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx!.fillStyle = topFade;
+      ctx!.fillRect(0, 0, W, 30);
+
+      const botFade = ctx!.createLinearGradient(0, H - 40, 0, H);
+      botFade.addColorStop(0, 'rgba(255,255,255,0)');
+      botFade.addColorStop(1, 'rgba(255,255,255,1)');
+      ctx!.fillStyle = botFade;
+      ctx!.fillRect(0, H - 40, W, 40);
+
+      raf = requestAnimationFrame(draw);
     }
 
-    function startLoop() {
+    function start() {
       if (running) return;
       running = true;
-      lastStart = performance.now();
-      tick();
+      last = performance.now();
+      draw();
     }
-    function stopLoop() {
-      if (!running) return;
+    function stop() {
       running = false;
-      pausedElapsed += ((performance.now() - lastStart) / 1000) * speed;
       cancelAnimationFrame(raf);
     }
 
     /* Pause when off-screen */
     const io = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) startLoop();
-          else stopLoop();
+        for (const e of entries) {
+          if (e.isIntersecting) start();
+          else stop();
         }
       },
       { threshold: 0 }
     );
     io.observe(canvas);
 
-    /* Also pause when tab hidden */
     function onVisibility() {
-      if (document.hidden) stopLoop();
-      else if (canvas!.getBoundingClientRect().bottom > 0) startLoop();
+      if (document.hidden) stop();
+      else if (canvas!.getBoundingClientRect().bottom > 0) start();
     }
     document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       cancelAnimationFrame(raf);
-      io.disconnect();
       ro.disconnect();
+      io.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
-      gl.deleteBuffer(buf); gl.deleteProgram(prog);
     };
   }, [speed]);
 
-  return <canvas ref={canvasRef} className={className} style={{ display:'block', width:'100%', height:'100%', ...style }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={className}
+      style={{ display: 'block', width: '100%', height: '100%', ...style }}
+    />
+  );
 }

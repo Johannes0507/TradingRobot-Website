@@ -1,86 +1,96 @@
 ---
 import FluidRibbon from './islands/FluidRibbon.tsx';
+import HeroPanel from './islands/HeroPanel.tsx';
+import Counter from './islands/Counter.tsx';
 import { subscribeUrl } from '../lib/cta';
 import { HERO_KPIS } from '../lib/mock-data';
-
-const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 ---
 
-<section class="relative pt-[112px] lg:pt-[140px] pb-[64px] lg:pb-[80px] overflow-hidden">
-  <!-- Aurora flow — desktop/tablet only; hidden on mobile to keep text readable -->
+<section class="relative pt-[112px] lg:pt-[140px] pb-[80px] lg:pb-[100px] overflow-hidden">
+  <!-- Background mesh — desktop/tablet only -->
   <div
     aria-hidden="true"
-    class="hidden md:block absolute top-0 right-0 w-[60%] lg:w-[55%] h-full overflow-hidden pointer-events-none z-0"
+    class="hidden md:block absolute inset-0 pointer-events-none z-0"
   >
     <FluidRibbon client:only="react" />
   </div>
 
-  <!-- (Grid overlay removed — created floating-rectangle visual artefact
-       when stacked over the animated background) -->
-
-  <!-- Content -->
+  <!-- Content grid -->
   <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
-    <div class="max-w-2xl">
-      <!-- Announcement pill — descriptive, not affiliation claim -->
-      <div
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-line bg-bg text-sm text-ink-soft mb-8"
-      >
-        <span class="w-2 h-2 rounded-full bg-success"></span>
-        <span class="font-mono">fUSD / fUST 自動報價</span>
+    <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-14 items-center">
+      <!-- Left: copy -->
+      <div>
+        <!-- Eyebrow with NEW tag (Lumen-style) -->
+        <div class="inline-flex items-center gap-2.5 pl-1 pr-3.5 py-1 rounded-pill border border-line bg-bg text-sm text-ink-soft mb-8">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-pill bg-ink text-white text-[10.5px] font-bold tracking-[0.06em] uppercase">
+            New
+          </span>
+          <span class="font-mono">fUSD / fUST 自動報價</span>
+        </div>
+
+        <!-- Headline (no AI-tell gradient text; single brand accent) -->
+        <h1 class="text-5xl lg:text-7xl font-display font-bold text-ink leading-[1.05] tracking-tight mb-7">
+          把 Bitfinex funding<br />
+          報價交給機器人 <span class="text-brand">24 × 60 × 60 秒</span>盯。
+        </h1>
+
+        <!-- Lede -->
+        <p class="text-lg lg:text-xl text-ink-soft leading-relaxed mb-9 max-w-xl">
+          fUSD 與 fUST 雙幣對的 funding 自動化工具，根據資金量分層報價，每 30 秒重新評估市場，每日結算入帳。
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-wrap gap-3 mb-12">
+          <a
+            href={subscribeUrl({ source: 'hero' })}
+            class="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-md bg-ink text-white font-medium hover:bg-ink-soft transition-colors"
+          >
+            開始使用
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+              <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+          <a
+            href="/guides/bitfinex-api-setup"
+            class="inline-flex items-center justify-center px-6 py-3 rounded-md border border-line bg-bg text-ink font-medium hover:bg-bg-soft transition-colors"
+          >
+            先看設定教學
+          </a>
+        </div>
+
+        <!-- KPI strip with animated counters -->
+        <dl class="grid grid-cols-3 gap-6 max-w-lg">
+          <div>
+            <dt class="sr-only">過去 30 日 fUSD 平均利率</dt>
+            <dd class="text-3xl font-display font-bold text-ink font-mono leading-none">
+              <Counter client:visible to={HERO_KPIS.fusd30dAvgApr} decimals={2} suffix="%" />
+            </dd>
+            <p class="text-sm text-mute mt-2 leading-snug">
+              過去 30 日<br />fUSD 平均利率
+            </p>
+          </div>
+          <div>
+            <dt class="sr-only">監控覆蓋率</dt>
+            <dd class="text-3xl font-display font-bold text-ink font-mono leading-none">24/7</dd>
+            <p class="text-sm text-mute mt-2 leading-snug">
+              全年無休<br />自動報價
+            </p>
+          </div>
+          <div>
+            <dt class="sr-only">報價重新評估週期</dt>
+            <dd class="text-3xl font-display font-bold text-ink font-mono leading-none">
+              <Counter client:visible to={HERO_KPIS.rateRefreshSec} suffix="s" />
+            </dd>
+            <p class="text-sm text-mute mt-2 leading-snug">
+              報價<br />重新評估週期
+            </p>
+          </div>
+        </dl>
       </div>
 
-      <!-- Headline -->
-      <h1
-        class="text-5xl lg:text-7xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-6"
-      >
-        把 Bitfinex funding 報價，<br />
-        交給機器人 <span class="text-brand">24×60×60 秒</span>盯
-      </h1>
-
-      <!-- Subhead -->
-      <p class="text-lg lg:text-xl text-ink-soft leading-relaxed mb-10 max-w-xl">
-        fUSD 與 fUST 雙幣對的 funding 自動化工具，根據資金量分層報價，每日結算入帳。
-      </p>
-
-      <!-- CTAs -->
-      <div class="flex flex-wrap gap-3">
-        <a
-          href={subscribeUrl({ source: 'hero' })}
-          class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-ink text-white font-medium hover:bg-ink-soft transition-colors"
-        >
-          開始使用 →
-        </a>
-        <a
-          href="/guides/bitfinex-api-setup"
-          class="inline-flex items-center justify-center px-6 py-3 rounded-md border border-line bg-bg text-ink font-medium hover:bg-bg-soft transition-colors"
-        >
-          先看設定教學
-        </a>
-      </div>
-
-      <!-- KPI strip -->
-      <div class="mt-10 lg:mt-12 grid grid-cols-3 gap-6 max-w-lg">
-        <div>
-          <div class="text-3xl font-display font-bold text-ink font-mono">{fmtPct(HERO_KPIS.fusd30dAvgApr)}</div>
-          <div class="text-sm text-mute mt-1">
-            過去 30 日<br />
-            fUSD 平均利率
-          </div>
-        </div>
-        <div>
-          <div class="text-3xl font-display font-bold text-ink font-mono">24/7</div>
-          <div class="text-sm text-mute mt-1">
-            自動<br />
-            報價監控
-          </div>
-        </div>
-        <div>
-          <div class="text-3xl font-display font-bold text-ink font-mono">{HERO_KPIS.rateRefreshSec}s</div>
-          <div class="text-sm text-mute mt-1">
-            報價<br />
-            重新評估週期
-          </div>
-        </div>
+      <!-- Right: code card + live data sub-card -->
+      <div class="hidden lg:block">
+        <HeroPanel client:visible />
       </div>
     </div>
   </div>
