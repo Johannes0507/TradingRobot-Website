@@ -37,20 +37,18 @@ import { subscribeUrl } from '../lib/cta';
     <div class="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-14 items-center">
       <!-- Left: copy -->
       <div>
-        <!-- Eyebrow — single mono label with tate-sen hairline -->
-        <div class="eyebrow text-xs font-mono font-semibold text-brand uppercase tracking-[0.14em] mb-7">
+        <!-- Eyebrow — muted mono label, brand reserved for interactive -->
+        <div class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-[0.14em] mb-7">
           Bitfinex · Funding Automation
         </div>
 
-        <!-- Headline — two-line, fluid-scaled type.
-             clamp() so it grows smoothly with viewport but never gets
-             so big it forces unwanted wraps inside the left column. -->
+        <!-- Headline — pure ink (Stripe-style); brand reserved for links/icons -->
         <h1
           class="font-display font-bold text-ink tracking-tight mb-6"
           style="font-size: clamp(30px, 3.6vw, 48px); line-height: 1.12;"
         >
           <span class="whitespace-nowrap">把 Bitfinex funding 報價</span><br />
-          交給機器人，<span class="text-brand whitespace-nowrap">24 × 60 × 60 秒</span>盯著。
+          交給機器人，<span class="whitespace-nowrap">24 × 60 × 60 秒</span>盯著。
         </h1>
 
         <!-- Lede — tightened to one line of value prop -->
