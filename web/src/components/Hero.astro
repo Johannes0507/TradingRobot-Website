@@ -1,5 +1,5 @@
 ---
-import FluidRibbon from './islands/FluidRibbon.tsx';
+import LumenMesh from './islands/LumenMesh.tsx';
 import HeroPanel from './islands/HeroPanel.tsx';
 import Counter from './islands/Counter.tsx';
 import { subscribeUrl } from '../lib/cta';
@@ -7,12 +7,31 @@ import { HERO_KPIS } from '../lib/mock-data';
 ---
 
 <section class="relative pt-[112px] lg:pt-[140px] pb-[80px] lg:pb-[100px] overflow-hidden">
-  <!-- Background mesh — desktop/tablet only -->
+  <!-- Background: WebGL animated mesh (desktop/tablet only).
+       Custom palette — soft cream → lavender → pink → peach.
+       Low amplitude so it stays gentle behind the text. -->
   <div
     aria-hidden="true"
-    class="hidden md:block absolute inset-0 pointer-events-none z-0"
+    class="hidden md:block absolute inset-0 pointer-events-none z-0 hero-mesh-frame"
   >
-    <FluidRibbon client:only="react" />
+    <LumenMesh
+      client:only="react"
+      segments={70}
+      amplitude={0.28}
+      speed={0.85}
+      freq1={1.6}
+      freq2={2.4}
+      freq3={3.2}
+      darkenTop={0.05}
+      style={{
+        '--gradientcolorzero': '#fbfafe',
+        '--gradientcolorone': '#dfe4ff',
+        '--gradientcolortwo': '#ffd9eb',
+        '--gradientcolorthree': '#ffe8d4',
+      } as any}
+    />
+    <!-- Left-edge fade so headline area stays clean -->
+    <div class="hero-mesh-fade" aria-hidden="true"></div>
   </div>
 
   <!-- Content grid -->
