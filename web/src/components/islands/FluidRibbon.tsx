@@ -35,12 +35,26 @@ export default function FluidRibbon({ speed = 1.0, className, style }: FluidRibb
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    /* Read brand tokens from CSS — palette stays in sync without touching JS */
+    const rootStyle = getComputedStyle(document.documentElement);
+    const hexToRgb = (hex: string): [number, number, number] => {
+      const h = hex.trim().replace('#', '');
+      const v = h.length === 3
+        ? h.split('').map((c) => parseInt(c + c, 16))
+        : [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+      return [v[0] || 0, v[1] || 0, v[2] || 0];
+    };
+    const tok = (name: string, fallback: [number, number, number]): [number, number, number] => {
+      const raw = rootStyle.getPropertyValue(name);
+      return raw ? hexToRgb(raw) : fallback;
+    };
+
     /* Light-theme blob palette — brand tokens at low opacity */
     const blobs: Blob[] = [
-      { x: 0.22, y: 0.25, r: 0.62, color: [99, 91, 255],  sx: 0.00030, sy: 0.00020, phase: 0   }, // brand purple
-      { x: 0.78, y: 0.40, r: 0.58, color: [251, 113, 133], sx: -0.00022, sy: 0.00026, phase: 2 }, // coral
-      { x: 0.55, y: 0.78, r: 0.50, color: [245, 158, 11],  sx: 0.00018, sy: -0.00028, phase: 4 }, // amber
-      { x: 0.88, y: 0.15, r: 0.42, color: [167, 139, 250], sx: -0.00026, sy: -0.00012, phase: 1 }, // light purple
+      { x: 0.22, y: 0.25, r: 0.62, color: tok('--color-brand',  [91, 124, 250]),  sx:  0.00030, sy:  0.00020, phase: 0 }, // periwinkle
+      { x: 0.78, y: 0.40, r: 0.58, color: tok('--color-coral',  [255, 126, 182]), sx: -0.00022, sy:  0.00026, phase: 2 }, // pink
+      { x: 0.55, y: 0.78, r: 0.50, color: tok('--color-amber',  [255, 196, 107]), sx:  0.00018, sy: -0.00028, phase: 4 }, // warm yellow
+      { x: 0.88, y: 0.15, r: 0.42, color: tok('--color-violet', [157, 108, 255]), sx: -0.00026, sy: -0.00012, phase: 1 }, // violet
     ];
 
     let W = 0, H = 0, dpr = 1;
