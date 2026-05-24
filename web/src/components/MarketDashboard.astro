@@ -1,30 +1,38 @@
 ---
 import { MARKET_DATA, META } from '../lib/mock-data';
 import Sparkline from './Sparkline.astro';
+import Counter from './islands/Counter.tsx';
 
-const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 const fmtDelta = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}`;
 const fmtDate = (iso: string) => iso.slice(0, 10);
 
 const cards = [
   {
     label: 'fUSD · 30 日平均',
-    value: fmtPct(MARKET_DATA.fusd30dAvgApr),
+    value: MARKET_DATA.fusd30dAvgApr,
+    decimals: 2,
+    suffix: '%',
     sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fusdVsPrevDelta)}`,
   },
   {
     label: 'fUST · 30 日平均',
-    value: fmtPct(MARKET_DATA.fust30dAvgApr),
+    value: MARKET_DATA.fust30dAvgApr,
+    decimals: 2,
+    suffix: '%',
     sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fustVsPrevDelta)}`,
   },
   {
     label: 'fUSD · 30 日高點',
-    value: fmtPct(MARKET_DATA.fusd30dHighApr),
+    value: MARKET_DATA.fusd30dHighApr,
+    decimals: 2,
+    suffix: '%',
     sub: `↗ ${fmtDate(MARKET_DATA.fusd30dHighDate)} · spike event`,
   },
   {
     label: 'fUSD · 30 日低點',
-    value: fmtPct(MARKET_DATA.fusd30dLowApr),
+    value: MARKET_DATA.fusd30dLowApr,
+    decimals: 2,
+    suffix: '%',
     sub: `↘ ${fmtDate(MARKET_DATA.fusd30dLowDate)} · low-vol day`,
   },
 ];
@@ -58,10 +66,10 @@ const spanStart = spanStartDate.toISOString().slice(0, 10);
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
       {
         cards.map((c) => (
-          <div class="p-6 rounded-2xl bg-bg border border-line-soft">
+          <div class="lift p-6 rounded-2xl bg-bg border border-line-soft">
             <div class="text-xs font-mono text-mute uppercase tracking-wider mb-3">{c.label}</div>
             <div class="text-3xl lg:text-4xl font-mono font-bold text-ink mb-2 tracking-tight">
-              {c.value}
+              <Counter client:visible to={c.value} decimals={c.decimals} suffix={c.suffix} />
             </div>
             <div class="text-xs text-mute font-mono">{c.sub}</div>
           </div>

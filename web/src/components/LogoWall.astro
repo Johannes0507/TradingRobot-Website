@@ -1,0 +1,95 @@
+---
+/**
+ * LogoWall — Stripe-style trust strip with continuous marquee.
+ *
+ * For LendAuto's pre-launch phase: we don't yet have client logos.
+ * Instead, we showcase the TECH STACK we integrate with — exchanges,
+ * security standards, infrastructure — as a trust signal of competence.
+ *
+ * Pattern from Lumen.html: gap-32px, mask-image edge fade, hover pauses.
+ */
+
+const items = [
+  'Bitfinex',
+  'fUSD',
+  'fUST',
+  'AES-256-GCM',
+  'TOTP 2FA',
+  'IP allowlist',
+  'Read-only by default',
+  'Go 1.26',
+  'PostgreSQL',
+  'Cloud Run',
+];
+---
+
+<section
+  aria-labelledby="logowall-heading"
+  class="relative py-14 lg:py-16 bg-bg-soft border-y border-line-soft"
+>
+  <h2 id="logowall-heading" class="sr-only">技術棧與標準</h2>
+  <p
+    class="text-center text-xs font-mono text-mute uppercase tracking-[0.18em] mb-8 px-6"
+  >
+    打通整條鏈：交易所、加密、平台、基礎建設
+  </p>
+  <div class="logowall-marquee" aria-hidden="true">
+    <div class="logowall-track">
+      {[...items, ...items].map((label) => (
+        <div class="logowall-item">
+          <span class="logowall-mark"></span>
+          {label}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .logowall-marquee {
+    position: relative;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+  .logowall-track {
+    display: flex;
+    gap: 64px;
+    width: max-content;
+    animation: logowall-scroll 42s linear infinite;
+  }
+  .logowall-marquee:hover .logowall-track {
+    animation-play-state: paused;
+  }
+  @keyframes logowall-scroll {
+    to { transform: translateX(-50%); }
+  }
+  .logowall-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-ink-soft);
+    opacity: 0.65;
+    transition: opacity var(--dur-micro) var(--ease-standard),
+                color var(--dur-micro) var(--ease-standard);
+  }
+  .logowall-item:hover {
+    opacity: 1;
+    color: var(--color-ink);
+  }
+  .logowall-mark {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background: currentColor;
+    opacity: 0.40;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logowall-track { animation: none; }
+  }
+</style>
