@@ -27,12 +27,6 @@ const steps = [
     desc: 'LendAuto 是掛單代理人，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。',
     tag: 'custody: self',
   },
-  {
-    n: '04',
-    title: '績效樣張無修圖',
-    desc: '我們在 demo 帳號跑 LendAuto 30 日的實際表現截圖，無美化、無修圖、無剪輯。累積時間後會增加更多時間範圍。',
-    tag: 'transparency',
-  },
 ];
 ---
 
@@ -40,12 +34,12 @@ const steps = [
   <div class="arch-wrap">
     <div class="arch-left">
       <header class="arch-header">
-        <div class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-4">
-          架構與安全
-        </div>
-        <h2 class="arch-title">你的錢，<br />我們從來<br />沒碰過。</h2>
+        <h2 class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-[0.14em] mb-5">
+          架構與安全 <span class="text-mute-soft normal-case"> 三條技術約束讓我們即使想拿也拿不到</span>
+        </h2>
+        <p class="arch-title">你的錢，<br />我們從來沒碰過。</p>
         <p class="arch-lede">
-          把自動化交給我們，把保管留給你自己。三個技術約束讓「我們即使想拿也拿不到」，加上實打實的績效透明。
+          把自動化交給我們，把保管留給你自己。
         </p>
       </header>
 
@@ -61,112 +55,69 @@ const steps = [
 
     <div class="arch-right">
       <div class="ss-stage">
-        <!-- Frame 0: API scope toggle -->
-        <div class="ss-frame ss-frame-0 is-active">
-          <div class="arch-frame-mock">
-            <div class="arch-mock-head">Bitfinex · Generate API Key</div>
-            <div class="arch-perm">
-              <div class="arch-perm-row arch-perm-on">
-                <span class="arch-perm-tick" aria-hidden="true"></span>
-                <span class="arch-perm-name">Funding · Provide funding</span>
-              </div>
-              <div class="arch-perm-row arch-perm-off">
-                <span class="arch-perm-x" aria-hidden="true"></span>
-                <span class="arch-perm-name">Withdrawals</span>
-              </div>
-              <div class="arch-perm-row arch-perm-off">
-                <span class="arch-perm-x" aria-hidden="true"></span>
-                <span class="arch-perm-name">Trading · Orders</span>
-              </div>
-              <div class="arch-perm-row arch-perm-off">
-                <span class="arch-perm-x" aria-hidden="true"></span>
-                <span class="arch-perm-name">Margin</span>
-              </div>
-              <div class="arch-perm-row arch-perm-off">
-                <span class="arch-perm-x" aria-hidden="true"></span>
-                <span class="arch-perm-name">Wallet · Transfer</span>
-              </div>
+        <!-- Card 0: API scope toggle -->
+        <div class="swap-card" data-card="0">
+          <div class="arch-mock-head">Bitfinex · Generate API Key</div>
+          <div class="arch-perm">
+            <div class="arch-perm-row arch-perm-on">
+              <span class="arch-perm-tick" aria-hidden="true"></span>
+              <span class="arch-perm-name">Funding · Provide funding</span>
+            </div>
+            <div class="arch-perm-row arch-perm-off">
+              <span class="arch-perm-x" aria-hidden="true"></span>
+              <span class="arch-perm-name">Withdrawals</span>
+            </div>
+            <div class="arch-perm-row arch-perm-off">
+              <span class="arch-perm-x" aria-hidden="true"></span>
+              <span class="arch-perm-name">Trading · Orders</span>
+            </div>
+            <div class="arch-perm-row arch-perm-off">
+              <span class="arch-perm-x" aria-hidden="true"></span>
+              <span class="arch-perm-name">Margin</span>
             </div>
           </div>
         </div>
 
-        <!-- Frame 1: AES-256-GCM key encryption -->
-        <div class="ss-frame ss-frame-1">
-          <div class="arch-frame-mock">
-            <div class="arch-mock-head">Encrypted at rest</div>
-            <div class="arch-crypto">
-              <div class="arch-crypto-row">
-                <span class="arch-crypto-key">api_key</span>
-                <span class="arch-crypto-val arch-crypto-plain">8a3f···c2b9</span>
-              </div>
-              <div class="arch-crypto-arrow">
-                <span class="arch-crypto-cipher">AES-256-GCM</span>
-              </div>
-              <div class="arch-crypto-row arch-crypto-stored">
-                <span class="arch-crypto-key">storage</span>
-                <span class="arch-crypto-val">
-                  <span class="arch-crypto-mask">██████ ██████ ██████ ██████</span>
-                </span>
-              </div>
+        <!-- Card 1: AES-256-GCM key encryption -->
+        <div class="swap-card" data-card="1">
+          <div class="arch-mock-head">Encrypted at rest</div>
+          <div class="arch-crypto">
+            <div class="arch-crypto-row">
+              <span class="arch-crypto-key">api_key</span>
+              <span class="arch-crypto-val arch-crypto-plain">8a3f···c2b9</span>
+            </div>
+            <div class="arch-crypto-arrow">
+              <span class="arch-crypto-cipher">AES-256-GCM</span>
+            </div>
+            <div class="arch-crypto-row arch-crypto-stored">
+              <span class="arch-crypto-key">storage</span>
+              <span class="arch-crypto-val">
+                <span class="arch-crypto-mask">██████ ██████ ██████ ██████</span>
+              </span>
             </div>
           </div>
         </div>
 
-        <!-- Frame 2: 資金 stays in user's Bitfinex -->
-        <div class="ss-frame ss-frame-2">
-          <div class="arch-frame-mock arch-flow">
-            <div class="arch-flow-row">
-              <div class="arch-flow-box arch-flow-user">
-                <span class="arch-flow-lbl">你的</span>
-                <span class="arch-flow-name">Bitfinex Account</span>
-                <span class="arch-flow-sub">資金保管</span>
-              </div>
-              <svg class="arch-flow-arrow" viewBox="0 0 80 12" aria-hidden="true">
-                <path d="M 2 6 L 76 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                <path d="M 68 2 L 76 6 L 68 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <div class="arch-flow-box arch-flow-bot">
-                <span class="arch-flow-lbl">LendAuto</span>
-                <span class="arch-flow-name">Quote Bot</span>
-                <span class="arch-flow-sub">只下 funding 單</span>
-              </div>
+        <!-- Card 2: 資金 stays in user's Bitfinex -->
+        <div class="swap-card" data-card="2">
+          <div class="arch-mock-head">Custody flow</div>
+          <div class="arch-flow-row">
+            <div class="arch-flow-box arch-flow-user">
+              <span class="arch-flow-lbl">你的</span>
+              <span class="arch-flow-name">Bitfinex Account</span>
+              <span class="arch-flow-sub">資金保管</span>
             </div>
-            <div class="arch-flow-note">資金永遠在你的帳號，我們僅持有「掛單」這一個動作的權限。</div>
-          </div>
-        </div>
-
-        <!-- Frame 3: Performance screenshot transparency -->
-        <div class="ss-frame ss-frame-3">
-          <div class="arch-frame-mock">
-            <div class="arch-mock-head">demo 帳號 · 30 日績效</div>
-            <div class="arch-perf">
-              <svg viewBox="0 0 320 140" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                  <linearGradient id="archPerfFill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="currentColor" stop-opacity="0.30" />
-                    <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M 0 110 Q 30 100 60 95 T 110 75 T 160 60 T 210 50 T 260 30 T 320 25 L 320 140 L 0 140 Z"
-                  fill="url(#archPerfFill)"
-                  class="arch-perf-fill"
-                />
-                <path
-                  d="M 0 110 Q 30 100 60 95 T 110 75 T 160 60 T 210 50 T 260 30 T 320 25"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  class="arch-perf-line"
-                />
-              </svg>
-              <div class="arch-perf-foot">
-                <span class="arch-perf-foot-lbl">Apr 18 — May 18</span>
-                <span class="arch-perf-foot-val">+ 8.42 %</span>
-              </div>
+            <svg class="arch-flow-arrow" viewBox="0 0 80 12" aria-hidden="true">
+              <path d="M 2 6 L 76 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+              <path d="M 68 2 L 76 6 L 68 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <div class="arch-flow-box arch-flow-bot">
+              <span class="arch-flow-lbl">LendAuto</span>
+              <span class="arch-flow-name">Quote Bot</span>
+              <span class="arch-flow-sub">只下 funding 單</span>
             </div>
           </div>
+          <div class="arch-flow-note">資金永遠在你的帳號，我們僅持有「掛單」這一個動作的權限。</div>
         </div>
       </div>
     </div>
@@ -211,7 +162,7 @@ const steps = [
   }
 
   .ss-step {
-    min-height: 78vh;
+    min-height: 60vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -266,51 +217,34 @@ const steps = [
     width: 100%;
     max-width: 460px;
     aspect-ratio: 1;
-    background:
-      radial-gradient(ellipse 70% 50% at 30% 20%, color-mix(in srgb, var(--color-brand) 14%, transparent), transparent 60%),
-      radial-gradient(ellipse 60% 50% at 80% 90%, color-mix(in srgb, var(--color-coral) 12%, transparent), transparent 60%),
-      linear-gradient(160deg, var(--color-bg), var(--color-bg-soft));
-    border: 1px solid var(--color-line);
-    border-radius: 24px;
-    overflow: hidden;
-    box-shadow:
-      0 30px 60px -20px rgba(10, 37, 64, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-  .ss-stage::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 110%, transparent 55%, rgba(10, 37, 64, 0.05) 100%);
-    pointer-events: none;
-  }
-  .ss-frame {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 500ms var(--ease-out-expo),
-                transform 500ms var(--ease-out-expo);
-    transform: translateY(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 36px;
-    pointer-events: none;
-  }
-  .ss-frame.is-active {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
+    perspective: 1400px;
+    transform-style: preserve-3d;
   }
 
-  /* ── Shared mock card ──────────────────────────────────────────── */
-  .arch-frame-mock {
-    width: 100%;
+  /* ── 3D stacked cards (reactbits CardSwap-inspired) ─────────────── */
+  .swap-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 340px;
+    height: 280px;
     background: var(--color-surface);
-    border-radius: 14px;
     border: 1px solid var(--color-line);
-    padding: 20px 22px;
-    box-shadow: 0 10px 30px -10px rgba(10, 37, 64, 0.10);
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow:
+      0 28px 70px -28px rgba(10, 37, 64, 0.30),
+      0 8px 20px -6px rgba(10, 37, 64, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+    /* GSAP sets translate3d + skewY at runtime; initial position is hidden
+       until GSAP places it (avoids a flash of stacked-on-origin layout). */
+    visibility: hidden;
+  }
+  .swap-card[style] {
+    visibility: visible;
   }
   .arch-mock-head {
     font-family: var(--font-mono);
@@ -413,7 +347,6 @@ const steps = [
   .arch-crypto-stored .arch-crypto-key { color: var(--color-mint); }
 
   /* ── Frame 2: flow diagram ──────────────────────────────────────── */
-  .arch-flow { padding: 22px; }
   .arch-flow-row {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -506,6 +439,8 @@ const steps = [
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ss-frame { transition: opacity 0ms; transform: none; }
+    /* GSAP respects user motion prefs via its own duration:0 in the island;
+       this rule is a fallback if cards somehow render without GSAP. */
+    .swap-card { transform: none !important; }
   }
 </style>

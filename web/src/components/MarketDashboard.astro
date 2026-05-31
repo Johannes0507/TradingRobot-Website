@@ -1,35 +1,35 @@
 ---
-import { MARKET_DATA, META } from '../lib/mock-data';
+import { MARKET_DATA } from '../lib/mock-data';
 import Sparkline from './Sparkline.astro';
 import Counter from './islands/Counter.tsx';
 
 const fmtDelta = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}`;
 const fmtDate = (iso: string) => iso.slice(0, 10);
 
+// Build-time: data window = last completed calendar month.
+// On 6/1 → shows May (5/1–5/31). On 5/31 → still shows April (4/1–4/30).
+// Updates monthly when site is rebuilt (CI cron required for live freshness).
+const today = new Date();
+const spanEndDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 0));
+const spanStartDate = new Date(Date.UTC(spanEndDate.getUTCFullYear(), spanEndDate.getUTCMonth(), 1));
+
 const cards = [
   {
-    label: 'fUSD · 30 日平均',
-    value: MARKET_DATA.fusd30dAvgApr,
-    decimals: 2,
-    suffix: '%',
-    sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fusdVsPrevDelta)}`,
-  },
-  {
-    label: 'fUST · 30 日平均',
+    label: 'USDT · 30 日平均',
     value: MARKET_DATA.fust30dAvgApr,
     decimals: 2,
     suffix: '%',
     sub: `vs 前 30 日 ${fmtDelta(MARKET_DATA.fustVsPrevDelta)}`,
   },
   {
-    label: 'fUSD · 30 日高點',
+    label: 'USD · 30 日高點',
     value: MARKET_DATA.fusd30dHighApr,
     decimals: 2,
     suffix: '%',
     sub: `↗ ${fmtDate(MARKET_DATA.fusd30dHighDate)} · spike event`,
   },
   {
-    label: 'fUSD · 30 日低點',
+    label: 'USD · 30 日低點',
     value: MARKET_DATA.fusd30dLowApr,
     decimals: 2,
     suffix: '%',
@@ -37,38 +37,60 @@ const cards = [
   },
 ];
 
-const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
-
-// Sparkline date span: 30 days ending on META.asOf (chronological, not low/high).
-const asOfDate = new Date(META.asOf);
-const spanEnd = asOfDate.toISOString().slice(0, 10);
-const spanStartDate = new Date(asOfDate);
-spanStartDate.setUTCDate(spanStartDate.getUTCDate() - 29);
+const spanEnd = spanEndDate.toISOString().slice(0, 10);
 const spanStart = spanStartDate.toISOString().slice(0, 10);
+const asOfLocal = spanEndDate.toLocaleDateString('zh-TW');
 ---
 
-<section id="market" class="py-[56px] lg:py-[96px] bg-bg-soft relative">
+<section id="market" class="py-12 lg:py-16 bg-bg-soft relative">
   <div class="max-w-7xl mx-auto px-6 lg:px-12">
-    <div class="max-w-2xl mb-12">
-      <div class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-4">
-        Market Data
+    <h2 class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-[0.14em] mb-5">
+      Bitfinex Funding · 30 日數據 <span class="text-mute-soft normal-case"> Bitfinex 把 USD / USDT 借出去的年化（APR）截至 {asOfLocal}</span>
+    </h2>
+    <p class="font-display font-semibold text-ink text-2xl lg:text-3xl leading-[1.25] tracking-tight mb-6 lg:mb-8 max-w-2xl">
+      LendAuto 就跑在這個市場上
+    </p>
+
+    {/* Hero number + Sparkline side-by-side on lg, stacked on mobile */}
+    <div class="grid grid-cols-1 lg:grid-cols-[5fr_4fr] gap-4 lg:gap-6 mb-6">
+      {/* Hero stat card */}
+      <div class="rounded-2xl bg-bg border border-line-soft p-6 lg:p-8 flex flex-col justify-center">
+        <div class="text-xs font-mono text-mute uppercase tracking-[0.18em] mb-3">
+          USD · 30 日平均
+        </div>
+        <p class="market-hero font-display font-bold leading-[0.92] tracking-[-0.045em] m-0">
+          <Counter client:visible to={MARKET_DATA.fusd30dAvgApr} decimals={2} suffix="%" />
+        </p>
+        <p class="text-sm text-mute font-mono mt-3">
+          vs 前 30 日 {fmtDelta(MARKET_DATA.fusdVsPrevDelta)}
+        </p>
       </div>
-      <h2
-        class="text-4xl lg:text-5xl font-display font-bold text-ink leading-[1.1] tracking-tight mb-5"
-      >
-        Bitfinex Funding Market
-      </h2>
-      <p class="text-lg text-ink-soft">
-        過去 30 日公開市場數據，來自 Bitfinex Public API。LendAuto 自動報價就跑在這個市場上。
-      </p>
+
+      {/* Sparkline card */}
+      <div class="rounded-2xl bg-bg border border-line-soft p-5 lg:p-6">
+        <div class="flex items-baseline justify-between mb-3">
+          <div class="text-xs font-mono text-mute uppercase tracking-wider">
+            USD · 30 日利率走勢
+          </div>
+          <div class="text-xs font-mono text-mute">
+            {spanStart} — {spanEnd}
+          </div>
+        </div>
+        <Sparkline
+          data={MARKET_DATA.fusd30dDaily}
+          height={120}
+          ariaLabel="Bitfinex 上 USD 過去 30 日每日平均年化利率"
+        />
+      </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    {/* 3 supporting KPIs in a row */}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
       {
         cards.map((c) => (
-          <div class="lift p-6 rounded-2xl bg-bg border border-line-soft">
-            <div class="text-xs font-mono text-mute uppercase tracking-wider mb-3">{c.label}</div>
-            <div class="text-3xl lg:text-4xl font-mono font-bold text-ink mb-2 tracking-tight">
+          <div class="lift p-4 lg:p-5 rounded-2xl bg-bg border border-line-soft">
+            <div class="text-xs font-mono text-mute uppercase tracking-wider mb-2">{c.label}</div>
+            <div class="text-2xl lg:text-3xl font-mono font-bold text-ink mb-1 tracking-tight">
               <Counter client:visible to={c.value} decimals={c.decimals} suffix={c.suffix} />
             </div>
             <div class="text-xs text-mute font-mono">{c.sub}</div>
@@ -77,24 +99,23 @@ const spanStart = spanStartDate.toISOString().slice(0, 10);
       }
     </div>
 
-    <div class="p-6 rounded-2xl bg-bg border border-line-soft">
-      <div class="flex items-baseline justify-between mb-4">
-        <div class="text-xs font-mono text-mute uppercase tracking-wider">
-          fUSD · 30 日利率走勢
-        </div>
-        <div class="text-xs font-mono text-mute">
-          {spanStart} — {spanEnd}
-        </div>
-      </div>
-      <Sparkline
-        data={MARKET_DATA.fusd30dDaily}
-        height={140}
-        ariaLabel="Bitfinex fUSD 過去 30 日每日平均年化利率"
-      />
-    </div>
-
-    <p class="text-xs text-mute font-mono mt-6">
-      資料來源：Bitfinex Public API（截至 {asOfLocal}）。本區塊全部數據與 LendAuto 自身績效無關。
+    <p class="text-xs text-mute-soft font-mono font-semibold tracking-[0.14em] mt-4 leading-relaxed">
+      資料來自 Bitfinex Public API 本區塊全部數據與 LendAuto 自身績效無關
     </p>
   </div>
 </section>
+
+<style>
+  .market-hero {
+    font-size: clamp(48px, 7vw, 96px);
+    background: linear-gradient(
+      180deg,
+      var(--color-ink) 25%,
+      color-mix(in srgb, var(--color-ink) 25%, transparent) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+</style>

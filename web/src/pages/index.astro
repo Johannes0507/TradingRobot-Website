@@ -4,7 +4,6 @@ import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import LogoWall from '../components/LogoWall.astro';
 import MarketDashboard from '../components/MarketDashboard.astro';
-import BigMetric from '../components/BigMetric.astro';
 import Architecture from '../components/Architecture.astro';
 import Steps from '../components/Steps.astro';
 import WhyHigher from '../components/WhyHigher.astro';
@@ -21,14 +20,15 @@ import StructuredData from '../components/StructuredData.astro';
   <main id="main">
     <Hero />
     <LogoWall />
-    <MarketDashboard />
-    <BigMetric />
-    <Architecture />
-    <Steps />
-    <WhyHigher />
-    <RoiBlock />
-    <Pricing />
-    <CtaFooter />
-    <WaitlistAndContact />
+    <div class="right-rail-zone">
+      <MarketDashboard />
+      <Architecture />
+      <Steps />
+      <WhyHigher />
+      <RoiBlock />
+      <Pricing />
+      <CtaFooter />
+      <WaitlistAndContact />
+    </div>
   </main>
 </Layout>

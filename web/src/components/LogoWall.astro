@@ -10,35 +10,28 @@
  */
 
 const items = [
-  'Bitfinex',
-  'fUSD',
-  'fUST',
-  'AES-256-GCM',
-  'TOTP 2FA',
-  'IP allowlist',
-  'Read-only by default',
-  'Go 1.26',
-  'PostgreSQL',
-  'Cloud Run',
+  { label: 'Bitfinex API',    sub: '官方串接',                  icon: '/icons/bitfinex.svg' },
+  { label: 'Claude',          sub: 'AI Agent · Anthropic',     icon: '/icons/claude.svg'   },
+  { label: 'Strategy Engine', sub: 'FRR · GRID · SPIKE · LIMIT', icon: '/icons/strategy.svg' },
+  { label: 'Go',              sub: 'Google · 業界速度',         icon: '/icons/go.svg'       },
+  { label: 'GCP',             sub: 'Google Cloud',             icon: '/icons/gcp.svg'      },
 ];
 ---
 
 <section
   aria-labelledby="logowall-heading"
-  class="relative py-14 lg:py-16 bg-bg-soft border-y border-line-soft"
+  class="relative py-8 lg:py-10 border-t border-line-soft no-reveal"
 >
-  <h2 id="logowall-heading" class="sr-only">技術棧與標準</h2>
-  <p
-    class="text-center text-xs font-mono text-mute uppercase tracking-[0.18em] mb-8 px-6"
-  >
-    打通整條鏈：交易所、加密、平台、基礎建設
-  </p>
+  <h2 id="logowall-heading" class="sr-only">技術棧</h2>
   <div class="logowall-marquee" aria-hidden="true">
     <div class="logowall-track">
-      {[...items, ...items].map((label) => (
+      {[...items, ...items].map((item) => (
         <div class="logowall-item">
-          <span class="logowall-mark"></span>
-          {label}
+          <img src={item.icon} alt="" class="logowall-icon" width="24" height="24" loading="lazy" />
+          <div class="logowall-text">
+            <div class="logowall-label">{item.label}</div>
+            <div class="logowall-sub">{item.sub}</div>
+          </div>
         </div>
       ))}
     </div>
@@ -49,14 +42,29 @@ const items = [
   .logowall-marquee {
     position: relative;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    /* Hard cut at the left page-rail position; fully opaque to the right edge
+       (no fade — items enter cleanly from viewport right and disappear at rail). */
+    --rail-x: max(24px, calc((100% - 1280px) / 2));
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      transparent var(--rail-x),
+      #000 var(--rail-x),
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      transparent var(--rail-x),
+      #000 var(--rail-x),
+      #000 100%
+    );
   }
   .logowall-track {
     display: flex;
-    gap: 64px;
+    gap: 88px;
     width: max-content;
-    animation: logowall-scroll 42s linear infinite;
+    animation: logowall-scroll 60s linear infinite;
   }
   .logowall-marquee:hover .logowall-track {
     animation-play-state: paused;
@@ -67,27 +75,40 @@ const items = [
   .logowall-item {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     white-space: nowrap;
+    color: var(--color-ink-soft);
+    transition: color var(--dur-micro) var(--ease-standard);
+  }
+  .logowall-item:hover {
+    color: var(--color-ink);
+  }
+  .logowall-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: block;
+  }
+  .logowall-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .logowall-label {
     font-family: var(--font-display);
     font-size: 20px;
     font-weight: 600;
     letter-spacing: -0.015em;
-    color: var(--color-ink-soft);
-    opacity: 0.65;
-    transition: opacity var(--dur-micro) var(--ease-standard),
-                color var(--dur-micro) var(--ease-standard);
+    line-height: 1;
   }
-  .logowall-item:hover {
-    opacity: 1;
-    color: var(--color-ink);
-  }
-  .logowall-mark {
-    width: 20px;
-    height: 20px;
-    border-radius: 5px;
-    background: currentColor;
-    opacity: 0.40;
+  .logowall-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+    line-height: 1;
   }
   @media (prefers-reduced-motion: reduce) {
     .logowall-track { animation: none; }

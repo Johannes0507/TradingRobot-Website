@@ -48,12 +48,18 @@ body {
    ============================================ */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    main > section {
+    main > section:not(.no-reveal) {
       animation: section-reveal linear both;
       animation-timeline: view();
       animation-range: entry 0% cover 35%;
     }
   }
+}
+
+/* Above-the-fold sections opt out — they shouldn't fade in on load */
+.no-reveal {
+  animation: none !important;
+  opacity: 1 !important;
 }
 
 @keyframes section-reveal {
@@ -406,7 +412,7 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
   display: none;
 }
 
@@ -414,22 +420,34 @@ h1, h2, h3, h4 {
   .page-rails {
     display: block;
   }
-  .page-rails::before,
-  .page-rails::after {
+  /* Left rail: full page, aligns with left edge of max-w-7xl container */
+  .page-rails::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--color-line-strong);
-  }
-  /* Left rail: aligns with left edge of max-w-7xl container */
-  .page-rails::before {
+    background: var(--color-line-soft);
     left: max(24px, calc((100% - 1280px) / 2));
   }
-  /* Right rail: aligns with right edge of max-w-7xl container */
-  .page-rails::after {
+}
+
+/* Right rail — scoped to a wrapper so we can exclude Hero/marquee.
+   Wrap any post-Hero sections that should show the right rail. */
+.right-rail-zone {
+  position: relative;
+}
+@media (min-width: 768px) {
+  .right-rail-zone::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
     right: max(24px, calc((100% - 1280px) / 2));
+    width: 1px;
+    background: var(--color-line-soft);
+    pointer-events: none;
+    z-index: 1;
   }
 }
 

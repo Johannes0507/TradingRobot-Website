@@ -1,25 +1,59 @@
 /**
- * StickyScrollStage — right-side sticky visual frames that cross-fade
- * based on which left-side step is currently centred in the viewport.
+ * StickyScrollStage — 3D card-swap stage driven by left-column scroll position.
  *
- * Reliability fix: instead of intersectionRatio > 0.4 (fragile when steps
- * are taller than viewport), we shrink the IO root to a 1px horizontal
- * line at viewport centre via rootMargin '-50% 0px -50% 0px'. Whichever
- * step crosses that line wins — deterministic, smooth, and frame-stable.
- *
- * The content is rendered via Astro markup; this island only orchestrates
- * the `.is-active` class on `.ss-frame` elements.
+ * Visual signature (inspired by reactbits.dev CardSwap):
+ *  - Cards stacked diagonally (offset x/y/z) with a subtle skewY tilt
+ *  - When scroll changes active step, the active card promotes to the front
+ *    while previous cards drop down + cycle to the back, using GSAP elastic
+ *    easing for that "organic bounce" feel.
+ *  - Unlike pure auto-cycle, swap is triggered by scroll — preserves the
+ *    left-text → right-visual narrative pairing.
  */
 import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 
 export interface StickyScrollStageProps {
   stepSelector?: string;
-  frameSelector?: string;
+  cardSelector?: string;
+  /** Horizontal offset per stack depth (px) */
+  cardDistance?: number;
+  /** Vertical lift per stack depth (px) */
+  verticalDistance?: number;
+  /** Tilt of every card (deg) */
+  skewAmount?: number;
+  /** GSAP easing — 'elastic' for bouncy, 'smooth' for restrained */
+  easing?: 'elastic' | 'smooth';
 }
+
+type Slot = { x: number; y: number; z: number; zIndex: number };
+
+const makeSlot = (depth: number, total: number, distX: number, distY: number): Slot => ({
+  x: depth * distX,
+  y: -depth * distY,
+  z: -depth * distX * 1.5,
+  zIndex: total - depth,
+});
+
+const placeNow = (el: HTMLElement, slot: Slot, skew: number) =>
+  gsap.set(el, {
+    x: slot.x,
+    y: slot.y,
+    z: slot.z,
+    xPercent: -50,
+    yPercent: -50,
+    skewY: skew,
+    transformOrigin: 'center center',
+    zIndex: slot.zIndex,
+    force3D: true,
+  });
 
 export default function StickyScrollStage({
   stepSelector = '.ss-step',
-  frameSelector = '.ss-frame',
+  cardSelector = '.swap-card',
+  cardDistance = 52,
+  verticalDistance = 56,
+  skewAmount = 5,
+  easing = 'elastic',
 }: StickyScrollStageProps) {
   const initialized = useRef(false);
 
@@ -27,43 +61,77 @@ export default function StickyScrollStage({
     if (initialized.current) return;
     initialized.current = true;
 
-    const steps = Array.from(
-      document.querySelectorAll<HTMLElement>(stepSelector)
-    );
-    const frames = Array.from(
-      document.querySelectorAll<HTMLElement>(frameSelector)
-    );
+    const steps = Array.from(document.querySelectorAll<HTMLElement>(stepSelector));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>(cardSelector));
+    if (steps.length === 0 || cards.length === 0) return;
 
-    if (steps.length === 0 || frames.length === 0) return;
+    const total = cards.length;
 
-    let activeIdx = -1;
-    const setActive = (idx: number) => {
-      if (idx === activeIdx) return;
-      activeIdx = idx;
-      frames.forEach((f, i) => f.classList.toggle('is-active', i === idx));
+    /* Order tracks which card index sits at each depth slot (0 = front). */
+    const order = Array.from({ length: total }, (_, i) => i);
+
+    /* Place all cards at their initial slots immediately, no animation. */
+    cards.forEach((el, depth) => placeNow(el, makeSlot(depth, total, cardDistance, verticalDistance), skewAmount));
+
+    const config =
+      easing === 'elastic'
+        ? { ease: 'elastic.out(0.6, 0.9)', durDrop: 1.4, durMove: 1.4, durReturn: 1.4, promoteOverlap: 0.85, returnDelay: 0.05 }
+        : { ease: 'power2.inOut', durDrop: 0.55, durMove: 0.55, durReturn: 0.55, promoteOverlap: 0.45, returnDelay: 0.15 };
+
+    /* Cycle the front of the stack: front card drops down, others promote forward,
+       the dropped card cycles to the back slot.  Animates `times` swaps in sequence
+       so a 2-step jump from step 0 → step 2 still feels natural. */
+    const cycleForward = (times: number) => {
+      for (let n = 0; n < times; n++) {
+        const front = order.shift()!;
+        const elFront = cards[front];
+
+        const tl = gsap.timeline();
+        tl.to(elFront, { y: '+=500', duration: config.durDrop, ease: config.ease });
+        tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
+
+        order.forEach((cardIdx, newDepth) => {
+          const el = cards[cardIdx];
+          const slot = makeSlot(newDepth, total, cardDistance, verticalDistance);
+          tl.set(el, { zIndex: slot.zIndex }, 'promote');
+          tl.to(el, { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease }, `promote+=${newDepth * 0.12}`);
+        });
+
+        const backSlot = makeSlot(total - 1, total, cardDistance, verticalDistance);
+        tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
+        tl.call(() => gsap.set(elFront, { zIndex: backSlot.zIndex }), undefined, 'return');
+        tl.to(elFront, { x: backSlot.x, y: backSlot.y, z: backSlot.z, duration: config.durReturn, ease: config.ease }, 'return');
+
+        order.push(front);
+      }
     };
 
-    /* Show first frame on initial load */
-    setActive(0);
+    /* Bring a specific card index to the front by cycling forward until it lands. */
+    let activeCardIdx = order[0];
+    const bringToFront = (targetIdx: number) => {
+      if (targetIdx === activeCardIdx) return;
+      const currentPos = order.indexOf(targetIdx);
+      if (currentPos < 0) return;
+      cycleForward(currentPos);
+      activeCardIdx = targetIdx;
+    };
 
-    /* rootMargin shrinks the root to a 1px horizontal line at viewport
-       centre — whichever step is crossing that line is "active". */
+    /* IO: detect which step is at viewport centre, swap to its matching card. */
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const idx = Number((e.target as HTMLElement).dataset.frame);
           if (Number.isNaN(idx)) continue;
-          setActive(idx);
+          bringToFront(idx);
         }
       },
       { rootMargin: '-50% 0px -50% 0px', threshold: 0 }
     );
-
     steps.forEach((s) => io.observe(s));
 
     return () => io.disconnect();
-  }, [stepSelector, frameSelector]);
+  }, [stepSelector, cardSelector, cardDistance, verticalDistance, skewAmount, easing]);
 
   return null;
 }
