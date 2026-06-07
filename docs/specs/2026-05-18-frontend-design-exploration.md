@@ -1,4 +1,4 @@
-# LendAuto Frontend Redesign — Design Spec
+# wen control Frontend Redesign — Design Spec
 
 **Date:** 2026-05-18
 **Status:** Draft (pending user review)
@@ -9,7 +9,7 @@
 
 ## 1. Origin & purpose
 
-LendAuto 的 v1 行銷網站（Astro 6）內容與設計大致完整，但 brainstorm 揭露了兩個關鍵 gap：
+穩穩控 的 v1 行銷網站（Astro 6）內容與設計大致完整，但 brainstorm 揭露了兩個關鍵 gap：
 
 1. **目標受眾的首要疑慮（怕詐騙）尚未被資訊架構優先處理** —— 「安全機制」目前在第五個 section，導致風險迴避型新手在看到信任證據前可能已跳出。
 2. **多處文案有「自證清白」或「過度承諾」的推銷感**（例：「像存股一樣每天配息」、「賺 15-20%」、「今晚就開始配息」），這對怕詐騙的受眾反而是反信任訊號。
@@ -36,7 +36,7 @@ LendAuto 的 v1 行銷網站（Astro 6）內容與設計大致完整，但 brain
 
 ### 3.1 文案規則（與 memory `feedback_copy_tone.md` 對齊）
 
-- ❌ 禁止具體報酬承諾：刪除「2-5%」「8% vs 15-20%」「年化最高 X%」等任何 LendAuto 報酬數字
+- ❌ 禁止具體報酬承諾：刪除「2-5%」「8% vs 15-20%」「年化最高 X%」等任何 穩穩控 報酬數字
 - ❌ 禁止自證型詞彙：「不是詐騙」「絕對安全」「合法合規」「Bitfinex 官方授權合作」（無實證）
 - ❌ 禁止推銷急迫感：「立即」「立刻搶購」「限時」「最後機會」「今晚就」
 - ❌ 禁止過度比喻：「像存股一樣」「USD 開始工作」「賺暴利」
@@ -117,7 +117,7 @@ CtaFooter                    (既有，文案降溫 + footer 不動)
 |------|------|---------|---------|---------|
 | Pill | `Bitfinex 官方授權合作` | `fUSD / fUST 自動報價` | `Bitfinex margin funding 機器人` | `Non-custodial · Bring-your-own Bitfinex 帳號` |
 | Headline | 你的加密貨幣，也可以像存股一樣每天配息 | 把 Bitfinex funding 報價，交給機器人 24×60×60 秒盯 | Bitfinex funding 全自動，每 30 秒重新評估報價 | 你不需要每天看 funding rate，機器人會 |
-| Subhead | LendAuto 是 Bitfinex 平台的自動放貸機器人 —— 24 小時為你尋找最佳利率，每天結算配息直接入帳。 | fUSD 與 fUST 雙幣對的 funding 自動化工具，根據資金量分層報價，每日結算入帳。 | 持續監控 fUSD / fUST funding market，多檔利率階梯部署，自動追逐 Flash Return Rate 變動。 | 自動化的 Bitfinex margin funding 報價工具。你保有資金 custody，我們只代為掛單。 |
+| Subhead | 穩穩控 是 Bitfinex 平台的自動放貸機器人 —— 24 小時為你尋找最佳利率，每天結算配息直接入帳。 | fUSD 與 fUST 雙幣對的 funding 自動化工具，根據資金量分層報價，每日結算入帳。 | 持續監控 fUSD / fUST funding market，多檔利率階梯部署，自動追逐 Flash Return Rate 變動。 | 自動化的 Bitfinex margin funding 報價工具。你保有資金 custody，我們只代為掛單。 |
 | CTA primary | `立即開始 →` | `開始使用 →` | `開始使用 →` | `開始使用 →` |
 | CTA secondary | `查看設定教學` | `先看設定教學` | `先看設定教學` | `先看設定教學` |
 
@@ -141,7 +141,7 @@ export const HERO_KPIS = {
 
 **File:** `web/src/components/MarketDashboard.astro`
 **Section id:** `market`
-**Role:** 立刻證明「Bitfinex funding 市場是真實且有規模的機會」，**完全不是 LendAuto 自家數據**。
+**Role:** 立刻證明「Bitfinex funding 市場是真實且有規模的機會」，**完全不是 穩穩控 自家數據**。
 
 **Layout:**
 
@@ -165,7 +165,7 @@ export const HERO_KPIS = {
 │ │  2025-04-18                            2025-05-18                │ │
 │ └──────────────────────────────────────────────────────────────────┘ │
 │                                                                      │
-│ 註：本區塊全部數據來自 Bitfinex 公開 API，與 LendAuto 績效無關。     │
+│ 註：本區塊全部數據來自 Bitfinex 公開 API，與 穩穩控 績效無關。     │
 │ Build-time 拉取，每日更新。                                          │
 └──────────────────────────────────────────────────────────────────────┘
 ```
@@ -209,7 +209,7 @@ export const MARKET_DATA = {
 
 ```
   ┌──────────┐      ┌──────────┐      ┌──────────────┐
-  │  你的     │──────│ LendAuto │──────│  Bitfinex    │
+  │  你的     │──────│ 穩穩控 │──────│  Bitfinex    │
   │ Bitfinex │      │  Server  │      │  Funding API │
   │  Account │      │          │      │              │
   └────┬─────┘      └──────────┘      └──────────────┘
@@ -238,16 +238,16 @@ export const MARKET_DATA = {
 
 | # | 標題 | 描述 | code tag |
 |---|------|------|----------|
-| 01 | API 權限只勾 Funding | 你在 Bitfinex 生成 API Key 時只勾 Funding scope，未勾 Withdrawals/Trading。Bitfinex 系統強制執行，連 LendAuto 後端也無法繞過。 | `scope: funding_only` |
-| 02 | AES-256-GCM 加密儲存 | API Key 在資料庫是密文，envelope encryption + per-tenant key。連 LendAuto 工程師都看不到明文。 | `AES-256-GCM · envelope` |
-| 03 | 資金永遠在你的 Bitfinex 帳號 | LendAuto 是「掛單代理人」，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。 | `custody: self` |
+| 01 | API 權限只勾 Funding | 你在 Bitfinex 生成 API Key 時只勾 Funding scope，未勾 Withdrawals/Trading。Bitfinex 系統強制執行，連 穩穩控 後端也無法繞過。 | `scope: funding_only` |
+| 02 | AES-256-GCM 加密儲存 | API Key 在資料庫是密文，envelope encryption + per-tenant key。連 穩穩控 工程師都看不到明文。 | `AES-256-GCM · envelope` |
+| 03 | 資金永遠在你的 Bitfinex 帳號 | 穩穩控 是「掛單代理人」，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。 | `custody: self` |
 
 **靜態績效截圖 slot：**
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │ 績效樣張                                                              │
-│ 過去 30 日，LendAuto 在 demo 帳號的實際表現                          │
+│ 過去 30 日，穩穩控 在 demo 帳號的實際表現                          │
 │ ┌──────────────────────────────────────────────────────────────────┐ │
 │ │ [PLACEHOLDER IMAGE]                                              │ │
 │ │ 1200×600px screenshot 區塊                                       │ │
@@ -450,7 +450,7 @@ export const ROI_PARAMS = {
 ```ts
 /**
  * 集中所有 mock data，未來 GCP phase 把這個檔案改成 build-time
- * generated（Cloud Build 拉 Bitfinex API + LendAuto v2 stats endpoint）。
+ * generated（Cloud Build 拉 Bitfinex API + 穩穩控 v2 stats endpoint）。
  * 元件層完全不需要改。
  */
 
@@ -501,9 +501,9 @@ Props：
 
 實作完成後，下列為手動驗收清單：
 
-1. **首屏到 MarketDashboard 之間沒有任何 LendAuto 報酬承諾數字** — 只有 Bitfinex 市場數據
+1. **首屏到 MarketDashboard 之間沒有任何 穩穩控 報酬承諾數字** — 只有 Bitfinex 市場數據
 2. **Hero 沒有任何「Bitfinex 官方授權合作」「保證」「保證收益」等無實證或推銷詞**
-3. **WhyHigher 移除了 8% / 15-20% 等具體 LendAuto 報酬數字**
+3. **WhyHigher 移除了 8% / 15-20% 等具體 穩穩控 報酬數字**
 4. **RoiBlock 預設場景的負數情境（$1000 卡片）有真實顯示為負**，誠實展示不適用情境
 5. **Architecture 區塊有 SVG 架構圖（不是裝飾性圖標）**，且圖中明確標示「提款權限路徑不存在」這個 invariant
 6. **靜態績效截圖 slot 有 placeholder 圖且註解清楚標示「待 demo 帳號累積資料後手動更新」**
@@ -560,12 +560,12 @@ Spec 撰寫時做了幾個 judgment call，請使用者確認或推翻：
 實施 redesign 同時，下列檔案要做最小化文案修正以維持「實戰質感」一致：
 
 ### 11.1 `Layout.astro` 預設 description
-- **現有：** `LendAuto — 你的加密貨幣，也可以像存股一樣每天配息。Bitfinex 自動放貸機器人，安全、透明、每日配息。`
-- **新：** `LendAuto — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。`
+- **現有：** `穩穩控 — 你的加密貨幣，也可以像存股一樣每天配息。Bitfinex 自動放貸機器人，安全、透明、每日配息。`
+- **新：** `穩穩控 — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。`
 
 ### 11.2 `index.astro` 的 `<title>`
-- **現有：** `LendAuto — 你的加密貨幣，也可以像存股一樣每天配息`
-- **新：** `LendAuto — Bitfinex Margin Funding 自動報價`（SEO 仍含「Bitfinex」「margin funding」核心字）
+- **現有：** `穩穩控 — 你的加密貨幣，也可以像存股一樣每天配息`
+- **新：** `穩穩控 — Bitfinex Margin Funding 自動報價`（SEO 仍含「Bitfinex」「margin funding」核心字）
 
 ### 11.3 `StructuredData.astro` FAQ 改寫
 
@@ -574,19 +574,19 @@ Spec 撰寫時做了幾個 judgment call，請使用者確認或推翻：
 | Q1（資金安全）| OK | 保留 |
 | Q2（為什麼比手動高）| **8% → 15-20% 禁忌** | 「三個機制差異：(1) bot 24 小時自動跟隨 Flash Return Rate 變動，手動掛單通常每天只動 1-2 次；(2) 階梯式預埋多檔高利率訂單，在市場波動時自動成交；(3) 毫秒級執行。報酬高低取決於市場利率波動，bot 主要改善的是「不錯過機會」而非保證任何特定報酬。」 |
 | Q3（付款）| OK | 保留 |
-| Q4（API Key 安全）| 「三層防護確保資金安全」自證型 | 「API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，LendAuto 不開錢包、不持有資產。」 |
+| Q4（API Key 安全）| 「三層防護確保資金安全」自證型 | 「API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，穩穩控 不開錢包、不持有資產。」 |
 
 ### 11.4 `StructuredData.astro` `orgSchema.description`
 - 現有：`...幫助加密貨幣持有者透過自動追單與策略網格，每日獲得被動配息收入。`
-- 新：`LendAuto 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。`
+- 新：`穩穩控 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。`
 
 ### 11.5 `StructuredData.astro` `serviceSchema.description`
 - 現有：`自動化的 Bitfinex USD/USDT 放貸機器人。24 小時追蹤市場利率，自動掛單、自動配息。非託管式架構，使用者資金始終在自己的 Bitfinex 帳號。`
 - 新：保持類似（這段已相對中性），微調為：`Bitfinex fUSD / fUST funding market 的自動報價代理工具。30 秒級重新評估市場利率、階梯式報價部署。Non-custodial — 使用者保有 Bitfinex 帳號 custody。`
 
 ### 11.6 `llms.txt.ts` intro
-- **現有第二段：** `LendAuto 是面向加密貨幣持有者的被動收入工具。核心價值：把手動掛單能賺到的 8% 年化報酬，透過自動追單、Spike Catching、預埋階梯網格策略，提升至 15-20%。`
-- **新第二段：** `LendAuto 是 Bitfinex margin funding 的自動報價工具。核心機制：Flash Return Rate 追蹤、Spike Catching、階梯式網格報價。目標是把手動掛單做不到的事（24 小時不間斷監控、毫秒級調整、多檔利率同時部署）自動化。報酬視市場利率波動而定。`
+- **現有第二段：** `穩穩控 是面向加密貨幣持有者的被動收入工具。核心價值：把手動掛單能賺到的 8% 年化報酬，透過自動追單、Spike Catching、預埋階梯網格策略，提升至 15-20%。`
+- **新第二段：** `穩穩控 是 Bitfinex margin funding 的自動報價工具。核心機制：Flash Return Rate 追蹤、Spike Catching、階梯式網格報價。目標是把手動掛單做不到的事（24 小時不間斷監控、毫秒級調整、多檔利率同時部署）自動化。報酬視市場利率波動而定。`
 
 ### 11.7 既有 `/guides` 與 `/blog` 文章
 - 本 spec 不掃描內容檔案。若內文有 8% / 15-20% 相似宣告，由使用者後續單獨清理（建議 issue 紀錄）。

@@ -9,11 +9,11 @@
 const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'LendAuto',
+  name: '穩穩控',
   url: 'https://lendauto.com',
   logo: 'https://lendauto.com/logo.png',
   description:
-    'LendAuto 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。',
+    '穩穩控 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。',
   sameAs: [
     // Add social links here when ready
   ],
@@ -28,7 +28,7 @@ const orgSchema = {
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'LendAuto',
+  name: '穩穩控',
   url: 'https://lendauto.com',
   inLanguage: 'zh-TW',
 };
@@ -37,7 +37,7 @@ const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   serviceType: '加密貨幣自動放貸服務',
-  provider: { '@type': 'Organization', name: 'LendAuto' },
+  provider: { '@type': 'Organization', name: '穩穩控' },
   description:
     'Bitfinex USD / USDT funding market 的自動報價代理工具。30 秒級重新評估市場利率、階梯式報價部署。Non-custodial — 使用者保有 Bitfinex 帳號 custody。',
   areaServed: { '@type': 'Country', name: 'Taiwan' },
@@ -72,15 +72,15 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'LendAuto 會碰到我的資金嗎？',
+      name: '穩穩控 會碰到我的資金嗎？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '不會。LendAuto 是非託管式（Non-custodial）架構，你的資金始終在自己的 Bitfinex 帳號內。我們只透過 API Key 幫你掛單，且 API 權限只開「Funding」，不開提款。',
+        text: '不會。穩穩控 是非託管式（Non-custodial）架構，你的資金始終在自己的 Bitfinex 帳號內。我們只透過 API Key 幫你掛單，且 API 權限只開「Funding」，不開提款。',
       },
     },
     {
       '@type': 'Question',
-      name: '為什麼用 LendAuto 報酬會比手動高？',
+      name: '為什麼用 穩穩控 報酬會比手動高？',
       acceptedAnswer: {
         '@type': 'Answer',
         text: '三個機制差異：(1) bot 24 小時自動跟隨 Flash Return Rate 變動，手動掛單通常每天只動 1-2 次；(2) 階梯式預埋多檔高利率訂單，在市場波動時自動成交；(3) 毫秒級執行。報酬高低取決於市場利率波動，bot 主要改善的是「不錯過機會」，而非保證任何特定報酬。',
@@ -99,7 +99,7 @@ const faqSchema = {
       name: 'API Key 安全嗎？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，LendAuto 不開錢包、不持有資產。',
+        text: 'API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，穩穩控 不開錢包、不持有資產。',
       },
     },
   ],

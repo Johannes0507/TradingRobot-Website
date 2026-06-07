@@ -11,7 +11,7 @@ export interface Props {
 
 const {
   title,
-  description = 'LendAuto — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。',
+  description = '穩穩控 — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。',
   ogImage = '/og-default.png',
   canonical,
   noindex = false,
@@ -53,7 +53,7 @@ const ogImageURL = new URL(ogImage, Astro.site).toString();
       rel="stylesheet"
     />
 
-    <link rel="alternate" type="application/rss+xml" title="LendAuto Blog" href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="wen control Blog" href="/rss.xml" />
 
     <slot name="head" />
   </head>

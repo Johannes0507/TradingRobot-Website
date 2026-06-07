@@ -78,45 +78,84 @@ export default function StickyScrollStage({
         ? { ease: 'elastic.out(0.6, 0.9)', durDrop: 1.4, durMove: 1.4, durReturn: 1.4, promoteOverlap: 0.85, returnDelay: 0.05 }
         : { ease: 'power2.inOut', durDrop: 0.55, durMove: 0.55, durReturn: 0.55, promoteOverlap: 0.45, returnDelay: 0.15 };
 
-    /* Cycle the front of the stack: front card drops down, others promote forward,
-       the dropped card cycles to the back slot.  Animates `times` swaps in sequence
-       so a 2-step jump from step 0 → step 2 still feels natural. */
-    const cycleForward = (times: number) => {
-      for (let n = 0; n < times; n++) {
-        const front = order.shift()!;
-        const elFront = cards[front];
+    /* Scrolling DOWN (next step): front card drops away, the rest promote one slot
+       forward, the dropped card returns to the back. */
+    const cycleForward = (): gsap.core.Timeline => {
+      const front = order.shift()!;
+      const elFront = cards[front];
 
-        const tl = gsap.timeline();
-        tl.to(elFront, { y: '+=500', duration: config.durDrop, ease: config.ease });
-        tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
+      const tl = gsap.timeline();
+      tl.to(elFront, { y: '+=500', duration: config.durDrop, ease: config.ease });
+      tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
 
-        order.forEach((cardIdx, newDepth) => {
-          const el = cards[cardIdx];
-          const slot = makeSlot(newDepth, total, cardDistance, verticalDistance);
-          tl.set(el, { zIndex: slot.zIndex }, 'promote');
-          tl.to(el, { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease }, `promote+=${newDepth * 0.12}`);
-        });
+      order.forEach((cardIdx, newDepth) => {
+        const el = cards[cardIdx];
+        const slot = makeSlot(newDepth, total, cardDistance, verticalDistance);
+        tl.set(el, { zIndex: slot.zIndex }, 'promote');
+        tl.to(el, { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease }, `promote+=${newDepth * 0.12}`);
+      });
 
-        const backSlot = makeSlot(total - 1, total, cardDistance, verticalDistance);
-        tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
-        tl.call(() => gsap.set(elFront, { zIndex: backSlot.zIndex }), undefined, 'return');
-        tl.to(elFront, { x: backSlot.x, y: backSlot.y, z: backSlot.z, duration: config.durReturn, ease: config.ease }, 'return');
+      const backSlot = makeSlot(total - 1, total, cardDistance, verticalDistance);
+      tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
+      tl.call(() => gsap.set(elFront, { zIndex: backSlot.zIndex }), undefined, 'return');
+      tl.to(elFront, { x: backSlot.x, y: backSlot.y, z: backSlot.z, duration: config.durReturn, ease: config.ease }, 'return');
 
-        order.push(front);
+      order.push(front);
+      return tl;
+    };
+
+    /* Scrolling UP (previous step): reverse of cycleForward — the back card rises
+       to the front, the rest demote one slot back. */
+    const cycleBackward = (): gsap.core.Timeline => {
+      const back = order.pop()!;
+      const elBack = cards[back];
+
+      const tl = gsap.timeline();
+      order.forEach((cardIdx, oldDepth) => {
+        const el = cards[cardIdx];
+        const slot = makeSlot(oldDepth + 1, total, cardDistance, verticalDistance);
+        tl.set(el, { zIndex: slot.zIndex }, 0);
+        tl.to(el, { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease }, 0);
+      });
+
+      const frontSlot = makeSlot(0, total, cardDistance, verticalDistance);
+      tl.set(elBack, { zIndex: total + 1 }, 0);
+      tl.to(elBack, { x: frontSlot.x, y: frontSlot.y, z: frontSlot.z, duration: config.durMove, ease: config.ease }, 0);
+
+      order.unshift(back);
+      return tl;
+    };
+
+    /* Sequential queue: one swap animates at a time, chaining toward the latest
+       target step.  Keeps the "flowing" cascade when scrolling through several
+       steps, while never running two drops at once (which is what made a card
+       briefly fly off-stage / disappear). */
+    let activeStep = order[0];   // step (= card) index currently at the front
+    let targetStep = activeStep; // latest requested step
+    let running = false;
+
+    const runQueue = () => {
+      if (activeStep === targetStep) {
+        running = false;
+        return;
       }
+      running = true;
+      const dir = targetStep > activeStep ? 1 : -1;
+      const tl = dir === 1 ? cycleForward() : cycleBackward();
+      activeStep += dir;
+      tl.eventCallback('onComplete', runQueue); // chain to the next step
     };
 
-    /* Bring a specific card index to the front by cycling forward until it lands. */
-    let activeCardIdx = order[0];
     const bringToFront = (targetIdx: number) => {
-      if (targetIdx === activeCardIdx) return;
-      const currentPos = order.indexOf(targetIdx);
-      if (currentPos < 0) return;
-      cycleForward(currentPos);
-      activeCardIdx = targetIdx;
+      targetStep = targetIdx;
+      if (!running) runQueue();
     };
 
-    /* IO: detect which step is at viewport centre, swap to its matching card. */
+    /* Mark the first step active on load (before any scroll). */
+    steps.forEach((s, j) => s.classList.toggle('is-active', j === 0));
+
+    /* IO: detect which step is at viewport centre, swap to its matching card
+       and mark that step active — couples the left text to the front card. */
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -124,6 +163,7 @@ export default function StickyScrollStage({
           const idx = Number((e.target as HTMLElement).dataset.frame);
           if (Number.isNaN(idx)) continue;
           bringToFront(idx);
+          steps.forEach((s, j) => s.classList.toggle('is-active', j === idx));
         }
       },
       { rootMargin: '-50% 0px -50% 0px', threshold: 0 }
@@ -133,5 +173,8 @@ export default function StickyScrollStage({
     return () => io.disconnect();
   }, [stepSelector, cardSelector, cardDistance, verticalDistance, skewAmount, easing]);
 
-  return null;
+  // Return an empty fragment (not null): @astrojs/react's SSR component-detection
+  // re-probes null-returning components outside React's renderer, which trips a
+  // harmless-but-noisy "Invalid hook call" warning on every server render.
+  return <></>;
 }

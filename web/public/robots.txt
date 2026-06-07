@@ -1,4 +1,4 @@
-# LendAuto — robots.txt
+# wen control — robots.txt
 # AI Search / GEO friendly — explicitly allow major LLM crawlers.
 
 User-agent: *

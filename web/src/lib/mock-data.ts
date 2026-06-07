@@ -1,8 +1,8 @@
 /**
- * Centralized mock data for the LendAuto marketing site.
+ * Centralized mock data for the wen control marketing site.
  *
  * Future GCP phase: this file will be replaced by a build-time generator
- * (Cloud Build pulling Bitfinex public API + LendAuto v2 stats endpoint).
+ * (Cloud Build pulling Bitfinex public API + wen control v2 stats endpoint).
  * The export *shape* below is the contract — keep field names stable.
  *
  * As-of date should reflect when the mock numbers were last sanity-checked.
@@ -14,7 +14,7 @@ export const META = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Bitfinex funding market — pure market data (NOT LendAuto performance)
+// Bitfinex funding market — pure market data (NOT wen control performance)
 // ---------------------------------------------------------------------------
 
 export const MARKET_DATA = {

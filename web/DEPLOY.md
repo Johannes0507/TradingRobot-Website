@@ -1,6 +1,6 @@
 # Cloudflare Pages 部署指南
 
-LendAuto Website 是純 SSG（靜態網站），**不需要 Cloudflare Adapter** —— 只要把 `dist/` 推上 Cloudflare Pages 即可。
+穩穩控 Website 是純 SSG（靜態網站），**不需要 Cloudflare Adapter** —— 只要把 `dist/` 推上 Cloudflare Pages 即可。
 
 > 為什麼選 Cloudflare：Cloudflare 2025 年收購 Astro，是一級支援平台，CDN 效能、邊緣快取、免費額度都對行銷站友善。
 

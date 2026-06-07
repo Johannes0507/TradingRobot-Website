@@ -73,7 +73,7 @@ export default function HeroPanel() {
       <div className="hero-card" ref={cardRef}>
         <div className="hero-card-face">
           <div className="hero-card-top">
-            <span className="hero-card-brand">LendAuto</span>
+            <span className="hero-card-brand">穩穩控</span>
             <span className="hero-card-tag">FUNDING · USD</span>
           </div>
 

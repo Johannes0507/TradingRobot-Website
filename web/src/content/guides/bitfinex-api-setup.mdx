@@ -1,6 +1,6 @@
 ---
 title: 'Bitfinex API Key 設定教學'
-description: '6 步驟把 Bitfinex 帳戶連結到 LendAuto。圖片導向，沒有冗長文字。'
+description: '6 步驟把 Bitfinex 帳戶連結到 穩穩控。圖片導向，沒有冗長文字。'
 pubDate: 2026-05-18
 updatedDate: 2026-05-18
 difficulty: 'beginner'
@@ -20,10 +20,10 @@ import LendautoConnect from '../../components/mdx/mockups/LendautoConnect.astro'
 import { Callout } from '../../components/mdx/Callout.tsx';
 import { CopyButton } from '../../components/islands/CopyButton.tsx';
 
-> **TL;DR**：登入 Bitfinex → API → Create New Key → **只勾 Funding 三項** → 複製 Key + Secret → 貼回 LendAuto。
+> **TL;DR**：登入 Bitfinex → API → Create New Key → **只勾 Funding 三項** → 複製 Key + Secret → 貼回 穩穩控。
 
 <Callout type="warn" client:visible>
-**最重要的一件事：絕對不要勾 Withdraw 權限。** LendAuto 不需要也不應該有提款權限。即使我們系統被駭，駭客也無法透過你的 API Key 提款。
+**最重要的一件事：絕對不要勾 Withdraw 權限。** 穩穩控 不需要也不應該有提款權限。即使我們系統被駭，駭客也無法透過你的 API Key 提款。
 </Callout>
 
 <Step n="1" title="進入 API 設定" desc="登入 Bitfinex 後，點右上角頭像 → API。">
@@ -49,16 +49,16 @@ import { CopyButton } from '../../components/islands/CopyButton.tsx';
 - ✅ Offer, cancel and close funding
 - ✅ Edit funding book settings
 
-**任何「Withdraw」字樣的選項都不要勾。**LendAuto 不需要、也不應該有提款權限。
+**任何「Withdraw」字樣的選項都不要勾。**穩穩控 不需要、也不應該有提款權限。
 </Callout>
 </Step>
 
-<Step n="4" title="IP 白名單（強烈建議）" desc="開啟 Restrict access to a list of IPs，貼上 LendAuto 伺服器 IP。">
+<Step n="4" title="IP 白名單（強烈建議）" desc="開啟 Restrict access to a list of IPs，貼上 穩穩控 伺服器 IP。">
   <Mockup chrome={false} caption="IP 白名單啟用後，非清單內的請求一律 401 拒絕">
     <BitfinexIpWhitelist />
   </Mockup>
 
-  <CopyButton client:visible text="52.198.42.7,13.231.156.108" label="複製 LendAuto 伺服器 IP" />
+  <CopyButton client:visible text="52.198.42.7,13.231.156.108" label="複製 穩穩控 伺服器 IP" />
 
   *上方為示意 IP。正式部署後會在這頁公布實際 IP。*
 </Step>
@@ -69,12 +69,12 @@ import { CopyButton } from '../../components/islands/CopyButton.tsx';
   </Mockup>
 
   <Callout type="warn" client:visible>
-**Secret 只會出現一次**。建議先複製到密碼管理器（1Password、Bitwarden）暫存，貼到 LendAuto 完成設定後再刪除。
+**Secret 只會出現一次**。建議先複製到密碼管理器（1Password、Bitwarden）暫存，貼到 穩穩控 完成設定後再刪除。
   </Callout>
 </Step>
 
-<Step n="6" title="帶回 LendAuto" desc="登入 LendAuto → 設定 → Bitfinex 連結，貼上兩串字按驗證。">
-  <Mockup url="app.lendauto.com/settings" caption="LendAuto 應用程式內的連結畫面 — 驗證通過即完成">
+<Step n="6" title="帶回 穩穩控" desc="登入 穩穩控 → 設定 → Bitfinex 連結，貼上兩串字按驗證。">
+  <Mockup url="app.lendauto.com/settings" caption="穩穩控 應用程式內的連結畫面 — 驗證通過即完成">
     <LendautoConnect />
   </Mockup>
 </Step>
@@ -91,7 +91,7 @@ import { CopyButton } from '../../components/islands/CopyButton.tsx';
 **❌ 絕對不要：**
 - 在 Bitfinex 開 Withdraw 權限（無法挽救）
 - 把 Secret 截圖上傳雲端
-- 跟任何「LendAuto 工程師」分享 Secret — 我們不會、也不需要問
+- 跟任何「穩穩控 工程師」分享 Secret — 我們不會、也不需要問
 
 ## 常見問題
 

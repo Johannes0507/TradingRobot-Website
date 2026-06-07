@@ -1,4 +1,4 @@
-# LendAuto Frontend Redesign Implementation Plan
+# wen control Frontend Redesign Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -74,10 +74,10 @@ Path: `web/src/lib/mock-data.ts`
 
 ```ts
 /**
- * Centralized mock data for the LendAuto marketing site.
+ * Centralized mock data for the wen control marketing site.
  *
  * Future GCP phase: this file will be replaced by a build-time generator
- * (Cloud Build pulling Bitfinex public API + LendAuto v2 stats endpoint).
+ * (Cloud Build pulling Bitfinex public API + wen control v2 stats endpoint).
  * The export *shape* below is the contract — keep field names stable.
  *
  * As-of date should reflect when the mock numbers were last sanity-checked.
@@ -89,7 +89,7 @@ export const META = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Bitfinex funding market — pure market data (NOT LendAuto performance)
+// Bitfinex funding market — pure market data (NOT wen control performance)
 // ---------------------------------------------------------------------------
 
 export const MARKET_DATA = {
@@ -297,7 +297,7 @@ EOF
 **Files:**
 - Create: `web/src/components/MarketDashboard.astro`
 
-**Why:** Spec §5.3. First post-Hero section. Proves "Bitfinex funding market is a real opportunity, with public data" before any LendAuto-specific claim.
+**Why:** Spec §5.3. First post-Hero section. Proves "Bitfinex funding market is a real opportunity, with public data" before any 穩穩控-specific claim.
 
 - [ ] **Step 1: Create the file**
 
@@ -350,7 +350,7 @@ const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
         Bitfinex Funding Market
       </h2>
       <p class="text-lg text-ink-soft">
-        過去 30 日公開市場數據，來自 Bitfinex Public API。LendAuto 自動報價就跑在這個市場上。
+        過去 30 日公開市場數據，來自 Bitfinex Public API。穩穩控 自動報價就跑在這個市場上。
       </p>
     </div>
 
@@ -385,7 +385,7 @@ const asOfLocal = new Date(META.asOf).toLocaleDateString('zh-TW');
     </div>
 
     <p class="text-xs text-mute font-mono mt-6">
-      資料來源：Bitfinex Public API（截至 {asOfLocal}）。本區塊全部數據與 LendAuto 自身績效無關。
+      資料來源：Bitfinex Public API（截至 {asOfLocal}）。本區塊全部數據與 穩穩控 自身績效無關。
     </p>
   </div>
 </section>
@@ -408,7 +408,7 @@ git commit -m "$(cat <<'EOF'
 feat(web): add MarketDashboard section
 
 Bitfinex funding market 30-day overview: 4 KPI cards (fUSD/fUST avg,
-high/low) + 30-point sparkline. Pure market data, no LendAuto claims.
+high/low) + 30-point sparkline. Pure market data, no 穩穩控 claims.
 Uses mock-data.ts which will be swapped at GCP integration phase.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
@@ -436,19 +436,19 @@ const pillars = [
   {
     n: '01',
     title: 'API 權限只勾 Funding',
-    desc: '你在 Bitfinex 生成 API Key 時，只勾 Funding scope，不勾 Withdrawals 與 Trading。Bitfinex 端強制執行，LendAuto 後端即使有 key 也無法繞過。',
+    desc: '你在 Bitfinex 生成 API Key 時，只勾 Funding scope，不勾 Withdrawals 與 Trading。Bitfinex 端強制執行，穩穩控 後端即使有 key 也無法繞過。',
     tag: 'scope: funding_only',
   },
   {
     n: '02',
     title: 'AES-256-GCM 加密儲存',
-    desc: 'API Key 在資料庫是密文，envelope encryption + per-tenant key。LendAuto 工程師也看不到明文。',
+    desc: 'API Key 在資料庫是密文，envelope encryption + per-tenant key。穩穩控 工程師也看不到明文。',
     tag: 'AES-256-GCM · envelope',
   },
   {
     n: '03',
     title: '資金永遠在你的 Bitfinex 帳號',
-    desc: 'LendAuto 是掛單代理人，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。',
+    desc: '穩穩控 是掛單代理人，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。',
     tag: 'custody: self',
   },
 ];
@@ -479,7 +479,7 @@ const pillars = [
           <div class="text-xs font-mono text-mute uppercase tracking-wider mb-5">
             資料流架構
           </div>
-          <svg viewBox="0 0 720 280" class="w-full h-auto" role="img" aria-label="LendAuto 系統架構圖">
+          <svg viewBox="0 0 720 280" class="w-full h-auto" role="img" aria-label="穩穩控 系統架構圖">
             <!-- Boxes -->
             <g font-family="JetBrains Mono, monospace" font-size="13" fill="#1a1f36">
               <!-- User -->
@@ -488,9 +488,9 @@ const pillars = [
               <text x="100" y="100" text-anchor="middle" font-weight="700">Account</text>
               <text x="100" y="118" text-anchor="middle" fill="#6b7280" font-size="11">資金 custody</text>
 
-              <!-- LendAuto Server -->
+              <!-- wen control Server -->
               <rect x="280" y="50" width="160" height="80" rx="12" fill="#ffffff" stroke="#635bff40" />
-              <text x="360" y="80" text-anchor="middle" font-weight="700" fill="#635bff">LendAuto</text>
+              <text x="360" y="80" text-anchor="middle" font-weight="700" fill="#635bff">穩穩控</text>
               <text x="360" y="100" text-anchor="middle" font-weight="700" fill="#635bff">Server</text>
               <text x="360" y="118" text-anchor="middle" fill="#6b7280" font-size="11">掛單代理</text>
 
@@ -532,7 +532,7 @@ const pillars = [
             </defs>
           </svg>
           <p class="text-xs text-mute font-mono mt-4 leading-relaxed">
-            紅色虛線：API Key 上根本沒有 Withdrawal 權限，這條路徑在 Bitfinex 平台層就被擋掉，LendAuto 端再怎麼想也無法觸發。
+            紅色虛線：API Key 上根本沒有 Withdrawal 權限，這條路徑在 Bitfinex 平台層就被擋掉，穩穩控 端再怎麼想也無法觸發。
           </p>
         </div>
 
@@ -564,11 +564,11 @@ const pillars = [
             績效樣張
           </div>
           <h3 class="text-lg font-display font-bold text-ink mb-3 tracking-tight">
-            LendAuto 在 demo 帳號跑 30 日的實際表現
+            穩穩控 在 demo 帳號跑 30 日的實際表現
           </h3>
           <img
             src="/screenshots/demo-performance-placeholder.png"
-            alt="LendAuto demo account 30 日績效截圖（placeholder，待真實資料更新）"
+            alt="穩穩控 demo account 30 日績效截圖（placeholder，待真實資料更新）"
             class="w-full rounded-xl border border-line-soft"
             loading="lazy"
             decoding="async"
@@ -644,7 +644,7 @@ Path: `web/public/screenshots/demo-performance-placeholder.svg`
     [ PLACEHOLDER ]
   </text>
   <text x="600" y="340" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="20" fill="#6b7280">
-    待 LendAuto demo 帳號累積 30 日資料後手動更新
+    待 穩穩控 demo 帳號累積 30 日資料後手動更新
   </text>
   <text x="600" y="380" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" fill="#9ca3af">
     1200 × 600 px · web/public/screenshots/demo-performance-placeholder.png
@@ -1991,12 +1991,12 @@ Modify: `web/src/layouts/Layout.astro`
 
 Find:
 ```astro
-  description = 'LendAuto — 你的加密貨幣，也可以像存股一樣每天配息。Bitfinex 自動放貸機器人，安全、透明、每日配息。',
+  description = '穩穩控 — 你的加密貨幣，也可以像存股一樣每天配息。Bitfinex 自動放貸機器人，安全、透明、每日配息。',
 ```
 
 Replace with:
 ```astro
-  description = 'LendAuto — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。',
+  description = '穩穩控 — Bitfinex margin funding 自動報價工具。非託管式架構，API 權限只開放貸。',
 ```
 
 - [ ] **Step 2: Type-check + build**
@@ -2040,13 +2040,13 @@ Modify: `web/src/components/StructuredData.astro`
 Find:
 ```astro
   description:
-    'LendAuto 是 Bitfinex 平台的自動化 USD 放貸機器人，幫助加密貨幣持有者透過自動追單與策略網格，每日獲得被動配息收入。',
+    '穩穩控 是 Bitfinex 平台的自動化 USD 放貸機器人，幫助加密貨幣持有者透過自動追單與策略網格，每日獲得被動配息收入。',
 ```
 
 Replace with:
 ```astro
   description:
-    'LendAuto 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。',
+    '穩穩控 是 Bitfinex margin funding 平台的自動報價工具。透過 Flash Return Rate 追蹤、Spike Catching、階梯網格策略，自動化原本需要手動操作的 funding 訂單管理。非託管式架構。',
 ```
 
 - [ ] **Step 2: Update `serviceSchema.description`**
@@ -2069,10 +2069,10 @@ Find:
 ```astro
     {
       '@type': 'Question',
-      name: '為什麼用 LendAuto 報酬會比手動高？',
+      name: '為什麼用 穩穩控 報酬會比手動高？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '三個原因：(1) 24 小時自動追蹤市場利率變動，不錯過機會；(2) 預埋高利率訂單，市場波動時自動成交；(3) 毫秒級執行速度，搶在其他人前面。手動掛單通常年化 8%，LendAuto 用戶平均 15-20%。',
+        text: '三個原因：(1) 24 小時自動追蹤市場利率變動，不錯過機會；(2) 預埋高利率訂單，市場波動時自動成交；(3) 毫秒級執行速度，搶在其他人前面。手動掛單通常年化 8%，穩穩控 用戶平均 15-20%。',
       },
     },
 ```
@@ -2081,7 +2081,7 @@ Replace with:
 ```astro
     {
       '@type': 'Question',
-      name: '為什麼用 LendAuto 報酬會比手動高？',
+      name: '為什麼用 穩穩控 報酬會比手動高？',
       acceptedAnswer: {
         '@type': 'Answer',
         text: '三個機制差異：(1) bot 24 小時自動跟隨 Flash Return Rate 變動，手動掛單通常每天只動 1-2 次；(2) 階梯式預埋多檔高利率訂單，在市場波動時自動成交；(3) 毫秒級執行。報酬高低取決於市場利率波動，bot 主要改善的是「不錯過機會」，而非保證任何特定報酬。',
@@ -2110,7 +2110,7 @@ Replace with:
       name: 'API Key 安全嗎？',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，LendAuto 不開錢包、不持有資產。',
+        text: 'API Key 在資料庫以 AES-256-GCM 加密儲存，連工程師都看不到明文。Bitfinex 端 API 權限只勾 Funding，不勾 Withdrawal/Trading，平台層強制限制提款路徑。資金始終在你的 Bitfinex 帳號，穩穩控 不開錢包、不持有資產。',
       },
     },
 ```
@@ -2159,12 +2159,12 @@ Modify: `web/src/pages/llms.txt.ts`
 
 Find:
 ```ts
-LendAuto 是面向加密貨幣持有者的被動收入工具。核心價值：把手動掛單能賺到的 8% 年化報酬，透過自動追單、Spike Catching、預埋階梯網格策略，提升至 15-20%。
+穩穩控 是面向加密貨幣持有者的被動收入工具。核心價值：把手動掛單能賺到的 8% 年化報酬，透過自動追單、Spike Catching、預埋階梯網格策略，提升至 15-20%。
 ```
 
 Replace with:
 ```ts
-LendAuto 是 Bitfinex margin funding 的自動報價工具。核心機制：Flash Return Rate 追蹤、Spike Catching、階梯式網格報價。目標是把手動掛單做不到的事（24 小時不間斷監控、毫秒級調整、多檔利率同時部署）自動化。報酬視市場利率波動而定。
+穩穩控 是 Bitfinex margin funding 的自動報價工具。核心機制：Flash Return Rate 追蹤、Spike Catching、階梯式網格報價。目標是把手動掛單做不到的事（24 小時不間斷監控、毫秒級調整、多檔利率同時部署）自動化。報酬視市場利率波動而定。
 ```
 
 - [ ] **Step 2: Type-check + build**
@@ -2223,7 +2223,7 @@ import WaitlistAndContact from '../components/WaitlistAndContact.astro';
 import StructuredData from '../components/StructuredData.astro';
 ---
 
-<Layout title="LendAuto — Bitfinex Margin Funding 自動報價">
+<Layout title="穩穩控 — Bitfinex Margin Funding 自動報價">
   <StructuredData slot="head" />
   <Nav />
   <main>

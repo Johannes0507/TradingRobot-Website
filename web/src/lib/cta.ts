@@ -36,7 +36,7 @@ function withParams(path: string, params: Record<string, string | undefined>) {
   return url.toString();
 }
 
-/** Subscription CTA — primary "start using LendAuto" action. */
+/** Subscription CTA — primary "start using wen control" action. */
 export function subscribeUrl(opts: CtaOptions): string {
   return withParams('/subscribe', {
     plan: opts.plan,

@@ -1,31 +1,33 @@
 ---
 /**
- * Architecture — "你的錢，我們從來沒碰過。"
+ * Architecture — "連接有範圍，執行有規則"
  *
- * Sticky-scroll pattern (v2 Lumen Light reference): left column scrolls
- * with multiple text panels, right column has a sticky stage where visual
- * frames cross-fade based on which left panel is currently in view.
+ * Editorial indexed-grid (left) + spec-sheet cards (right), bound by a
+ * sticky-scroll: the active left step couples to the front 3D-swap card.
  */
 import StickyScrollStage from './islands/StickyScrollStage.tsx';
 
 const steps = [
   {
     n: '01',
-    title: 'API 權限只勾 Funding',
-    desc: '你在 Bitfinex 生成 API Key 時，只勾 Funding scope，不勾 Withdrawals 與 Trading。Bitfinex 端強制執行，LendAuto 後端即使有 key 也無法繞過。',
-    tag: 'scope: funding_only',
+    title: '只開必要的權限',
+    desc: 'API 金鑰只開啟必要權限，以及餘額查閱權限，用來確認資金狀態。提款、轉帳、交易與帳戶設定修改都不開；系統也會在每次送出新單前強制檢查。',
+    tag: '最小權限 API',
+    href: '/guides/bitfinex-api-setup',
   },
   {
     n: '02',
-    title: 'AES-256-GCM 加密儲存',
-    desc: 'API Key 在資料庫是密文，envelope encryption + per-tenant key。LendAuto 工程師也看不到明文。',
-    tag: 'AES-256-GCM · envelope',
+    title: '系統只執行策略指令',
+    desc: '穩穩控不移動你的資產，而是依照你設定的規則，定期比對市場狀態、可用餘額與安全限制；符合條件時，才透過 API 送出授權範圍內的指令。',
+    tag: '策略指令層',
+    href: 'https://support.bitfinex.com/hc/en-us/articles/360023366314-What-is-the-Bitfinex-API',
   },
   {
     n: '03',
-    title: '資金永遠在你的 Bitfinex 帳號',
-    desc: 'LendAuto 是掛單代理人，不是 custodian。我們不開錢包、不持有資產、不經手任何提款。',
-    tag: 'custody: self',
+    title: '安全邊界仍在來源平台',
+    desc: '你的資產仍留在 Bitfinex 帳號中。Bitfinex 自 2012 年營運，服務專業交易者與機構用戶；2026 年取得國家級合規監管牌照 (DASP)，也曾公開鏈上錢包與儲備資訊。穩穩控只做外層策略控制，安全邊界仍在來源平台。',
+    tag: 'Bitfinex DASP 2026',
+    href: 'https://blog.bitfinex.com/announcements/bitfinex-secures-licence-in-el-salvador/',
   },
 ];
 ---
@@ -35,95 +37,101 @@ const steps = [
     <div class="arch-left">
       <header class="arch-header">
         <h2 class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-[0.14em] mb-5">
-          架構與安全 <span class="text-mute-soft normal-case"> 三條技術約束讓我們即使想拿也拿不到</span>
+          安全 <span class="text-mute-soft normal-case"> 三道約束，分開下單與動用資產</span>
         </h2>
-        <p class="arch-title">你的錢，<br />我們從來沒碰過。</p>
-        <p class="arch-lede">
-          把自動化交給我們，把保管留給你自己。
+        <p class="font-display font-semibold text-ink text-2xl lg:text-3xl leading-[1.25] tracking-tight">
+          連接有範圍，執行有規則
         </p>
       </header>
 
-      {steps.map((s, i) => (
-        <article class="ss-step" data-frame={i.toString()}>
-          <div class="stepnum">Step {s.n}</div>
-          <h3>{s.title}</h3>
-          <p>{s.desc}</p>
-          <div class="arch-tag">{s.tag}</div>
-        </article>
-      ))}
+      {steps.map((s, i) => {
+        const external = s.href.startsWith('http');
+        return (
+          <article class="ss-step" data-frame={i.toString()}>
+            <div class="ss-row">
+              <div class="ss-idx">{s.n}</div>
+              <div class="ss-body">
+                <h3>{s.title}</h3>
+                <p>{s.desc}</p>
+                <a
+                  class="ss-meta"
+                  href={s.href}
+                  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                >
+                  <span class="ss-meta-txt">{s.tag}</span>
+                  <span class="ss-meta-rule" aria-hidden="true" />
+                  {external ? (
+                    <svg class="ss-meta-arrow" width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M3.5 8.5 8.5 3.5M5 3.5h3.5v3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg class="ss-meta-arrow" width="13" height="11" viewBox="0 0 13 12" fill="none" aria-hidden="true">
+                      <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  )}
+                </a>
+              </div>
+            </div>
+          </article>
+        );
+      })}
     </div>
 
     <div class="arch-right">
       <div class="ss-stage">
-        <!-- Card 0: API scope toggle -->
+        <!-- Card 0 · API SCOPE -->
         <div class="swap-card" data-card="0">
-          <div class="arch-mock-head">Bitfinex · Generate API Key</div>
-          <div class="arch-perm">
-            <div class="arch-perm-row arch-perm-on">
-              <span class="arch-perm-tick" aria-hidden="true"></span>
-              <span class="arch-perm-name">Funding · Provide funding</span>
-            </div>
-            <div class="arch-perm-row arch-perm-off">
-              <span class="arch-perm-x" aria-hidden="true"></span>
-              <span class="arch-perm-name">Withdrawals</span>
-            </div>
-            <div class="arch-perm-row arch-perm-off">
-              <span class="arch-perm-x" aria-hidden="true"></span>
-              <span class="arch-perm-name">Trading · Orders</span>
-            </div>
-            <div class="arch-perm-row arch-perm-off">
-              <span class="arch-perm-x" aria-hidden="true"></span>
-              <span class="arch-perm-name">Margin</span>
-            </div>
+          <div class="spec-head">
+            <span class="spec-idx">01</span>
+            <span class="spec-label">API Scope</span>
           </div>
+          <div class="spec-rows">
+            <div class="spec-row"><span class="spec-k">查詢餘額</span><span class="spec-v spec-v--on">開啟</span></div>
+            <div class="spec-row"><span class="spec-k">提供資金報價</span><span class="spec-v spec-v--on">開啟</span></div>
+            <div class="spec-rule" aria-hidden="true"></div>
+            <div class="spec-row"><span class="spec-k">提款</span><span class="spec-v spec-v--off">關閉</span></div>
+            <div class="spec-row"><span class="spec-k">轉帳</span><span class="spec-v spec-v--off">關閉</span></div>
+            <div class="spec-row"><span class="spec-k">交易</span><span class="spec-v spec-v--off">關閉</span></div>
+            <div class="spec-row"><span class="spec-k">修改設定</span><span class="spec-v spec-v--off">關閉</span></div>
+          </div>
+          <div class="spec-foot">最小權限原則</div>
         </div>
 
-        <!-- Card 1: AES-256-GCM key encryption -->
+        <!-- Card 1 · STRATEGY ENGINE -->
         <div class="swap-card" data-card="1">
-          <div class="arch-mock-head">Encrypted at rest</div>
-          <div class="arch-crypto">
-            <div class="arch-crypto-row">
-              <span class="arch-crypto-key">api_key</span>
-              <span class="arch-crypto-val arch-crypto-plain">8a3f···c2b9</span>
-            </div>
-            <div class="arch-crypto-arrow">
-              <span class="arch-crypto-cipher">AES-256-GCM</span>
-            </div>
-            <div class="arch-crypto-row arch-crypto-stored">
-              <span class="arch-crypto-key">storage</span>
-              <span class="arch-crypto-val">
-                <span class="arch-crypto-mask">██████ ██████ ██████ ██████</span>
-              </span>
-            </div>
+          <div class="spec-head">
+            <span class="spec-idx">02</span>
+            <span class="spec-label">Strategy Engine</span>
           </div>
+          <div class="spec-rows">
+            <div class="spec-row"><span class="spec-k">市場狀態</span><span class="spec-v spec-v--on">符合</span></div>
+            <div class="spec-row"><span class="spec-k">可用餘額</span><span class="spec-v spec-v--on">充足</span></div>
+            <div class="spec-row"><span class="spec-k">安全限制</span><span class="spec-v spec-v--on">通過</span></div>
+            <div class="spec-rule spec-rule--label" aria-hidden="true"><span>規則比對</span></div>
+            <div class="spec-out"><span class="spec-out-arrow" aria-hidden="true">→</span>送出授權範圍內的指令</div>
+          </div>
+          <div class="spec-foot">資產零移動</div>
         </div>
 
-        <!-- Card 2: 資金 stays in user's Bitfinex -->
+        <!-- Card 2 · SECURITY BOUNDARY (中間 hairline = 邊界) -->
         <div class="swap-card" data-card="2">
-          <div class="arch-mock-head">Custody flow</div>
-          <div class="arch-flow-row">
-            <div class="arch-flow-box arch-flow-user">
-              <span class="arch-flow-lbl">你的</span>
-              <span class="arch-flow-name">Bitfinex Account</span>
-              <span class="arch-flow-sub">資金保管</span>
-            </div>
-            <svg class="arch-flow-arrow" viewBox="0 0 80 12" aria-hidden="true">
-              <path d="M 2 6 L 76 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-              <path d="M 68 2 L 76 6 L 68 10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            <div class="arch-flow-box arch-flow-bot">
-              <span class="arch-flow-lbl">LendAuto</span>
-              <span class="arch-flow-name">Quote Bot</span>
-              <span class="arch-flow-sub">只下 funding 單</span>
-            </div>
+          <div class="spec-head">
+            <span class="spec-idx">03</span>
+            <span class="spec-label">Security Boundary</span>
           </div>
-          <div class="arch-flow-note">資金永遠在你的帳號，我們僅持有「掛單」這一個動作的權限。</div>
+          <div class="spec-rows">
+            <div class="spec-row"><span class="spec-k">策略控制層</span><span class="spec-v">穩穩控 · 外層</span></div>
+            <div class="spec-rule spec-rule--label"><span>邊界</span></div>
+            <div class="spec-row"><span class="spec-k">資產保管</span><span class="spec-v spec-v--on">Bitfinex</span></div>
+            <div class="spec-note">你的資金始終留在 Bitfinex 帳號</div>
+          </div>
+          <div class="spec-foot spec-foot--data">營運自 2012 · DASP 2026 · 公開鏈上儲備</div>
         </div>
       </div>
     </div>
   </div>
 
-  <StickyScrollStage client:load />
+  <StickyScrollStage client:load skewAmount={0} />
 </section>
 
 <style>
@@ -142,67 +150,72 @@ const steps = [
     margin: 0 auto;
     padding: 0 32px;
   }
-  .arch-left { padding: 96px 0 120px; }
-  .arch-header { margin-bottom: 48px; }
-  .arch-title {
-    font-family: var(--font-display);
-    font-size: clamp(40px, 5vw, 64px);
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.030em;
-    color: var(--color-ink);
-    margin: 0 0 18px;
-  }
-  .arch-lede {
-    font-size: 17px;
-    line-height: 1.65;
-    color: var(--color-ink-soft);
-    max-width: 480px;
-    margin: 0;
-  }
+  .arch-left { padding: 96px 0 96px; }
+  .arch-header { margin-bottom: 32px; }
 
+  /* ── Indexed editorial grid (left column) ───────────────────────── */
   .ss-step {
-    min-height: 60vh;
+    min-height: clamp(360px, 52vh, 520px);
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 28px 0;
-    border-top: 1px solid var(--color-line-soft);
+    border-top: 1px solid var(--color-line);
   }
-  .ss-step .stepnum {
+  .ss-step:first-of-type { border-top: none; }
+  .ss-row { display: grid; grid-template-columns: 64px 1fr; }
+  .ss-idx {
     font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--color-mute);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
+    font-size: 30px; font-weight: 700; line-height: 1; letter-spacing: -0.02em;
+    color: var(--color-mute-soft); opacity: 0.45;
+    transition: color var(--dur-base) var(--ease-out-expo), opacity var(--dur-base) var(--ease-out-expo);
   }
-  .ss-step h3 {
+  .ss-body {
+    border-left: 1px solid var(--color-line-soft);
+    padding-left: 28px;
+    transition: border-color var(--dur-base) var(--ease-out-expo);
+  }
+  .ss-body h3 {
     font-family: var(--font-display);
-    font-size: clamp(28px, 3vw, 38px);
-    line-height: 1.15;
-    letter-spacing: -0.022em;
+    font-size: clamp(20px, 1.8vw, 23px);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
     font-weight: 600;
     color: var(--color-ink);
     margin: 0 0 14px;
+    text-wrap: balance;
   }
-  .ss-step p {
+  .ss-body p {
     color: var(--color-ink-soft);
     font-size: 16px;
-    line-height: 1.65;
-    max-width: 440px;
-    margin: 0 0 18px;
+    line-height: 1.625;
+    max-width: 420px;
+    margin: 0 0 22px;
+    line-break: strict;
   }
-  .arch-tag {
-    align-self: flex-start;
-    padding: 4px 10px;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--color-ink) 5%, transparent);
-    color: var(--color-mute);
+  /* right-aligned meta with em-rule */
+  .ss-meta {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
     font-family: var(--font-mono);
-    font-size: 11.5px;
-    letter-spacing: 0.03em;
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--color-mute);
+    transition: color var(--dur-micro) var(--ease-standard);
   }
+  .ss-meta-txt { flex-shrink: 0; }
+  .ss-meta-rule {
+    flex: 1; height: 1px; background: var(--color-line);
+    transition: background var(--dur-micro) var(--ease-standard);
+  }
+  .ss-meta-arrow { flex-shrink: 0; display: block; transition: transform var(--dur-micro) var(--ease-standard); }
+  .ss-meta:hover { color: var(--color-brand); }
+  .ss-meta:hover .ss-meta-rule { background: color-mix(in srgb, var(--color-brand) 40%, transparent); }
+  .ss-meta:hover .ss-meta-arrow { transform: translate(2px, -2px); }
+  .ss-meta:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+
+  /* active-step coupling (toggled by StickyScrollStage island) */
+  .ss-step.is-active .ss-idx { color: var(--color-ink); opacity: 1; }
+  .ss-step.is-active .ss-body { border-left-color: var(--color-brand); }
 
   .arch-right {
     position: sticky;
@@ -226,16 +239,17 @@ const steps = [
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 340px;
-    height: 280px;
+    width: 344px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
     background: var(--color-surface);
     border: 1px solid var(--color-line);
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 22px 24px;
     box-shadow:
-      0 28px 70px -28px rgba(10, 37, 64, 0.30),
-      0 8px 20px -6px rgba(10, 37, 64, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      0 26px 64px -30px rgba(10, 37, 64, 0.28),
+      0 6px 16px -6px rgba(10, 37, 64, 0.07);
     transform-style: preserve-3d;
     backface-visibility: hidden;
     will-change: transform;
@@ -246,181 +260,79 @@ const steps = [
   .swap-card[style] {
     visibility: visible;
   }
-  .arch-mock-head {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--color-mute);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding-bottom: 12px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid var(--color-line-soft);
-  }
 
-  /* ── Frame 0: permission toggles ───────────────────────────────── */
-  .arch-perm { display: flex; flex-direction: column; gap: 10px; }
-  .arch-perm-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 14px;
-    border-radius: 10px;
-    background: var(--color-bg);
-    font-family: var(--font-mono);
-    font-size: 13px;
+  /* ── Spec-sheet card grammar (shared, editorial) ────────────────── */
+  .spec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 12px; margin-bottom: 12px;
+    border-bottom: 1px solid var(--color-line);
   }
-  .arch-perm-name { color: var(--color-ink-soft); }
-  .arch-perm-tick, .arch-perm-x {
-    width: 18px; height: 18px;
-    border-radius: 5px;
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
+  .spec-idx {
+    font-family: var(--font-mono); font-size: 30px; font-weight: 700;
+    line-height: 1; color: var(--color-ink); letter-spacing: -0.02em;
   }
-  .arch-perm-on { background: color-mix(in srgb, var(--color-mint) 8%, transparent); }
-  .arch-perm-on .arch-perm-name { color: var(--color-ink); font-weight: 500; }
-  .arch-perm-tick {
-    background: var(--color-mint);
-    position: relative;
+  .spec-label {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-mute-soft);
   }
-  .arch-perm-tick::after {
-    content: '';
-    width: 10px; height: 5px;
-    border-left: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    transform: translateY(-1px) rotate(-45deg);
+  .spec-rows { flex: 1; display: flex; flex-direction: column; }
+  .spec-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0; font-size: 13.5px;
   }
-  .arch-perm-x {
-    background: color-mix(in srgb, var(--color-mute) 18%, transparent);
-    color: var(--color-mute);
-    position: relative;
-  }
-  .arch-perm-x::before,
-  .arch-perm-x::after {
-    content: '';
-    position: absolute;
-    width: 10px; height: 1.6px;
-    background: var(--color-mute);
-  }
-  .arch-perm-x::before { transform: rotate(45deg); }
-  .arch-perm-x::after  { transform: rotate(-45deg); }
-  .arch-perm-off .arch-perm-name { color: var(--color-mute); }
-
-  /* ── Frame 1: crypto flow ───────────────────────────────────────── */
-  .arch-crypto { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
-  .arch-crypto-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: var(--color-bg);
-    font-family: var(--font-mono);
-    font-size: 13px;
-  }
-  .arch-crypto-key { color: var(--color-mute); letter-spacing: 0.04em; }
-  .arch-crypto-val { color: var(--color-ink); font-weight: 500; }
-  .arch-crypto-plain { color: var(--color-coral); }
-  .arch-crypto-mask {
-    color: var(--color-brand);
-    letter-spacing: 0.10em;
-    font-size: 12px;
-  }
-  .arch-crypto-arrow {
-    display: flex; justify-content: center;
-    position: relative;
-    padding: 4px 0;
-  }
-  .arch-crypto-arrow::before {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0; left: 50%;
-    width: 1px;
-    background: color-mix(in srgb, var(--color-brand) 35%, transparent);
-  }
-  .arch-crypto-cipher {
-    position: relative;
-    padding: 4px 12px;
-    background: color-mix(in srgb, var(--color-brand) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    color: var(--color-brand);
-    letter-spacing: 0.06em;
-  }
-  .arch-crypto-stored .arch-crypto-key { color: var(--color-mint); }
-
-  /* ── Frame 2: flow diagram ──────────────────────────────────────── */
-  .arch-flow-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 12px;
-  }
-  .arch-flow-box {
-    padding: 16px 14px;
-    border-radius: 10px;
-    background: var(--color-bg);
-    border: 1px solid var(--color-line);
-    text-align: center;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .arch-flow-bot {
-    background: color-mix(in srgb, var(--color-brand) 6%, var(--color-surface));
-    border-color: color-mix(in srgb, var(--color-brand) 30%, transparent);
-  }
-  .arch-flow-lbl {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    color: var(--color-mute);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .arch-flow-bot .arch-flow-lbl { color: var(--color-brand); }
-  .arch-flow-name {
+  .spec-k {
     font-family: var(--font-display);
-    font-weight: 600;
+    font-weight: 500; font-size: 14px; letter-spacing: -0.01em;
     color: var(--color-ink);
-    font-size: 13.5px;
-    white-space: nowrap;
   }
-  .arch-flow-sub {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    color: var(--color-mute);
-    white-space: nowrap;
+  .spec-v {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--color-mute-soft); letter-spacing: 0.02em;
+    display: inline-flex; align-items: center; gap: 7px;
   }
-  .arch-flow-arrow {
-    width: 80px;
-    height: 12px;
-    color: var(--color-brand);
+  .spec-v--on { color: var(--color-ink); }
+  .spec-v--on::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-mint); flex-shrink: 0;
   }
-  .arch-flow-note {
-    margin-top: 18px;
-    text-align: center;
-    font-size: 12.5px;
-    color: var(--color-mute);
-    line-height: 1.55;
+  .spec-v--off::before { content: '—'; color: var(--color-mute-soft); }
+
+  /* structural hairlines */
+  .spec-rule { height: 1px; background: var(--color-line-soft); margin: 8px 0; }
+  .spec-rule--label {
+    height: auto; background: none; margin: 12px 0;
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--color-mute);
+  }
+  .spec-rule--label span { flex-shrink: 0; }
+  .spec-rule--label::before, .spec-rule--label::after {
+    content: ''; flex: 1; height: 1px; background: var(--color-line);
   }
 
-  /* ── Frame 3: performance graph ─────────────────────────────────── */
-  .arch-perf { color: var(--color-brand); }
-  .arch-perf svg { width: 100%; height: 140px; display: block; }
-  .arch-perf-foot {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid var(--color-line-soft);
+  /* emphasized output row (card 02) — flush-left, aligns with the keys above */
+  .spec-out {
+    display: flex; align-items: center; gap: 9px;
+    margin-top: 8px; padding: 2px 0;
+    color: var(--color-brand);
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 14.5px; letter-spacing: -0.01em;
   }
-  .arch-perf-foot-lbl {
-    font-family: var(--font-mono);
-    font-size: 11px;
+  .spec-out-arrow { font-family: var(--font-mono); font-weight: 400; }
+
+  .spec-note {
+    font-family: var(--font-display); font-size: 12.5px;
+    color: var(--color-mute); margin-top: 4px; padding: 2px 0;
+  }
+
+  .spec-foot {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--color-line);
+    font-family: var(--font-mono); font-weight: 600;
+    font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--color-mute);
-    letter-spacing: 0.06em;
   }
-  .arch-perf-foot-val {
-    font-family: var(--font-mono);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--color-mint);
-    letter-spacing: -0.01em;
-  }
+  .spec-foot--data { letter-spacing: 0.05em; text-transform: none; color: var(--color-mute-soft); }
 
   /* ── Responsive ─────────────────────────────────────────────────── */
   @media (max-width: 900px) {
@@ -428,8 +340,10 @@ const steps = [
       grid-template-columns: 1fr;
       gap: 40px;
     }
-    .arch-left { padding: 64px 0 80px; }
+    .arch-left { padding: 56px 0 56px; }
     .ss-step { min-height: auto; padding: 24px 0; }
+    .ss-row { grid-template-columns: 46px 1fr; }
+    .ss-body { padding-left: 18px; }
     .arch-right {
       position: relative;
       height: auto;

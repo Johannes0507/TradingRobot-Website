@@ -1,8 +1,8 @@
 ---
-title: 'LendAuto 是什麼？為什麼我做這個工具'
-description: 'LendAuto 是一個自動化的 Bitfinex 放貸機器人。這篇文章解釋它解決什麼問題、適合誰、不適合誰。'
+title: '穩穩控 是什麼？為什麼我做這個工具'
+description: '穩穩控 是一個自動化的 Bitfinex 放貸機器人。這篇文章解釋它解決什麼問題、適合誰、不適合誰。'
 pubDate: 2026-05-10
-author: 'LendAuto Team'
+author: 'wen control Team'
 tags: ['介紹', '產品']
 ---
 
@@ -15,7 +15,7 @@ Bitfinex 的 USD funding 利率是浮動的 — 有時候年化 2%，有時候�
 - 高利率機會通常出現在凌晨 3 點
 - 利率變動時要逐筆改價，超繁瑣
 
-LendAuto 把這些痛點全自動化。
+穩穩控 把這些痛點全自動化。
 
 ## 適合誰
 
