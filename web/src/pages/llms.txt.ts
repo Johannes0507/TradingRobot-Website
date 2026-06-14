@@ -28,8 +28,9 @@ export const GET: APIRoute = async ({ site }) => {
 
 ## 產品資訊
 
-- [首頁與產品介紹](${baseUrl}/): 包含 Hero、運作原理、安全機制、定價方案
-- [定價方案](${baseUrl}/#pricing): Starter (免費)、Pro (NT$899/月)、Elite (NT$2,999/月)
+- [首頁與產品介紹](${baseUrl}/): 包含 Hero、市場儀表板、安全機制、三步驟上手
+- [關於我們與運作原理](${baseUrl}/about): 為什麼報酬更高 — FRR 追蹤、Spike Catching、毫秒級執行
+- [定價方案與 ROI 試算](${baseUrl}/pricing): Starter (免費)、Pro (NT$899/月)、Elite (NT$2,999/月)
 - [安全機制](${baseUrl}/#security): API 權限只開放貸、AES-256-GCM 加密、非託管式架構
 
 ## 教學文章
@@ -41,8 +42,6 @@ ${posts.length === 0 ? '\n（部落格文章準備中）\n' : posts.map((p) => `
 ## 重要連結
 
 - [產品應用程式](https://app.lendauto.com): 註冊、登入、訂閱、Dashboard
-- [服務條款](${baseUrl}/terms)
-- [隱私政策](${baseUrl}/privacy)
 - [聯絡信箱](mailto:hello@lendauto.com)
 `;
 

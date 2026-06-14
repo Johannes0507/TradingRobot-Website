@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Pricing from '../components/Pricing.astro';
+import RoiBlock from '../components/RoiBlock.astro';
+import CtaFooter from '../components/CtaFooter.astro';
+import StructuredData from '../components/StructuredData.astro';
+---
+
+<Layout
+  title="定價 — 穩穩控"
+  description="穩穩控 定價：Starter 永久免費，Pro 月訂閱、台幣付款。下方附 ROI 試算，用過去 30 日市場均利率算給你看訂閱划不划算。"
+>
+  <StructuredData slot="head" page="pricing" />
+  <Nav />
+  <main id="main" class="pt-[68px]">
+    <Pricing />
+    <RoiBlock />
+  </main>
+  <CtaFooter />
+</Layout>

@@ -163,6 +163,11 @@ const steps = [
     border-top: 1px solid var(--color-line);
   }
   .ss-step:first-of-type { border-top: none; }
+  /* Each step already centres its content, so it carries its own ~half-height of
+     trailing space.  The last step just needs a small extra nudge so 03 doesn't
+     un-stick the instant its centre crosses viewport-centre — not a full blank
+     screen.  Keep it modest so all three steps dwell consistently. */
+  .ss-step:last-of-type { padding-bottom: clamp(40px, 8vh, 100px); }
   .ss-row { display: grid; grid-template-columns: 64px 1fr; }
   .ss-idx {
     font-family: var(--font-mono);

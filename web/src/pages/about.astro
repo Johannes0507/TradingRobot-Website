@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import WaitlistAndContact from '../components/WaitlistAndContact.astro';
+import CtaFooter from '../components/CtaFooter.astro';
+---
+
+<Layout
+  title="關於我們 — 穩穩控"
+  description="穩穩控 只做一件事：把 Bitfinex margin funding 的報價與調倉自動化，資產與安全邊界留在你原本信任的平台。這裡說明我們把報酬做得更高的技術原理。"
+>
+  <Nav />
+  <main id="main" class="pt-[68px]">
+    <section class="pt-16 lg:pt-24 pb-10 lg:pb-14 relative overflow-hidden">
+      <!-- Subtle radial mesh, consistent with /guides -->
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] pointer-events-none opacity-60"
+        style="background: radial-gradient(ellipse, rgb(99 91 255 / 0.10) 0%, transparent 70%);"
+      >
+      </div>
+
+      <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+        <header class="max-w-2xl">
+          <div class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-4">
+            關於我們
+          </div>
+          <h1
+            class="text-5xl lg:text-6xl font-display font-bold text-ink tracking-tight leading-[1.05] mb-5"
+          >
+            把放貸交給規則，<br />不是交給盯盤
+          </h1>
+          <p class="text-lg lg:text-xl text-ink-soft leading-relaxed">
+            穩穩控只做一件事：把 Bitfinex margin funding 的報價與調倉自動化，
+            而資產與安全邊界，始終留在你原本信任的平台。
+            有任何問題，或想在我們推出新方案時收到通知，都可以在下面留言。
+          </p>
+        </header>
+      </div>
+    </section>
+
+    <WaitlistAndContact />
+  </main>
+  <CtaFooter />
+</Layout>

@@ -4,7 +4,17 @@
  * Drop into Layout for the homepage / inject elsewhere via <slot name="head"/>.
  *
  * GEO 2026 finding: Schema.org JSON-LD is a top-5 predictor of LLM citation.
+ *
+ * `page` prop selects which schemas this instance emits:
+ *  - 'home'    (default) → Organization + WebSite + Service (no pricing) + FAQ
+ *  - 'pricing'           → the priced Service (offers), bound to /pricing
+ * Keeping the price offers on /pricing — where the prices are actually shown —
+ * is what makes Google trust them for price rich-results.
  */
+export interface Props {
+  page?: 'home' | 'pricing';
+}
+const { page = 'home' } = Astro.props;
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -33,6 +43,32 @@ const websiteSchema = {
   inLanguage: 'zh-TW',
 };
 
+// Pricing offers — emitted only on /pricing, where the prices are shown.
+const offers = [
+  {
+    '@type': 'Offer',
+    name: 'Starter',
+    price: '0',
+    priceCurrency: 'TWD',
+    description: '免費方案，資金上限 $5,000，2 個策略',
+  },
+  {
+    '@type': 'Offer',
+    name: 'Pro',
+    price: '899',
+    priceCurrency: 'TWD',
+    description: '月訂閱，資金上限 $100,000，10 個策略，Spike Catching',
+  },
+  {
+    '@type': 'Offer',
+    name: 'Elite',
+    price: '2999',
+    priceCurrency: 'TWD',
+    description: '月訂閱，資金上限 $1,000,000，50 個策略，專屬伺服器',
+  },
+];
+
+// Site-wide Service description (no price offers — those live on /pricing).
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -41,29 +77,18 @@ const serviceSchema = {
   description:
     'Bitfinex USD / USDT funding market 的自動報價代理工具。30 秒級重新評估市場利率、階梯式報價部署。Non-custodial — 使用者保有 Bitfinex 帳號 custody。',
   areaServed: { '@type': 'Country', name: 'Taiwan' },
-  offers: [
-    {
-      '@type': 'Offer',
-      name: 'Starter',
-      price: '0',
-      priceCurrency: 'TWD',
-      description: '免費方案，資金上限 $5,000，2 個策略',
-    },
-    {
-      '@type': 'Offer',
-      name: 'Pro',
-      price: '899',
-      priceCurrency: 'TWD',
-      description: '月訂閱，資金上限 $100,000，10 個策略，Spike Catching',
-    },
-    {
-      '@type': 'Offer',
-      name: 'Elite',
-      price: '2999',
-      priceCurrency: 'TWD',
-      description: '月訂閱，資金上限 $1,000,000，50 個策略，專屬伺服器',
-    },
-  ],
+};
+
+// /pricing — the priced Service, carrying the three subscription offers.
+const pricingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: '穩穩控',
+  serviceType: '加密貨幣自動放貸服務',
+  provider: { '@type': 'Organization', name: '穩穩控' },
+  url: 'https://lendauto.com/pricing',
+  areaServed: { '@type': 'Country', name: 'Taiwan' },
+  offers,
 };
 
 const faqSchema = {
@@ -105,7 +130,10 @@ const faqSchema = {
   ],
 };
 
-const schemas = [orgSchema, websiteSchema, serviceSchema, faqSchema];
+const schemas =
+  page === 'pricing'
+    ? [pricingSchema]
+    : [orgSchema, websiteSchema, serviceSchema, faqSchema];
 ---
 
 {
