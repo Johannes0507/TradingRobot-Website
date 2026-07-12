@@ -1,0 +1,104 @@
+---
+/**
+ * LegalArticle — shared shell for legal documents (/privacy, /terms).
+ * Header mirrors about.astro; prose styles mirror guide-prose but scoped
+ * to .legal-prose. Narrow column (max-w-3xl) for long-form readability.
+ */
+interface Props {
+  title: string;
+  lastUpdated: Date;
+}
+
+const { title, lastUpdated } = Astro.props;
+const updatedLabel = lastUpdated.toISOString().slice(0, 10);
+---
+
+<section class="pt-16 lg:pt-24 pb-10 lg:pb-14 relative overflow-hidden">
+  <!-- Subtle radial mesh, consistent with /about and /guides -->
+  <div
+    class="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] pointer-events-none opacity-60"
+    style="background: radial-gradient(ellipse, rgb(99 91 255 / 0.10) 0%, transparent 70%);"
+  >
+  </div>
+
+  <div class="relative max-w-7xl mx-auto px-6 lg:px-12">
+    <header class="max-w-3xl">
+      <div class="eyebrow text-xs font-mono font-semibold text-mute uppercase tracking-wider mb-4">
+        法務
+      </div>
+      <h1
+        class="text-5xl lg:text-6xl font-display font-bold text-ink tracking-tight leading-[1.05] mb-5"
+      >
+        {title}
+      </h1>
+      <p class="text-sm font-mono text-mute">最後更新：{updatedLabel}</p>
+    </header>
+  </div>
+</section>
+
+<section class="pb-[64px] lg:pb-[96px]">
+  <div class="max-w-7xl mx-auto px-6 lg:px-12">
+    <article class="legal-prose max-w-3xl">
+      <slot />
+    </article>
+  </div>
+</section>
+
+<style is:global>
+  /* Scoped to .legal-prose so it doesn't pollute other pages. */
+  .legal-prose {
+    color: var(--color-ink-soft);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+
+  .legal-prose > * + * {
+    margin-top: 1.2em;
+  }
+
+  .legal-prose h2 {
+    margin: 3rem 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    scroll-margin-top: 8rem;
+  }
+
+  .legal-prose p {
+    color: var(--color-ink-soft);
+  }
+
+  .legal-prose p strong {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  .legal-prose a {
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color 150ms ease;
+  }
+
+  .legal-prose a:hover {
+    color: color-mix(in srgb, var(--color-brand) 75%, black);
+  }
+
+  .legal-prose ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    list-style: disc;
+  }
+
+  .legal-prose li {
+    margin: 0.4em 0;
+  }
+
+  .legal-prose li::marker {
+    color: var(--color-mute);
+  }
+</style>
