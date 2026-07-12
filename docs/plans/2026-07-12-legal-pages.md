@@ -541,8 +541,8 @@ git commit -m "feat(web): restore legal links in footer + llms.txt (KEI-21)"
 Run: `cd web && npm run build`
 Expected: 成功。
 
-Run: `grep -c "送出即表示你同意" web/dist/index.html`
-Expected: ≥1（首頁含 WaitlistAndContact 區塊，SSR 產出提示文字）
+Run: `grep -c "送出即表示你同意" web/dist/about/index.html`
+Expected: `2`（WaitlistAndContact 區塊在 /about，兩個表單各 SSR 產出一次提示文字；首頁沒有此區塊）
 
 - [ ] **Step 4: Commit**
 
