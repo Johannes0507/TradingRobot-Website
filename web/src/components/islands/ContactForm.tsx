@@ -103,6 +103,14 @@ export default function ContactForm() {
         {status === 'submitting' ? '處理中…' : '送出'}
       </button>
 
+      <p className="text-xs text-mute leading-relaxed">
+        送出即表示你同意
+        <a href="/privacy" className="underline underline-offset-2 hover:text-ink transition-colors">
+          〈隱私政策〉
+        </a>
+        。
+      </p>
+
       <div id="contact-status" role="status" aria-live="polite" className="min-h-[1.25rem] text-xs font-mono">
         {status === 'error' && <span className="text-danger">{errorMsg}</span>}
       </div>
