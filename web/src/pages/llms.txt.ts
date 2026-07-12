@@ -43,6 +43,8 @@ ${posts.length === 0 ? '\n（部落格文章準備中）\n' : posts.map((p) => `
 
 - [產品應用程式](https://app.lendauto.com): 註冊、登入、訂閱、Dashboard
 - [聯絡信箱](mailto:hello@lendauto.com)
+- [服務條款](${baseUrl}/terms)
+- [隱私政策](${baseUrl}/privacy)
 `;
 
   return new Response(body, {
