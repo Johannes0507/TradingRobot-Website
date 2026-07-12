@@ -231,7 +231,7 @@ git commit -m "feat(web): terms of service content (KEI-21)"
 /**
  * LegalArticle — shared shell for legal documents (/privacy, /terms).
  * Header mirrors about.astro; prose styles mirror guide-prose but scoped
- * to .legal-prose. Narrow column (max-w-3xl) for long-form readability.
+ * to .legal-prose (h2 downsized for the narrower column). Narrow column (max-w-3xl) for long-form readability.
  */
 interface Props {
   title: string;
@@ -300,7 +300,7 @@ const updatedLabel = lastUpdated.toISOString().slice(0, 10);
     color: var(--color-ink-soft);
   }
 
-  .legal-prose p strong {
+  .legal-prose strong {
     color: var(--color-ink);
     font-weight: 700;
   }
