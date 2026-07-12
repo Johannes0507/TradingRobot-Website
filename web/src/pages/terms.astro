@@ -1,0 +1,21 @@
+---
+import { getEntry, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import CtaFooter from '../components/CtaFooter.astro';
+import LegalArticle from '../components/LegalArticle.astro';
+
+const entry = await getEntry('legal', 'terms');
+if (!entry) throw new Error('content/legal/terms.md is missing');
+const { Content } = await render(entry);
+---
+
+<Layout title={`${entry.data.title} — 穩穩控`} description={entry.data.description}>
+  <Nav />
+  <main id="main" class="pt-[68px]">
+    <LegalArticle title={entry.data.title} lastUpdated={entry.data.lastUpdated}>
+      <Content />
+    </LegalArticle>
+  </main>
+  <CtaFooter />
+</Layout>
