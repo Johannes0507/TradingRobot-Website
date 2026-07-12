@@ -1,11 +1,12 @@
 /**
  * Content Collections — Astro 6 Content Layer
  *
- * Two collections:
+ * Three collections:
  *   - blog/   : marketing & insight posts
  *   - guides/ : step-by-step tutorials (Bitfinex setup, strategy guides, etc.)
+ *   - legal/  : legal documents (privacy policy, terms of service)
  *
- * Both use the glob loader (Astro 6 default) — drops .md/.mdx files into the
+ * All use the glob loader (Astro 6 default) — drops .md/.mdx files into the
  * collection folder and they appear automatically.
  */
 import { defineCollection, z } from 'astro:content';
@@ -45,4 +46,14 @@ const guides = defineCollection({
   }),
 });
 
-export const collections = { blog, guides };
+const legal = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/legal' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    /** 頁面顯示「最後更新」；法務頁標配 */
+    lastUpdated: z.coerce.date(),
+  }),
+});
+
+export const collections = { blog, guides, legal };
