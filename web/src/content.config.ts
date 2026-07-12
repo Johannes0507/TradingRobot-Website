@@ -47,11 +47,12 @@ const guides = defineCollection({
 });
 
 const legal = defineCollection({
+  // .md only (not .mdx) — legal text stays plain markdown, no custom components.
   loader: glob({ pattern: '**/*.md', base: './src/content/legal' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    /** 頁面顯示「最後更新」；法務頁標配 */
+    /** Revision date shown as「最後更新」. Deliberately not pubDate/updatedDate: legal docs have no publish workflow, only revisions. */
     lastUpdated: z.coerce.date(),
   }),
 });
